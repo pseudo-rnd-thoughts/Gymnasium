@@ -1,15 +1,15 @@
 """Lambda reward wrappers which apply a function to the reward."""
 
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Optional, SupportsFloat, Union
 
 import numpy as np
 
 import gymnasium as gym
-from gymnasium.dev_wrappers import ArgType
+from gymnasium.core import ActType, ObsType
 from gymnasium.error import InvalidBound
 
 
-class LambdaRewardV0(gym.RewardWrapper):
+class LambdaRewardV0(gym.RewardWrapper[ObsType, ActType]):
     """A reward wrapper that allows a custom function to modify the step reward.
 
     Example:
@@ -25,8 +25,8 @@ class LambdaRewardV0(gym.RewardWrapper):
 
     def __init__(
         self,
-        env: gym.Env,
-        func: Callable[[ArgType], Any],
+        env: gym.Env[ObsType, ActType],
+        func: Callable[[SupportsFloat], Any],
     ):
         """Initialize LambdaRewardV0 wrapper.
 
@@ -38,11 +38,11 @@ class LambdaRewardV0(gym.RewardWrapper):
 
         self.func = func
 
-    def reward(self, reward: Union[float, int, np.ndarray]) -> Any:
+    def reward(self, reward: SupportsFloat) -> Any:
         """Apply function to reward.
 
         Args:
-            reward (Union[float, int, np.ndarray]): environment's reward
+            reward: environment's reward
         """
         return self.func(reward)
 
@@ -63,7 +63,7 @@ class ClipRewardsV0(LambdaRewardV0):
 
     def __init__(
         self,
-        env: gym.Env,
+        env: gym.Env[ObsType, ActType],
         min_reward: Optional[Union[float, np.ndarray]] = None,
         max_reward: Optional[Union[float, np.ndarray]] = None,
     ):

@@ -1,19 +1,18 @@
 """Lambda action wrapper which apply a function to the provided action."""
 
-from typing import Any, Callable
+from typing import Callable
 
 import gymnasium as gym
-from gymnasium.core import ActType
-from gymnasium.dev_wrappers import ArgType
+from gymnasium.core import ActType, ObsType, WrapperActType
 
 
-class LambdaActionV0(gym.ActionWrapper):
+class LambdaActionV0(gym.ActionWrapper[ObsType, WrapperActType]):
     """A wrapper that provides a function to modify the action passed to :meth:`step`."""
 
     def __init__(
         self,
-        env: gym.Env,
-        func: Callable[[ArgType], Any],
+        env: gym.Env[ObsType, ActType],
+        func: Callable[[WrapperActType], ActType],
     ):
         """Initialize LambdaAction.
 
@@ -25,6 +24,6 @@ class LambdaActionV0(gym.ActionWrapper):
 
         self.func = func
 
-    def action(self, action: ActType) -> Any:
+    def action(self, action: WrapperActType) -> ActType:
         """Apply function to action."""
         return self.func(action)
