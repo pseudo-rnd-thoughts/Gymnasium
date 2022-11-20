@@ -1,5 +1,6 @@
 import os
 import shutil
+from typing import Callable
 
 import numpy as np
 
@@ -39,8 +40,8 @@ def test_record_video_using_default_trigger():
     )
 
 
-def modulo_step_trigger(mod: int):
-    def step_trigger(step_index):
+def modulo_step_trigger(mod: int) -> Callable[[int], bool]:
+    def step_trigger(step_index: int) -> bool:
         return step_index % mod == 0
 
     return step_trigger

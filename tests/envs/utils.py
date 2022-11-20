@@ -1,5 +1,5 @@
 """Finds all the specs that we can test with"""
-from typing import List, Optional
+from typing import List, Optional, Any
 
 import numpy as np
 
@@ -8,7 +8,7 @@ from gymnasium import logger
 from gymnasium.envs.registration import EnvSpec
 
 
-def try_make_env(env_spec: EnvSpec) -> Optional[gym.Env]:
+def try_make_env(env_spec: EnvSpec) -> Optional[gym.Env[Any, Any]]:
     """Tries to make the environment showing if it is possible.
 
     Warning the environments have no wrappers, including time limit and order enforcing.
@@ -54,7 +54,7 @@ gym_testing_env_specs: List[EnvSpec] = [
 # TODO, add minimum testing env spec in testing
 
 
-def assert_equals(a, b, prefix=None):
+def assert_equals(a: Any, b: Any, prefix: Optional[str] = None):
     """Assert equality of data structures `a` and `b`.
 
     Args:

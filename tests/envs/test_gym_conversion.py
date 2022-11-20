@@ -21,7 +21,7 @@ ALL_GYM_ENVS = [
 @pytest.mark.parametrize(
     "env_id", ALL_GYM_ENVS, ids=[env_id for env_id in ALL_GYM_ENVS]
 )
-def test_gym_conversion_by_id(env_id):
+def test_gym_conversion_by_id(env_id: str):
     env = gymnasium.make("GymV26Environment-v0", env_id=env_id).unwrapped
     with warnings.catch_warnings(record=True) as caught_warnings:
         check_env(env, skip_render_check=True)
@@ -33,7 +33,7 @@ def test_gym_conversion_by_id(env_id):
 @pytest.mark.parametrize(
     "env_id", ALL_GYM_ENVS, ids=[env_id for env_id in ALL_GYM_ENVS]
 )
-def test_gym_conversion_instantiated(env_id):
+def test_gym_conversion_instantiated(env_id: str):
     env = gym.make(env_id)
     env = gymnasium.make("GymV26Environment-v0", env=env).unwrapped
     with warnings.catch_warnings(record=True) as caught_warnings:

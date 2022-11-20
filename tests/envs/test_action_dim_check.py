@@ -1,3 +1,5 @@
+from typing import Any
+
 import numpy as np
 import pytest
 
@@ -61,7 +63,7 @@ DISCRETE_ENVS = list(
     DISCRETE_ENVS,
     ids=[env.spec.id for env in DISCRETE_ENVS if env.spec is not None],
 )
-def test_discrete_actions_out_of_bound(env: gym.Env):
+def test_discrete_actions_out_of_bound(env: gym.Env[Any, Any]):
     """Test out of bound actions in Discrete action_space.
 
     In discrete action_space environments, `out-of-bound`
@@ -92,7 +94,7 @@ OOB_VALUE = 100
 @pytest.mark.parametrize(
     "env", BOX_ENVS, ids=[env.spec.id for env in BOX_ENVS if env.spec is not None]
 )
-def test_box_actions_out_of_bound(env: gym.Env):
+def test_box_actions_out_of_bound(env: gym.Env[Any, Any]):
     """Test out of bound actions in Box action_space.
 
     Environments with Box actions spaces perform clipping inside `step`.

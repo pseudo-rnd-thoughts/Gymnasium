@@ -1,6 +1,8 @@
+from __future__ import annotations
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
+import numpy.typing as npt
 
 import gymnasium
 from gymnasium.spaces import Discrete
@@ -20,10 +22,10 @@ class LegacyEnvExplicit(LegacyEnv, gymnasium.Env):
     def reset(self):
         return 0
 
-    def step(self, action):
+    def step(self, action) -> tuple[Any, Any, bool, dict[str, Any]]:
         return 0, 0, False, {}
 
-    def render(self, mode="human"):
+    def render(self, mode="human") -> Optional[npt.NDArray[np.uint8]]:
         if mode == "human":
             return
         elif mode == "rgb_array":
@@ -52,7 +54,7 @@ class LegacyEnvImplicit(gymnasium.Env):
     def step(self, action: Any) -> Tuple[int, float, bool, Dict]:
         return 0, 0.0, False, {}
 
-    def render(self, mode: Optional[str] = "human") -> Any:
+    def render(self, mode: Optional[str] = "human") -> Optional[npt.NDArray[np.uint8]]:
         if mode == "human":
             return
         elif mode == "rgb_array":

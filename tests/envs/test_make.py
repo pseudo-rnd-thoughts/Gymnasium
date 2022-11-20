@@ -9,6 +9,7 @@ import pytest
 
 import gymnasium as gym
 from gymnasium.envs.classic_control import cartpole
+from gymnasium.envs.registration import EnvSpec
 from gymnasium.wrappers import (
     AutoResetWrapper,
     HumanRendering,
@@ -173,7 +174,7 @@ def test_apply_api_compatibility():
 @pytest.mark.parametrize(
     "spec", all_testing_env_specs, ids=[spec.id for spec in all_testing_env_specs]
 )
-def test_passive_checker_wrapper_warnings(spec):
+def test_passive_checker_wrapper_warnings(spec: EnvSpec):
     with warnings.catch_warnings(record=True) as caught_warnings:
         env = gym.make(spec)  # disable_env_checker=False
         env.reset()

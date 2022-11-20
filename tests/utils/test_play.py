@@ -1,6 +1,7 @@
+from __future__ import annotations
 from functools import partial
 from itertools import product
-from typing import Callable
+from typing import Any, Callable, Tuple
 
 import numpy as np
 import pygame
@@ -25,21 +26,21 @@ PlayableEnv = partial(
 
 
 class KeysToActionWrapper(gym.Wrapper):
-    def __init__(self, env, keys_to_action):
+    def __init__(self, env: gym.Env[Any, Any], keys_to_action: dict[str, int]):
         super().__init__(env)
         self.keys_to_action = keys_to_action
 
-    def get_keys_to_action(self):
+    def get_keys_to_action(self) -> dict[str, int]:
         return self.keys_to_action
 
 
 class PlayStatus:
-    def __init__(self, callback: Callable):
+    def __init__(self, callback: Callable[[Any, Any, Any, float, bool, bool, dict[str, Any]], tuple[Any, Any, Any, float, bool, bool, dict[str, Any]]]):
         self.data_callback = callback
         self.cumulative_reward = 0
         self.last_observation = None
 
-    def callback(self, obs_t, obs_tp1, action, rew, terminated, truncated, info):
+    def callback(self, obs_t: Any, obs_tp1: Any, action: Any, rew: float, terminated: bool, truncated: bool, info: dict[str, Any]):
         _, obs_tp1, _, rew, _, _, _ = self.data_callback(
             obs_t, obs_tp1, action, rew, terminated, truncated, info
         )
@@ -163,7 +164,7 @@ def test_play_loop_real_env():
         ]
         keydown_events = [k for k in callback_events if k.type == KEYDOWN]
 
-        def callback(obs_t, obs_tp1, action, rew, terminated, truncated, info):
+        def callback(obs_t: Any, obs_tp1: Any, act: Any, rew: float, terminated: bool, truncated: bool, info: dict[str, Any]) -> tuple[Any, Any, Any, float, bool, bool, dict[str, Any]]:
             pygame_event = callback_events.pop(0)
             event.post(pygame_event)
 
@@ -173,7 +174,7 @@ def test_play_loop_real_env():
                 pygame_event = callback_events.pop(0)
                 event.post(pygame_event)
 
-            return obs_t, obs_tp1, action, rew, terminated, truncated, info
+            return obs_t, obs_tp1, act, rew, terminated, truncated, info
 
         env = gym.make(ENV, render_mode="rgb_array", disable_env_checker=True)
         env.reset(seed=SEED)

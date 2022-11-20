@@ -1,7 +1,7 @@
 from typing import Any, Dict, Optional
 
 import numpy as np
-
+import numpy.typing as npt
 from gymnasium.functional import FuncEnv
 
 
@@ -9,19 +9,19 @@ class TestEnv(FuncEnv):
     def __init__(self, options: Optional[Dict[str, Any]] = None):
         super().__init__(options)
 
-    def initial(self, rng: Any) -> np.ndarray:
+    def initial(self, rng: Any) -> npt.NDArray[np.float32]:
         return np.array([0, 0], dtype=np.float32)
 
-    def observation(self, state: np.ndarray) -> np.ndarray:
+    def observation(self, state: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
         return state
 
-    def transition(self, state: np.ndarray, action: int, rng: None) -> np.ndarray:
+    def transition(self, state: npt.NDArray[np.float32], action: int, rng: None) -> npt.NDArray[np.float32]:
         return state + np.array([0, action], dtype=np.float32)
 
-    def reward(self, state: np.ndarray, action: int, next_state: np.ndarray) -> float:
+    def reward(self, state: npt.NDArray[np.float32], action: int, next_state: npt.NDArray[np.float32]) -> float:
         return 1.0 if next_state[1] > 0 else 0.0
 
-    def terminal(self, state: np.ndarray) -> bool:
+    def terminal(self, state: npt.NDArray[np.float32]) -> bool:
         return state[1] > 0
 
 

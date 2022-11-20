@@ -1,10 +1,11 @@
-from typing import Optional
+from __future__ import annotations
+from typing import Optional, Any
 
 import numpy as np
 import pytest
 
 import gymnasium as gym
-from gymnasium.envs.box2d import BipedalWalker
+from gymnasium.envs.box2d import BipedalWalker, CarRacing
 from gymnasium.envs.box2d.lunar_lander import demo_heuristic_lander
 from gymnasium.envs.toy_text import TaxiEnv
 from gymnasium.envs.toy_text.frozen_lake import generate_random_map
@@ -23,7 +24,7 @@ def test_carracing_domain_randomize():
     CarRacing DomainRandomize should have different colours at every reset.
     However, it should have same colours when `options={"randomize": False}` is given to reset.
     """
-    env = gym.make("CarRacing-v2", domain_randomize=True)
+    env: CarRacing = gym.make("CarRacing-v2", domain_randomize=True)
 
     road_color = env.road_color
     bg_color = env.bg_color
@@ -31,29 +32,29 @@ def test_carracing_domain_randomize():
 
     env.reset(options={"randomize": False})
 
-    assert (
+    assert np.all(
         road_color == env.road_color
-    ).all(), f"Have different road color after reset with randomize turned off. Before: {road_color}, after: {env.road_color}."
-    assert (
+    ), f"Have different road color after reset with randomize turned off. Before: {road_color}, after: {env.road_color}."
+    assert np.all(
         bg_color == env.bg_color
-    ).all(), f"Have different bg color after reset with randomize turned off. Before: {bg_color}, after: {env.bg_color}."
-    assert (
+    ), f"Have different bg color after reset with randomize turned off. Before: {bg_color}, after: {env.bg_color}."
+    assert np.all(
         grass_color == env.grass_color
-    ).all(), f"Have different grass color after reset with randomize turned off. Before: {grass_color}, after: {env.grass_color}."
+    ), f"Have different grass color after reset with randomize turned off. Before: {grass_color}, after: {env.grass_color}."
 
     env.reset()
 
-    assert (
+    assert np.all(
         road_color != env.road_color
-    ).all(), f"Have same road color after reset. Before: {road_color}, after: {env.road_color}."
-    assert (
+    ), f"Have same road color after reset. Before: {road_color}, after: {env.road_color}."
+    assert np.all(
         bg_color != env.bg_color
-    ).all(), (
+    ), (
         f"Have same bg color after reset. Before: {bg_color}, after: {env.bg_color}."
     )
-    assert (
+    assert np.all(
         grass_color != env.grass_color
-    ).all(), f"Have same grass color after reset. Before: {grass_color}, after: {env.grass_color}."
+    ), f"Have same grass color after reset. Before: {grass_color}, after: {env.grass_color}."
 
 
 @pytest.mark.parametrize("seed", range(5))
@@ -154,7 +155,7 @@ def test_taxi_encode_decode():
 @pytest.mark.parametrize(
     "low_high", [None, (-0.4, 0.4), (np.array(-0.4), np.array(0.4))]
 )
-def test_customizable_resets(env_name: str, low_high: Optional[list]):
+def test_customizable_resets(env_name: str, low_high: Optional[tuple[Any, Any]]):
     env = gym.make(env_name)
     env.action_space.seed(0)
     # First ensure we can do a reset.
@@ -177,7 +178,7 @@ def test_customizable_resets(env_name: str, low_high: Optional[list]):
         (np.array(1.2), np.array(1.0)),
     ],
 )
-def test_customizable_pendulum_resets(low_high: Optional[list]):
+def test_customizable_pendulum_resets(low_high: Optional[tuple[Any, Any]]):
     env = gym.make("Pendulum-v1")
     env.action_space.seed(0)
     # First ensure we can do a reset and the values are within expected ranges.
@@ -206,7 +207,7 @@ def test_customizable_pendulum_resets(low_high: Optional[list]):
         (np.array([-1.0, -1.0]), np.array([1.0, 1.0])),
     ],
 )
-def test_invalid_customizable_resets(env_name: str, low_high: list):
+def test_invalid_customizable_resets(env_name: str, low_high: tuple[Any, Any]):
     env = gym.make(env_name)
     low, high = low_high
     with pytest.raises(ValueError):

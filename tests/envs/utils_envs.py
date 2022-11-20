@@ -1,3 +1,5 @@
+from typing import Any, Optional
+
 import gymnasium as gym
 
 
@@ -13,7 +15,7 @@ class ArgumentEnv(gym.Env):
     observation_space = gym.spaces.Box(low=-1, high=1, shape=(1,))
     action_space = gym.spaces.Box(low=-1, high=1, shape=(1,))
 
-    def __init__(self, arg1, arg2, arg3):
+    def __init__(self, arg1: Any, arg2: Any, arg3: Any):
         self.arg1 = arg1
         self.arg2 = arg2
         self.arg3 = arg3
@@ -25,7 +27,7 @@ class NoHuman(gym.Env):
 
     metadata = {"render_modes": ["rgb_array_list"], "render_fps": 4}
 
-    def __init__(self, render_mode=None):
+    def __init__(self, render_mode: Optional[str] = None):
         assert render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode
 
@@ -44,6 +46,6 @@ class NoHumanNoRGB(gym.Env):
 
     metadata = {"render_modes": ["ascii"], "render_fps": 4}
 
-    def __init__(self, render_mode=None):
+    def __init__(self, render_mode: Optional[str] = None):
         assert render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode

@@ -1,23 +1,23 @@
 """Contains methods for step compatibility, from old-to-new and new-to-old API."""
-from typing import Tuple, Union
+from __future__ import annotations
+from typing import Tuple, Union, Any
 
 import numpy as np
-
-from gymnasium.core import ObsType
+import numpy.typing as npt
 
 DoneStepType = Tuple[
-    Union[ObsType, np.ndarray],
-    Union[float, np.ndarray],
-    Union[bool, np.ndarray],
-    Union[dict, list],
+    Union[Any, npt.NDArray[Any]],
+    Union[float, npt.NDArray[np.floating[Any]]],
+    Union[bool, npt.NDArray[np.bool_]],
+    Union[dict[str, Any], list[dict[str, Any]]],
 ]
 
 TerminatedTruncatedStepType = Tuple[
-    Union[ObsType, np.ndarray],
-    Union[float, np.ndarray],
-    Union[bool, np.ndarray],
-    Union[bool, np.ndarray],
-    Union[dict, list],
+    Union[Any, npt.NDArray[Any]],
+    Union[float, npt.NDArray[np.floating[Any]]],
+    Union[bool, npt.NDArray[np.bool_]],
+    Union[bool, npt.NDArray[np.bool_]],
+    Union[dict[str, Any], list[dict[str, Any]]],
 ]
 
 

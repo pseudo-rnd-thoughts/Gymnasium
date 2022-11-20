@@ -1,14 +1,18 @@
+from __future__ import annotations
+
 import copy
 import itertools
 import json  # note: ujson fails this test due to float equality
 import pickle
 import tempfile
-from typing import List, Union
+from typing import Any, Union, Callable
 
 import numpy as np
+import numpy.typing as npt
 import pytest
 
 from gymnasium.spaces import Box, Discrete, MultiBinary, MultiDiscrete, Space, Text
+from gymnasium.spaces.space import MaskNDArray
 from gymnasium.utils import seeding
 from gymnasium.utils.env_checker import data_equivalence
 from tests.spaces.utils import (
@@ -33,7 +37,7 @@ TESTING_SPACES_PERMUTATIONS = list(
 
 
 @pytest.mark.parametrize("space", TESTING_SPACES, ids=TESTING_SPACES_IDS)
-def test_roundtripping(space: Space):
+def test_roundtripping(space: Space[Any]):
     """Tests if space samples passed to `to_jsonable` and `from_jsonable` produce the original samples."""
     sample_1 = space.sample()
     sample_2 = space.sample()
@@ -57,7 +61,7 @@ def test_roundtripping(space: Space):
     TESTING_SPACES_PERMUTATIONS,
     ids=[f"({s1}, {s2})" for s1, s2 in TESTING_SPACES_PERMUTATIONS],
 )
-def test_space_equality(space_1, space_2):
+def test_space_equality(space_1: Space[Any], space_2: Space[Any]):
     """Check that `space.__eq__` works.
 
     Testing spaces permutations contains all combinations of testing spaces of the same type.
@@ -88,7 +92,7 @@ CHI_SQUARED = np.array(
 @pytest.mark.parametrize(
     "space", TESTING_FUNDAMENTAL_SPACES, ids=TESTING_FUNDAMENTAL_SPACES_IDS
 )
-def test_sample(space: Space, n_trials: int = 1_000):
+def test_sample(space: Space[Any], n_trials: int = 1_000):
     """Test the space sample has the expected distribution with the chi-squared test and KS test.
 
     Example code with scipy.stats.chisquared that should have the same
@@ -133,7 +137,7 @@ def test_sample(space: Space, n_trials: int = 1_000):
         assert np.all(variance < CHI_SQUARED[1])
     elif isinstance(space, MultiDiscrete):
         # Due to the multi-axis capability of MultiDiscrete, these functions need to be recursive and that the expected / observed numpy are of non-regular shapes
-        def _generate_frequency(dim, func):
+        def _generate_frequency(dim: Union[npt.NDArray[Any], int], func: Callable[[int], npt.NDArray[np.int64]]) -> npt.NDArray[np.int64]:
             if isinstance(dim, np.ndarray):
                 return np.array(
                     [_generate_frequency(sub_dim, func) for sub_dim in dim],
@@ -142,8 +146,9 @@ def test_sample(space: Space, n_trials: int = 1_000):
             else:
                 return func(dim)
 
-        def _update_observed_frequency(obs_sample, obs_freq):
+        def _update_observed_frequency(obs_sample: Union[npt.NDArray[Any], int], obs_freq: npt.NDArray[np.int64]):
             if isinstance(obs_sample, np.ndarray):
+                assert isinstance(obs_freq, list)
                 for sub_sample, sub_freq in zip(obs_sample, obs_freq):
                     _update_observed_frequency(sub_sample, sub_freq)
             else:
@@ -156,7 +161,7 @@ def test_sample(space: Space, n_trials: int = 1_000):
         for sample in samples:
             _update_observed_frequency(sample, observed_frequency)
 
-        def _chi_squared_test(dim, exp_freq, obs_freq):
+        def _chi_squared_test(dim: Union[int, npt.NDArray[np.int64]], exp_freq: npt.NDArray[np.int64], obs_freq: npt.NDArray[np.int64]):
             if isinstance(dim, np.ndarray):
                 for sub_dim, sub_exp_freq, sub_obs_freq in zip(dim, exp_freq, obs_freq):
                     _chi_squared_test(sub_dim, sub_exp_freq, sub_obs_freq)
@@ -231,7 +236,7 @@ SAMPLE_MASK_RNG, _ = seeding.np_random(1)
     ),
     ids=TESTING_FUNDAMENTAL_SPACES_IDS,
 )
-def test_space_sample_mask(space: Space, mask, n_trials: int = 100):
+def test_space_sample_mask(space: Space[Any], mask: Any, n_trials: int = 100):
     """Tests that the sampling a space with a mask has the expected distribution.
 
     The implemented code is similar to the `test_space_sample` that considers the mask applied.
@@ -281,9 +286,7 @@ def test_space_sample_mask(space: Space, mask, n_trials: int = 100):
         assert np.all(variance < CHI_SQUARED[1])
     elif isinstance(space, MultiDiscrete):
         # Due to the multi-axis capability of MultiDiscrete, these functions need to be recursive and that the expected / observed numpy are of non-regular shapes
-        def _generate_frequency(
-            _dim: Union[np.ndarray, int], _mask, func: callable
-        ) -> List:
+        def _generate_frequency(_dim: npt.NDArray[Any] | int, _mask: MaskNDArray, func: Callable[[int, MaskNDArray], Any]) -> list[Any]:
             if isinstance(_dim, np.ndarray):
                 return [
                     _generate_frequency(sub_dim, sub_mask, func)
@@ -292,14 +295,14 @@ def test_space_sample_mask(space: Space, mask, n_trials: int = 100):
             else:
                 return func(_dim, _mask)
 
-        def _update_observed_frequency(obs_sample, obs_freq):
+        def _update_observed_frequency(obs_sample: npt.NDArray[Any] | int, obs_freq: Any):
             if isinstance(obs_sample, np.ndarray):
                 for sub_sample, sub_freq in zip(obs_sample, obs_freq):
                     _update_observed_frequency(sub_sample, sub_freq)
             else:
                 obs_freq[obs_sample] += 1
 
-        def _exp_freq_fn(_dim: int, _mask: np.ndarray):
+        def _exp_freq_fn(_dim: int, _mask: MaskNDArray) -> npt.NDArray[np.int64]:
             if np.any(_mask == 1):
                 assert _dim == len(_mask)
                 return np.ones(_dim) * (n_trials / np.sum(_mask)) * _mask
@@ -317,7 +320,7 @@ def test_space_sample_mask(space: Space, mask, n_trials: int = 100):
         for sample in samples:
             _update_observed_frequency(sample, observed_frequency)
 
-        def _chi_squared_test(dim, _mask, exp_freq, obs_freq):
+        def _chi_squared_test(dim: Union[int, npt.NDArray[np.int64]], _mask: MaskNDArray, exp_freq: npt.NDArray[Any], obs_freq: npt.NDArray[Any]):
             if isinstance(dim, np.ndarray):
                 for sub_dim, sub_mask, sub_exp_freq, sub_obs_freq in zip(
                     dim, _mask, exp_freq, obs_freq
@@ -382,7 +385,7 @@ def test_space_sample_mask(space: Space, mask, n_trials: int = 100):
 
 
 @pytest.mark.parametrize("space", TESTING_SPACES, ids=TESTING_SPACES_IDS)
-def test_seed_reproducibility(space):
+def test_seed_reproducibility(space: Space[Any]):
     """Test that the set the space seed will reproduce the same samples."""
     space_1 = space
     space_2 = copy.deepcopy(space)
@@ -422,7 +425,7 @@ assert len(SPACE_CLS) == len(SPACE_KWARGS)
     list(zip(SPACE_CLS, SPACE_KWARGS)),
     ids=[f"{space_cls}" for space_cls in SPACE_CLS],
 )
-def test_seed_np_random(space_cls, kwarg):
+def test_seed_np_random(space_cls: type[Space[Any]], kwarg: dict[str, Any]):
     """During initialisation of a space, a rng instance can be passed to the space.
 
     Test that the space's `np_random` is the rng instance
@@ -434,7 +437,7 @@ def test_seed_np_random(space_cls, kwarg):
 
 
 @pytest.mark.parametrize("space", TESTING_SPACES, ids=TESTING_SPACES_IDS)
-def test_sample_contains(space):
+def test_sample_contains(space: Space[Any]):
     """Test that samples are contained within the space.
 
     Then test that for all other spaces, we test that an error is not raise with a sample and a bool is returned.
@@ -450,12 +453,12 @@ def test_sample_contains(space):
 
 
 @pytest.mark.parametrize("space", TESTING_SPACES, ids=TESTING_SPACES_IDS)
-def test_repr(space):
+def test_repr(space: Space[Any]):
     assert isinstance(str(space), str)
 
 
 @pytest.mark.parametrize("space", TESTING_SPACES, ids=TESTING_SPACES_IDS)
-def test_space_pickling(space):
+def test_space_pickling(space: Space[Any]):
     """Tests the spaces can be pickled with the unpickled version being equivalent to the original."""
     space.seed(0)
 

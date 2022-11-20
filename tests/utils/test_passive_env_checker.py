@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import re
 import warnings
-from typing import Dict, Union
+from typing import Any, Type, Optional, Callable
 
 import numpy as np
 import pytest
@@ -18,7 +20,7 @@ from gymnasium.utils.passive_env_checker import (
 from tests.testing_env import GenericTestEnv
 
 
-def _modify_space(space: spaces.Space, attribute: str, value):
+def _modify_space(space: spaces.Space[Any], attribute: str, value: Any):
     setattr(space, attribute, value)
     return space
 
@@ -105,7 +107,9 @@ def _modify_space(space: spaces.Space, attribute: str, value):
         ],
     ],
 )
-def test_check_observation_space(test, space, message: str):
+def test_check_observation_space(
+    test: Exception, space: spaces.Space[Any], message: str
+):
     """Tests the check observation space."""
     if test is UserWarning:
         with pytest.warns(
@@ -173,7 +177,7 @@ def test_check_observation_space(test, space, message: str):
     ],
 )
 def test_check_action_space(
-    test: Union[UserWarning, type], space: spaces.Space, message: str
+    test: UserWarning | type, space: spaces.Space[Any], message: str
 ):
     """Tests the check action space function."""
     if test is UserWarning:
@@ -229,7 +233,7 @@ def test_check_action_space(
         ],
     ],
 )
-def test_check_obs(test, obs, obs_space: spaces.Space, message: str):
+def test_check_obs(test: Type[Exception], obs: Any, obs_space: spaces.Space[Any], message: str):
     """Tests the check observations function."""
     if test is UserWarning:
         with pytest.warns(
@@ -243,20 +247,20 @@ def test_check_obs(test, obs, obs_space: spaces.Space, message: str):
         assert len(caught_warnings) == 0
 
 
-def _reset_no_seed(self, options=None):
+def _reset_no_seed(self: gym.Env[Any, Any], options: Optional[dict[str, Any]] = None) -> tuple[Any, dict[str, Any]]:
     return self.observation_space.sample(), {}
 
 
-def _reset_seed_default(self, seed="error", options=None):
+def _reset_seed_default(self: gym.Env[Any, Any], seed: str = "error", options: Optional[dict[str, Any]] = None) -> tuple[Any, dict[str, Any]]:
     return self.observation_space.sample(), {}
 
 
-def _reset_no_option(self, seed=None):
+def _reset_no_option(self: gym.Env[Any, Any], seed: Optional[int] = None) -> tuple[Any, dict[str, Any]]:
     return self.observation_space.sample(), {}
 
 
-def _make_reset_results(results):
-    def _reset_result(self, seed=None, options=None):
+def _make_reset_results(results: Any) -> Callable[[gym.Env[Any, Any], Optional[int], Optional[dict[str, Any]]], Any]:
+    def _reset_result(self: gym.Env[Any, Any], seed: Optional[int] = None, options: Optional[dict[str, Any]] = None) -> Any:
         return results
 
     return _reset_result
@@ -297,7 +301,9 @@ def _make_reset_results(results):
         ],
     ],
 )
-def test_passive_env_reset_checker(test, func: callable, message: str, kwargs: Dict):
+def test_passive_env_reset_checker(
+    test: Type[Exception], func: Callable[[gym.Env[Any, Any], Optional[int], Optional[dict[str, Any]]], tuple[Any, dict[str, Any]]], message: str, kwargs: dict[str, Any]
+):
     """Tests the passive env reset check"""
     if test is UserWarning:
         with pytest.warns(
@@ -312,7 +318,12 @@ def test_passive_env_reset_checker(test, func: callable, message: str, kwargs: D
 
 
 def _modified_step(
-    self, obs=None, reward=0, terminated=False, truncated=False, info=None
+    self: gym.Env[Any, Any],
+    obs: Any = None,
+    reward: int = 0,
+    terminated: bool = False,
+    truncated: bool = False,
+    info: dict[str, Any] | None = None,
 ):
     if obs is None:
         obs = self.observation_space.sample()
@@ -376,7 +387,7 @@ def _modified_step(
     ],
 )
 def test_passive_env_step_checker(
-    test: Union[UserWarning, type], func: callable, message: str
+    test: Type[UserWarning] | Type[Exception], func: Callable[[gym.Env[Any, Any], Any], tuple[Any, float, bool, bool, dict[str, Any]]], message: str
 ):
     """Tests the passive env step checker."""
     if test is UserWarning:
@@ -444,7 +455,9 @@ def test_passive_env_step_checker(
         ],
     ],
 )
-def test_passive_render_checker(test, env: GenericTestEnv, message: str):
+def test_passive_render_checker(
+    test: Type[UserWarning] | Type[Exception], env: GenericTestEnv, message: str
+):
     """Tests the passive render checker."""
     if test is UserWarning:
         with pytest.warns(

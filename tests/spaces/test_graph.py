@@ -1,4 +1,5 @@
 import re
+from typing import Union
 
 import numpy as np
 import pytest
@@ -132,6 +133,6 @@ def test_edge_space_sample():
         ),
     ],
 )
-def test_not_contains(sample):
+def test_not_contains(sample: Union[str, GraphInstance]):
     space = Graph(node_space=Discrete(2), edge_space=Discrete(2))
     assert sample not in space

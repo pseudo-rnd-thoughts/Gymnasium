@@ -1,4 +1,6 @@
 """Test suite for LambdaActionV0."""
+from typing import Any, Callable
+
 import numpy as np
 import pytest
 
@@ -12,7 +14,7 @@ NUM_ENVS = 3
 BOX_SPACE = Box(-5, 5, (1,), dtype=np.float64)
 
 
-def env_step_fn(self, action):
+def env_step_fn(self: gym.Env[Any, Any], action: int):
     return 0, 0, False, False, {"action": action}
 
 
@@ -27,7 +29,9 @@ def env_step_fn(self, action):
         ),
     ],
 )
-def test_lambda_action_v0(env, func, action, expected):
+def test_lambda_action_v0(
+    env: gym.Env[Any, Any], func: Callable[[int], int], action: int, expected: int
+):
     """Tests lambda action.
     Tests if function is correctly applied to environment's action.
     """

@@ -1,14 +1,15 @@
 """Tests that the `env_checker` runs as expects and all errors are possible."""
+from __future__ import annotations
+
 import re
 import warnings
-from typing import Tuple, Union
+from typing import Any, Type, Optional, Callable, Tuple, Dict
 
 import numpy as np
 import pytest
 
 import gymnasium as gym
 from gymnasium import spaces
-from gymnasium.core import ObsType
 from gymnasium.utils.env_checker import (
     check_env,
     check_reset_options,
@@ -18,6 +19,9 @@ from gymnasium.utils.env_checker import (
     check_seed_deprecation,
 )
 from tests.testing_env import GenericTestEnv
+
+
+ResetCallableTypeHint = Callable[[gym.Env[Any, Any], Optional[int], Optional[Dict[str, Any]]], Tuple[Any, Dict[str, Any]]]
 
 
 @pytest.mark.parametrize(
@@ -45,7 +49,7 @@ from tests.testing_env import GenericTestEnv
         ),
     ],
 )
-def test_no_error_warnings(env):
+def test_no_error_warnings(env: gym.Env[Any, Any]):
     """A full version of this test with all gymnasium envs is run in tests/envs/test_envs.py."""
     with warnings.catch_warnings(record=True) as caught_warnings:
         check_env(env)
@@ -53,22 +57,34 @@ def test_no_error_warnings(env):
     assert len(caught_warnings) == 0, [warning.message for warning in caught_warnings]
 
 
-def _no_super_reset(self, seed=None, options=None):
+def _no_super_reset(
+    self: gym.Env[Any, Any],
+    seed: int | None = None,
+    options: dict[str, Any] | None = None,
+) -> tuple[Any, dict[str, Any]]:
     self.np_random.random()  # generates a new prng
     # generate seed deterministic result
     self.observation_space.seed(0)
     return self.observation_space.sample(), {}
 
 
-def _super_reset_fixed(self, seed=None, options=None):
+def _super_reset_fixed(
+    self: GenericTestEnv,
+    seed: int | None = None,
+    options: dict[str, Any] | None = None,
+) -> tuple[Any, dict[str, Any]]:
     # Call super that ignores the seed passed, use fixed seed
     super(GenericTestEnv, self).reset(seed=1)
     # deterministic output
-    self.observation_space._np_random = self.np_random
+    self.observation_space._np_random = (  # pyright: ignore [reportPrivateUsage]
+        self.np_random
+    )
     return self.observation_space.sample(), {}
 
 
-def _reset_default_seed(self: GenericTestEnv, seed="Error", options=None):
+def _reset_default_seed(
+    self: GenericTestEnv, seed: str = "Error", options: dict[str, Any] | None = None
+) -> tuple[Any, dict[str, Any]]:
     super(GenericTestEnv, self).reset(seed=seed)
     self.observation_space._np_random = (  # pyright: ignore [reportPrivateUsage]
         self.np_random
@@ -106,7 +122,7 @@ def _reset_default_seed(self: GenericTestEnv, seed="Error", options=None):
         ],
     ],
 )
-def test_check_reset_seed(test, func: callable, message: str):
+def test_check_reset_seed(test: Type[Exception], func: ResetCallableTypeHint, message: str):
     """Tests the check reset seed function works as expected."""
     if test is UserWarning:
         with pytest.warns(
@@ -119,8 +135,8 @@ def test_check_reset_seed(test, func: callable, message: str):
 
 
 def _deprecated_return_info(
-    self, return_info: bool = False
-) -> Union[Tuple[ObsType, dict], ObsType]:
+    self: gym.Env[Any, Any], return_info: bool = False
+) -> tuple[Any, dict] | Any:
     """function to simulate the signature and behavior of a `reset` function with the deprecated `return_info` optional argument"""
     if return_info:
         return self.observation_space.sample(), {}
@@ -128,25 +144,41 @@ def _deprecated_return_info(
         return self.observation_space.sample()
 
 
-def _reset_var_keyword_kwargs(self, kwargs):
+def _reset_var_keyword_kwargs(self: gym.Env[Any, Any], kwargs: dict[str, Any]) -> tuple[Any, dict[str, Any]]:
     return self.observation_space.sample(), {}
 
 
-def _reset_return_info_type(self, seed=None, options=None):
+def _reset_return_info_type(
+    self: gym.Env[Any, Any],
+    seed: int | None = None,
+    options: dict[str, Any] | None = None,
+) -> list[Any]:
     """Returns a `list` instead of a `tuple`. This function is used to make sure `env_checker` correctly
     checks that the return type of `env.reset()` is a `tuple`"""
     return [self.observation_space.sample(), {}]
 
 
-def _reset_return_info_length(self, seed=None, options=None):
+def _reset_return_info_length(
+    self: gym.Env[Any, Any],
+    seed: int | None = None,
+    options: dict[str, Any] | None = None,
+) -> tuple[int, int, int]:
     return 1, 2, 3
 
 
-def _return_info_obs_outside(self, seed=None, options=None):
+def _return_info_obs_outside(
+    self: gym.Env[Any, Any],
+    seed: int | None = None,
+    options: dict[str, Any] | None = None,
+) -> tuple[Any, dict[str, Any]]:
     return self.observation_space.sample() + self.observation_space.high, {}
 
 
-def _return_info_not_dict(self, seed=None, options=None):
+def _return_info_not_dict(
+    self: gym.Env[Any, Any],
+    seed: int | None = None,
+    options: dict[str, Any] | None = None,
+) -> tuple[Any, list[str]]:
     return self.observation_space.sample(), ["key", "value"]
 
 
@@ -175,7 +207,7 @@ def _return_info_not_dict(self, seed=None, options=None):
         ],
     ],
 )
-def test_check_reset_return_type(test, func: callable, message: str):
+def test_check_reset_return_type(test: Type[Exception], func: ResetCallableTypeHint, message: str):
     """Tests the check `env.reset()` function has a correct return type."""
 
     with pytest.raises(test, match=f"^{re.escape(message)}$"):
@@ -194,7 +226,7 @@ def test_check_reset_return_type(test, func: callable, message: str):
         ],
     ],
 )
-def test_check_reset_return_info_deprecation(test, func: callable, message: str):
+def test_check_reset_return_info_deprecation(test: Type[UserWarning], func: ResetCallableTypeHint, message: str):
     """Tests that return_info has been correct deprecated as an argument to `env.reset()`."""
 
     with pytest.warns(test, match=f"^\\x1b\\[33mWARN: {re.escape(message)}\\x1b\\[0m$"):
@@ -208,13 +240,13 @@ def test_check_seed_deprecation():
 
     env = GenericTestEnv()
 
-    def seed(seed):
+    def seed_func(seed: Optional[int]):
         return
 
     with pytest.warns(
         UserWarning, match=f"^\\x1b\\[33mWARN: {re.escape(message)}\\x1b\\[0m$"
     ):
-        env.seed = seed
+        env.seed = seed_func
         assert callable(env.seed)
         check_seed_deprecation(env)
 
@@ -256,7 +288,7 @@ def test_check_reset_options():
         ],
     ],
 )
-def test_check_env(env: gym.Env, message: str):
+def test_check_env(env: gym.Env[Any, Any], message: str):
     """Tests the check_env function works as expected."""
     with pytest.raises(AssertionError, match=f"^{re.escape(message)}$"):
         check_env(env)

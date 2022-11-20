@@ -3,6 +3,7 @@ import re
 from typing import Optional
 
 import pytest
+from _pytest.fixtures import FixtureFunction
 
 import gymnasium as gym
 
@@ -85,7 +86,7 @@ def test_register(
         "MyNamespace///MyNotSoAwesomeEnv-vNone",
     ],
 )
-def test_register_error(env_id):
+def test_register_error(env_id: str):
     with pytest.raises(gym.error.Error, match=f"^Malformed environment ID: {env_id}"):
         gym.register(env_id, "no-entry-point")
 
@@ -105,7 +106,7 @@ def test_register_error(env_id):
         ("MyAwesomeNamespace/MyAwesomeVersioneEnv", "MyAwesomeVersionedEnv"),
     ],
 )
-def test_env_suggestions(register_testing_envs, env_id_input, env_id_suggested):
+def test_env_suggestions(register_testing_envs: FixtureFunction, env_id_input: str, env_id_suggested: str):
     with pytest.raises(
         gym.error.UnregisteredEnv, match=f"Did you mean: `{env_id_suggested}`?"
     ):
@@ -124,7 +125,7 @@ def test_env_suggestions(register_testing_envs, env_id_input, env_id_suggested):
     ],
 )
 def test_env_version_suggestions(
-    register_testing_envs, env_id_input, suggested_versions, default_version
+    register_testing_envs: FixtureFunction, env_id_input: str, suggested_versions: str, default_version: bool
 ):
     if default_version:
         with pytest.raises(
@@ -173,7 +174,7 @@ def test_register_versioned_unversioned():
     del gym.envs.registry[unversioned_env]
 
 
-def test_make_latest_versioned_env(register_testing_envs):
+def test_make_latest_versioned_env(register_testing_envs: FixtureFunction):
     with pytest.warns(
         UserWarning,
         match=re.escape(

@@ -1,4 +1,5 @@
 from functools import partial
+from typing import Callable
 
 import pytest
 
@@ -19,6 +20,6 @@ TESTING_SPACE = Space()
         partial(utils.unflatten, TESTING_SPACE, None),
     ],
 )
-def test_not_implemented_errors(func):
+def test_not_implemented_errors(func: Callable[[], None]):
     with pytest.raises(NotImplementedError):
         func()

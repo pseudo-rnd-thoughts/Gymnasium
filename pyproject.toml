@@ -1,8 +1,13 @@
 [tool.pyright]
 
 include = [
-    "gymnasium/**",
-    "tests/**"
+#    "gymnasium/**",
+    "tests/dev_wrappers/**",
+    "tests/envs/**",
+    "tests/spaces/**",
+    "tests/utils/**",
+#    "tests/vector/**",
+#    "tests/wrappers/**",
 ]
 
 exclude = [
@@ -29,7 +34,7 @@ reportMissingTypeStubs = false
 reportInvalidTypeVarUse = "none"
 
 # reportUnknownMemberType = "warning"  # -> raises 6035 warnings
-# reportUnknownParameterType = "warning"  # -> raises 1327 warnings
+ reportUnknownParameterType = "warning"  # -> raises 1327 warnings
 # reportUnknownVariableType = "warning"  # -> raises 2585 warnings
 # reportUnknownArgumentType = "warning"  # -> raises 2104 warnings
 reportGeneralTypeIssues = "none"  # -> commented out raises 489 errors

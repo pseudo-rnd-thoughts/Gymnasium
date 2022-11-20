@@ -3,6 +3,8 @@ import pytest
 
 from gymnasium.utils.env_checker import data_equivalence
 from gymnasium.utils.step_api_compatibility import (
+    DoneStepType,
+    TerminatedTruncatedStepType,
     convert_to_done_step_api,
     convert_to_terminated_truncated_step_api,
 )
@@ -55,7 +57,10 @@ from gymnasium.utils.step_api_compatibility import (
     ),
 )
 def test_to_done_step_api(
-    is_vector_env, done_returns, expected_terminated, expected_truncated
+    is_vector_env: bool,
+    done_returns: DoneStepType,
+    expected_terminated: bool,
+    expected_truncated: bool,
 ):
     _, _, terminated, truncated, info = convert_to_terminated_truncated_step_api(
         done_returns, is_vector_env=is_vector_env
@@ -113,7 +118,10 @@ def test_to_done_step_api(
     ),
 )
 def test_to_terminated_truncated_step_api(
-    is_vector_env, terminated_truncated_returns, expected_done, expected_truncated
+    is_vector_env: bool,
+    terminated_truncated_returns: TerminatedTruncatedStepType,
+    expected_done: bool,
+    expected_truncated: bool,
 ):
     _, _, done, info = convert_to_done_step_api(
         terminated_truncated_returns, is_vector_env=is_vector_env

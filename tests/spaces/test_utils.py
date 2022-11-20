@@ -1,11 +1,11 @@
 from itertools import zip_longest
-from typing import Optional
+from typing import Any, Optional
 
 import numpy as np
 import pytest
 
 import gymnasium as gym
-from gymnasium.spaces import Box, Graph, utils
+from gymnasium.spaces import Box, Graph, Space, utils
 from gymnasium.utils.env_checker import data_equivalence
 from tests.spaces.utils import TESTING_SPACES, TESTING_SPACES_IDS
 
@@ -56,7 +56,7 @@ TESTING_SPACES_EXPECTED_FLATDIMS = [
     zip_longest(TESTING_SPACES, TESTING_SPACES_EXPECTED_FLATDIMS),
     ids=TESTING_SPACES_IDS,
 )
-def test_flatdim(space: gym.spaces.Space, flatdim: Optional[int]):
+def test_flatdim(space: Space[Any], flatdim: Optional[int]):
     """Checks that the flattened dims of the space is equal to an expected value."""
     if space.is_np_flattenable:
         dim = utils.flatdim(space)
@@ -69,7 +69,7 @@ def test_flatdim(space: gym.spaces.Space, flatdim: Optional[int]):
 
 
 @pytest.mark.parametrize("space", TESTING_SPACES, ids=TESTING_SPACES_IDS)
-def test_flatten_space(space):
+def test_flatten_space(space: Space[Any]):
     """Test that the flattened spaces are a box and have the `flatdim` shape."""
     flat_space = utils.flatten_space(space)
 
@@ -98,7 +98,7 @@ def test_flatten_space(space):
 
 
 @pytest.mark.parametrize("space", TESTING_SPACES, ids=TESTING_SPACES_IDS)
-def test_flatten(space):
+def test_flatten(space: Space[Any]):
     """Test that a flattened sample have the `flatdim` shape."""
     flattened_sample = utils.flatten(space, space.sample())
 
@@ -113,7 +113,7 @@ def test_flatten(space):
 
 
 @pytest.mark.parametrize("space", TESTING_SPACES, ids=TESTING_SPACES_IDS)
-def test_flat_space_contains_flat_points(space):
+def test_flat_space_contains_flat_points(space: Space[Any]):
     """Test that the flattened samples are contained within the flattened space."""
     flattened_samples = [utils.flatten(space, space.sample()) for _ in range(10)]
     flat_space = utils.flatten_space(space)
@@ -123,7 +123,7 @@ def test_flat_space_contains_flat_points(space):
 
 
 @pytest.mark.parametrize("space", TESTING_SPACES, ids=TESTING_SPACES_IDS)
-def test_flatten_roundtripping(space):
+def test_flatten_roundtripping(space: Space[Any]):
     """Tests roundtripping with flattening and unflattening are equal to the original sample."""
     samples = [space.sample() for _ in range(10)]
 

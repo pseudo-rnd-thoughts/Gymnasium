@@ -1,5 +1,6 @@
 import pickle
 import warnings
+from typing import Any
 
 import numpy as np
 import pytest
@@ -40,7 +41,7 @@ CHECK_ENV_IGNORE_WARNINGS = [
     all_testing_env_specs,
     ids=[spec.id for spec in all_testing_env_specs],
 )
-def test_envs_pass_env_checker(spec):
+def test_envs_pass_env_checker(spec: EnvSpec):
     """Check that all environments pass the environment checker with no warnings other than the expected."""
     with warnings.catch_warnings(record=True) as caught_warnings:
         env = spec.make(disable_env_checker=True).unwrapped
@@ -119,7 +120,7 @@ def test_env_determinism_rollout(env_spec: EnvSpec):
     env_2.close()
 
 
-def check_rendered(rendered_frame, mode: str):
+def check_rendered(rendered_frame: Any, mode: str):
     """Check that the rendered frame is as expected."""
     if mode == "rgb_array_list":
         assert isinstance(rendered_frame, list)
@@ -163,7 +164,7 @@ render_mode_env_specs = [
 @pytest.mark.parametrize(
     "spec", render_mode_env_specs, ids=[spec.id for spec in render_mode_env_specs]
 )
-def test_render_modes(spec):
+def test_render_modes(spec: EnvSpec):
     """There is a known issue where rendering a mujoco environment then mujoco-py will cause an error on non-mac based systems.
 
     Therefore, we are only testing with mujoco environments.
@@ -193,7 +194,7 @@ def test_render_modes(spec):
     all_testing_initialised_envs,
     ids=[env.spec.id for env in all_testing_initialised_envs if env.spec is not None],
 )
-def test_pickle_env(env: gym.Env):
+def test_pickle_env(env: gym.Env[Any, Any]):
     pickled_env = pickle.loads(pickle.dumps(env))
 
     data_equivalence(env.reset(), pickled_env.reset())

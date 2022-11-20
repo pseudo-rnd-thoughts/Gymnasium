@@ -1,3 +1,5 @@
+from typing import Any, Callable
+
 import numpy as np
 import pytest
 
@@ -61,7 +63,7 @@ def test_sequence_inheritance():
         ),
     ],
 )
-def test_seeds(space, seed, expected_len):
+def test_seeds(space: Tuple[Any], seed: Any, expected_len: int):
     seeds = space.seed(seed)
     assert isinstance(seeds, list) and all(isinstance(elem, int) for elem in seeds)
     assert len(seeds) == expected_len
@@ -83,7 +85,7 @@ def test_seeds(space, seed, expected_len):
         lambda: Tuple("abc"),
     ],
 )
-def test_bad_space_calls(space_fn):
+def test_bad_space_calls(space_fn: Callable[[], Tuple[Any]]):
     with pytest.raises(AssertionError):
         space_fn()
 

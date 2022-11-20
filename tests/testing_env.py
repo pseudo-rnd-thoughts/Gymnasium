@@ -1,4 +1,5 @@
 """Provides a generic testing environment for use in tests with custom reset, step and render functions."""
+from __future__ import annotations
 import types
 from typing import Any, Dict, Optional, Tuple, Union
 
@@ -13,7 +14,7 @@ def basic_reset_fn(
     *,
     seed: Optional[int] = None,
     options: Optional[dict] = None,
-) -> Union[ObsType, Tuple[ObsType, dict]]:
+) -> Tuple[ObsType, dict]:
     """A basic reset function that will pass the environment check using random actions from the observation space."""
     super(GenericTestEnv, self).reset(seed=seed)
     self.observation_space.seed(seed)

@@ -1,7 +1,11 @@
+from __future__ import annotations
+
 import re
 import warnings
+from typing import Any
 
 import numpy as np
+import numpy.typing as npt
 import pytest
 
 import gymnasium as gym
@@ -33,7 +37,7 @@ from gymnasium.spaces.box import get_inf
         (Box(low=np.zeros(3), high=1.0), (3,)),  # Test with array and scalar
     ],
 )
-def test_shape_inference(box, expected_shape):
+def test_shape_inference(box: Box, expected_shape: tuple[int, ...]):
     """Test that the shape inference is as expected."""
     assert box.shape == expected_shape
     assert box.sample().shape == expected_shape
@@ -57,7 +61,7 @@ def test_shape_inference(box, expected_shape):
         ("string", False),
     ],
 )
-def test_low_high_values(value, valid: bool):
+def test_low_high_values(value: Any, valid: bool):
     """Test what `low` and `high` values are valid for `Box` space."""
     if valid:
         with warnings.catch_warnings(record=True) as caught_warnings:
@@ -139,7 +143,13 @@ def test_low_high_values(value, valid: bool):
         ),
     ],
 )
-def test_init_errors(low, high, kwargs, error, message):
+def test_init_errors(
+    low: int | npt.NDArray[Any] | None,
+    high: int | npt.NDArray[Any] | None,
+    kwargs: dict[str, Any],
+    error: Exception,
+    message: str,
+):
     """Test all constructor errors."""
     with pytest.raises(error, match=f"^{re.escape(message)}$"):
         Box(low=low, high=high, **kwargs)
@@ -196,7 +206,7 @@ def test_dtype_check():
         Box(low=np.array([-np.inf, 0]), high=np.array([0.0, np.inf]), dtype=np.float64),
     ],
 )
-def test_infinite_space(space):
+def test_infinite_space(space: Box):
     """
     To test spaces that are passed in have only 0 or infinite bounds because `space.high` and `space.low`
      are both modified within the init, we check for infinite when we know it's not 0

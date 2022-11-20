@@ -1,3 +1,5 @@
+from typing import Callable, Type, Any
+
 import jax
 import jax.numpy as jnp
 import jax.random as jrng
@@ -6,10 +8,11 @@ import pytest
 
 from gymnasium.envs.phys2d.cartpole import CartPoleF  # noqa: E402
 from gymnasium.envs.phys2d.pendulum import PendulumF  # noqa: E402
+from gymnasium.functional import FuncEnv
 
 
 @pytest.mark.parametrize("env_class", [CartPoleF, PendulumF])
-def test_normal(env_class):
+def test_normal(env_class: Type[FuncEnv[Any, Any, Any, Any, Any, Any]]):
     env = env_class()
     rng = jrng.PRNGKey(0)
 
@@ -41,7 +44,7 @@ def test_normal(env_class):
 
 
 @pytest.mark.parametrize("env_class", [CartPoleF, PendulumF])
-def test_jit(env_class):
+def test_jit(env_class: Type[FuncEnv[Any, Any, Any, Any, Any, Any]]):
     env = env_class()
     rng = jrng.PRNGKey(0)
 
@@ -74,7 +77,7 @@ def test_jit(env_class):
 
 
 @pytest.mark.parametrize("env_class", [CartPoleF, PendulumF])
-def test_vmap(env_class):
+def test_vmap(env_class: Type[FuncEnv[Any, Any, Any, Any, Any, Any]]):
     env = env_class()
     num_envs = 10
     rng = jrng.split(jrng.PRNGKey(0), num_envs)
