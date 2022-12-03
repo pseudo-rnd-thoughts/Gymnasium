@@ -7,12 +7,12 @@
     <meta property="og:title" content="Gymnasium Documentation" />
     <meta property="og:type" content="website" />
     <meta property="og:description" content="A standard API for reinforcement learning and a diverse set of reference environments (formerly Gym)" />
-    <meta property="og:url" content="https://gymnasium.farama.org/tutorials/reinforce_invpend_gym_v26.html" /><meta property="og:image" content="https://gymnasium.farama.org/_static/img/gymnasium-github.png" /><meta name="twitter:card" content="summary_large_image"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-<link rel="index" title="Index" href="../../genindex/" /><link rel="search" title="Search" href="../../search/" /><link rel="prev" title="Implementing Custom Wrappers" href="../implementing_custom_wrappers/" />
-        <link rel="canonical" href="https://gymnasium.farama.org/tutorials/reinforce_invpend_gym_v26.html" />
+    <meta property="og:url" content="https://gymnasium.farama.org/tutorials/implementing_custom_wrappers.html" /><meta property="og:image" content="https://gymnasium.farama.org/_static/img/gymnasium-github.png" /><meta name="twitter:card" content="summary_large_image"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<link rel="index" title="Index" href="../../genindex/" /><link rel="search" title="Search" href="../../search/" /><link rel="next" title="Training using REINFORCE for Mujoco" href="../reinforce_invpend_gym_v26/" /><link rel="prev" title="Handling Time Limits" href="../handling_time_limits/" />
+        <link rel="canonical" href="https://gymnasium.farama.org/tutorials/implementing_custom_wrappers.html" />
 
     <link rel="shortcut icon" href="../../_static/favicon.png"/><meta name="generator" content="sphinx-5.3.0, furo 2022.09.15.dev1"/>
-        <title>Training using REINFORCE for Mujoco - Gymnasium Documentation</title>
+        <title>Implementing Custom Wrappers - Gymnasium Documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?digest=685fa18242db31520d31c3a9d25d30ba22d0f107" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?digest=403a31844f8e23b4c27a66e8d07df595b970be09" />
@@ -348,8 +348,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../blackjack_tutorial/">Solving Blackjack with Q-Learning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../environment_creation/">Make your own custom environment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../handling_time_limits/">Handling Time Limits</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../implementing_custom_wrappers/">Implementing Custom Wrappers</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Training using REINFORCE for Mujoco</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Implementing Custom Wrappers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reinforce_invpend_gym_v26/">Training using REINFORCE for Mujoco</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
@@ -376,7 +376,7 @@
         <div class="content-icon-container">
           
     <div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/Farama-Foundation/Gymnasium/edit/main/docs/tutorials/reinforce_invpend_gym_v26.py" title="Edit this page">
+  <a class="muted-link" href="https://github.com/Farama-Foundation/Gymnasium/edit/main/docs/tutorials/implementing_custom_wrappers.py" title="Edit this page">
     <svg aria-hidden="true" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
       <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
@@ -399,301 +399,136 @@
         </div>
         <article role="main">
           
-          <section id="training-using-reinforce-for-mujoco">
-<h1>Training using REINFORCE for Mujoco<a class="headerlink" href="#training-using-reinforce-for-mujoco" title="Permalink to this heading">#</a></h1>
-<a class="reference internal image-reference" href="../../_images/reinforce_invpend_gym_v26_fig1.gif"><img alt="agent-environment-diagram" src="../../_images/reinforce_invpend_gym_v26_fig1.gif" style="width: 400px;" /></a>
-<dl class="simple">
-<dt>This tutorial serves 2 purposes:</dt><dd><ol class="arabic simple">
-<li><p>To understand how to implement REINFORCE [1] from scratch to solve Mujoco’s InvertedPendulum-v4</p></li>
-<li><p>Implementation a deep reinforcement learning algorithm with Gymnasium’s v0.26+ <cite>step()</cite> function</p></li>
-</ol>
-</dd>
-</dl>
-<p>We will be using <strong>REINFORCE</strong>, one of the earliest policy gradient methods. Unlike going under the burden of learning a value function first and then deriving a policy out of it,
-REINFORCE optimizes the policy directly. In other words, it is trained to maximize the probability of Monte-Carlo returns. More on that later.</p>
-<p><strong>Inverted Pendulum</strong> is Mujoco’s cartpole but now powered by the Mujoco physics simulator -
-which allows more complex experiments (such as varying the effects of gravity).
-This environment involves a cart that can moved linearly, with a pole fixed on it at one end and having another end free.
-The cart can be pushed left or right, and the goal is to balance the pole on the top of the cart by applying forces on the cart.
-More information on the environment could be found at <a class="reference external" href="https://gymnasium.farama.org/environments/mujoco/inverted_pendulum/">https://gymnasium.farama.org/environments/mujoco/inverted_pendulum/</a></p>
-<p><strong>Training Objectives</strong>: To balance the pole (inverted pendulum) on top of the cart</p>
-<p><strong>Actions</strong>: The agent takes a 1D vector for actions. The action space is a continuous <code class="docutils literal notranslate"><span class="pre">(action)</span></code> in <code class="docutils literal notranslate"><span class="pre">[-3,</span> <span class="pre">3]</span></code>,
-where action represents the numerical force applied to the cart
-(with magnitude representing the amount of force and sign representing the direction)</p>
-<p><strong>Approach</strong>: We use PyTorch to code REINFORCE from scratch to train a Neural Network policy to master Inverted Pendulum.</p>
-<p>An explanation of the Gymnasium v0.26+ <cite>Env.step()</cite> function</p>
-<p><code class="docutils literal notranslate"><span class="pre">env.step(A)</span></code> allows us to take an action ‘A’ in the current environment ‘env’. The environment then executes the action
-and returns five variables:</p>
+          <section id="implementing-custom-wrappers">
+<h1>Implementing Custom Wrappers<a class="headerlink" href="#implementing-custom-wrappers" title="Permalink to this heading">#</a></h1>
+<p>In this tutorial we will describe how to implement your own custom wrappers.
+Wrappers are a great way to add functionality to your environments in a modular way.
+This will save you a lot of boilerplate code.</p>
+<p>We will show how to create a wrapper by</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">next_obs</span></code>: This is the observation that the agent will receive after taking the action.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">reward</span></code>: This is the reward that the agent will receive after taking the action.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">terminated</span></code>: This is a boolean variable that indicates whether or not the environment has terminated.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">truncated</span></code>: This is a boolean variable that also indicates whether the episode ended by early truncation, i.e., a time limit is reached.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">info</span></code>: This is a dictionary that might contain additional information about the environment.</p></li>
+<li><p>Inheriting from <a class="reference internal" href="../../api/wrappers/observation_wrappers/#gymnasium.ObservationWrapper" title="gymnasium.ObservationWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">gymnasium.ObservationWrapper</span></code></a></p></li>
+<li><p>Inheriting from <a class="reference internal" href="../../api/wrappers/action_wrappers/#gymnasium.ActionWrapper" title="gymnasium.ActionWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">gymnasium.ActionWrapper</span></code></a></p></li>
+<li><p>Inheriting from <a class="reference internal" href="../../api/wrappers/reward_wrappers/#gymnasium.RewardWrapper" title="gymnasium.RewardWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">gymnasium.RewardWrapper</span></code></a></p></li>
+<li><p>Inheriting from <a class="reference internal" href="../../api/wrappers/#gymnasium.Wrapper" title="gymnasium.Wrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">gymnasium.Wrapper</span></code></a></p></li>
 </ul>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
-
-<span class="kn">import</span> <span class="nn">random</span>
-
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
-<span class="kn">from</span> <span class="nn">torch.distributions.normal</span> <span class="kn">import</span> <span class="n">Normal</span>
+<p>Before following this tutorial, make sure to check out the docs of the <a class="reference internal" href="../../api/wrappers/#module-gymnasium.wrappers" title="gymnasium.wrappers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">gymnasium.wrappers</span></code></a> module.</p>
+<section id="inheriting-from-gymnasium-observationwrapper">
+<h2>Inheriting from <a class="reference internal" href="../../api/wrappers/observation_wrappers/#gymnasium.ObservationWrapper" title="gymnasium.ObservationWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">gymnasium.ObservationWrapper</span></code></a><a class="headerlink" href="#inheriting-from-gymnasium-observationwrapper" title="Permalink to this heading">#</a></h2>
+<p>Observation wrappers are useful if you want to apply some function to the observations that are returned
+by an environment. If you implement an observation wrapper, you only need to define this transformation
+by implementing the <a class="reference internal" href="../../api/wrappers/observation_wrappers/#gymnasium.ObservationWrapper.observation" title="gymnasium.ObservationWrapper.observation"><code class="xref py py-meth docutils literal notranslate"><span class="pre">gymnasium.ObservationWrapper.observation()</span></code></a> method. Moreover, you should remember to
+update the observation space, if the transformation changes the shape of observations (e.g. by transforming
+dictionaries into numpy arrays, as in the following example).</p>
+<p>Imagine you have a 2D navigation task where the environment returns dictionaries as observations with
+keys <code class="docutils literal notranslate"><span class="pre">&quot;agent_position&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;target_position&quot;</span></code>. A common thing to do might be to throw away some degrees of
+freedom and only consider the position of the target relative to the agent, i.e.
+<code class="docutils literal notranslate"><span class="pre">observation[&quot;target_position&quot;]</span> <span class="pre">-</span> <span class="pre">observation[&quot;agent_position&quot;]</span></code>. For this, you could implement an
+observation wrapper like this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">gym</span> <span class="kn">import</span> <span class="n">ActionWrapper</span><span class="p">,</span> <span class="n">ObservationWrapper</span><span class="p">,</span> <span class="n">RewardWrapper</span><span class="p">,</span> <span class="n">Wrapper</span>
 
 <span class="kn">import</span> <span class="nn">gymnasium</span> <span class="k">as</span> <span class="nn">gym</span>
+<span class="kn">from</span> <span class="nn">gymnasium.spaces</span> <span class="kn">import</span> <span class="n">Box</span><span class="p">,</span> <span class="n">Discrete</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;figure.figsize&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
-</pre></div>
-</div>
-<section id="policy-network">
-<h2>Policy Network<a class="headerlink" href="#policy-network" title="Permalink to this heading">#</a></h2>
-<img alt="../../_images/reinforce_invpend_gym_v26_fig2.png" src="../../_images/reinforce_invpend_gym_v26_fig2.png" />
-<p>We start by building a policy that the agent will learn using REINFORCE.
-A policy is a mapping from the current environment observation to a probability distribution of the actions to be taken.
-The policy used in the tutorial is parameterized by a neural network. It consists of 2 linear layers that are shared between both the predicted mean and standard deviation.
-Further, the single individual linear layers are used to estimate the mean and the standard deviation. <code class="docutils literal notranslate"><span class="pre">nn.Tanh</span></code> is used as a non-linearity between the hidden layers.
-The following function estimates a mean and standard deviation of a normal distribution from which an action is sampled. Hence it is expected for the policy to learn
-appropriate weights to output means and standard deviation based on the current observation.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Policy_Network</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Parametrized Policy Network.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs_space_dims</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">action_space_dims</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Initializes a neural network that estimates the mean and standard deviation</span>
-<span class="sd">         of a normal distribution from which an action is sampled from.</span>
+<span class="k">class</span> <span class="nc">RelativePosition</span><span class="p">(</span><span class="n">ObservationWrapper</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">observation_space</span> <span class="o">=</span> <span class="n">Box</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,),</span> <span class="n">low</span><span class="o">=-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            obs_space_dims: Dimension of the observation space</span>
-<span class="sd">            action_space_dims: Dimension of the action space</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-
-        <span class="n">hidden_space1</span> <span class="o">=</span> <span class="mi">16</span>  <span class="c1"># Nothing special with 16, feel free to change</span>
-        <span class="n">hidden_space2</span> <span class="o">=</span> <span class="mi">32</span>  <span class="c1"># Nothing special with 32, feel free to change</span>
-
-        <span class="c1"># Shared Network</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">shared_net</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
-            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">obs_space_dims</span><span class="p">,</span> <span class="n">hidden_space1</span><span class="p">),</span>
-            <span class="n">nn</span><span class="o">.</span><span class="n">Tanh</span><span class="p">(),</span>
-            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">hidden_space1</span><span class="p">,</span> <span class="n">hidden_space2</span><span class="p">),</span>
-            <span class="n">nn</span><span class="o">.</span><span class="n">Tanh</span><span class="p">(),</span>
-        <span class="p">)</span>
-
-        <span class="c1"># Policy Mean specific Linear Layer</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">policy_mean_net</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
-            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">hidden_space2</span><span class="p">,</span> <span class="n">action_space_dims</span><span class="p">)</span>
-        <span class="p">)</span>
-
-        <span class="c1"># Policy Std Dev specific Linear Layer</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">policy_stddev_net</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
-            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">hidden_space2</span><span class="p">,</span> <span class="n">action_space_dims</span><span class="p">)</span>
-        <span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Conditioned on the observation, returns the mean and standard deviation</span>
-<span class="sd">         of a normal distribution from which an action is sampled from.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            x: Observation from the environment</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            action_means: predicted mean of the normal distribution</span>
-<span class="sd">            action_stddevs: predicted standard deviation of the normal distribution</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">shared_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_net</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">float</span><span class="p">())</span>
-
-        <span class="n">action_means</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">policy_mean_net</span><span class="p">(</span><span class="n">shared_features</span><span class="p">)</span>
-        <span class="n">action_stddevs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
-            <span class="mi">1</span> <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">policy_stddev_net</span><span class="p">(</span><span class="n">shared_features</span><span class="p">))</span>
-        <span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">action_means</span><span class="p">,</span> <span class="n">action_stddevs</span>
+    <span class="k">def</span> <span class="nf">observation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">obs</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">obs</span><span class="p">[</span><span class="s2">&quot;agent&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 </section>
-<section id="building-an-agent">
-<h2>Building an agent<a class="headerlink" href="#building-an-agent" title="Permalink to this heading">#</a></h2>
-<img alt="../../_images/reinforce_invpend_gym_v26_fig3.jpeg" src="../../_images/reinforce_invpend_gym_v26_fig3.jpeg" />
-<p>Now that we are done building the policy, let us develop <strong>REINFORCE</strong> which gives life to the policy network.
-The algorithm of REINFORCE could be found above. As mentioned before, REINFORCE aims to maximize the Monte-Carlo returns.</p>
-<p>Fun Fact: REINFROCE is an acronym for “ ‘RE’ward ‘I’ncrement ‘N’on-negative ‘F’actor times ‘O’ffset ‘R’einforcement times ‘C’haracteristic ‘E’ligibility</p>
-<p>Note: The choice of hyperparameters is to train a decently performing agent. No extensive hyperparameter
-tuning was done.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">REINFORCE</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;REINFORCE algorithm.&quot;&quot;&quot;</span>
+<section id="inheriting-from-gymnasium-actionwrapper">
+<h2>Inheriting from <a class="reference internal" href="../../api/wrappers/action_wrappers/#gymnasium.ActionWrapper" title="gymnasium.ActionWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">gymnasium.ActionWrapper</span></code></a><a class="headerlink" href="#inheriting-from-gymnasium-actionwrapper" title="Permalink to this heading">#</a></h2>
+<p>Action wrappers can be used to apply a transformation to actions before applying them to the environment.
+If you implement an action wrapper, you need to define that transformation by implementing
+<a class="reference internal" href="../../api/wrappers/action_wrappers/#gymnasium.ActionWrapper.action" title="gymnasium.ActionWrapper.action"><code class="xref py py-meth docutils literal notranslate"><span class="pre">gymnasium.ActionWrapper.action()</span></code></a>. Moreover, you should specify the domain of that transformation
+by updating the action space of the wrapper.</p>
+<p>Let’s say you have an environment with action space of type <a class="reference internal" href="../../api/spaces/fundamental/#gymnasium.spaces.Box" title="gymnasium.spaces.Box"><code class="xref py py-class docutils literal notranslate"><span class="pre">gymnasium.spaces.Box</span></code></a>, but you would only like
+to use a finite subset of actions. Then, you might want to implement the following wrapper:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">DiscreteActions</span><span class="p">(</span><span class="n">ActionWrapper</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">disc_to_cont</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">disc_to_cont</span> <span class="o">=</span> <span class="n">disc_to_cont</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_space</span> <span class="o">=</span> <span class="n">Discrete</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">disc_to_cont</span><span class="p">))</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs_space_dims</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">action_space_dims</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Initializes an agent that learns a policy via REINFORCE algorithm [1]</span>
-<span class="sd">        to solve the task at hand (Inverted Pendulum v4).</span>
+    <span class="k">def</span> <span class="nf">action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">act</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">disc_to_cont</span><span class="p">[</span><span class="n">act</span><span class="p">]</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            obs_space_dims: Dimension of the observation space</span>
-<span class="sd">            action_space_dims: Dimension of the action space</span>
-<span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># Hyperparameters</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">=</span> <span class="mf">1e-4</span>  <span class="c1"># Learning rate for policy optimization</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">gamma</span> <span class="o">=</span> <span class="mf">0.99</span>  <span class="c1"># Discount factor</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">eps</span> <span class="o">=</span> <span class="mf">1e-6</span>  <span class="c1"># small number for mathematical stability</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">probs</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Stores probability values of the sampled action</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rewards</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Stores the corresponding rewards</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">net</span> <span class="o">=</span> <span class="n">Policy_Network</span><span class="p">(</span><span class="n">obs_space_dims</span><span class="p">,</span> <span class="n">action_space_dims</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">AdamW</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">sample_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns an action, conditioned on the policy and observation.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            state: Observation from the environment</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            action: Action to be performed</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">state</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">state</span><span class="p">]))</span>
-        <span class="n">action_means</span><span class="p">,</span> <span class="n">action_stddevs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-
-        <span class="c1"># create a normal distribution from the predicted</span>
-        <span class="c1">#   mean and standard deviation and sample an action</span>
-        <span class="n">distrib</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="n">action_means</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">eps</span><span class="p">,</span> <span class="n">action_stddevs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">eps</span><span class="p">)</span>
-        <span class="n">action</span> <span class="o">=</span> <span class="n">distrib</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span>
-        <span class="n">prob</span> <span class="o">=</span> <span class="n">distrib</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
-
-        <span class="n">action</span> <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">probs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prob</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">action</span>
-
-    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Updates the policy network&#39;s weights.&quot;&quot;&quot;</span>
-        <span class="n">running_g</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">gs</span> <span class="o">=</span> <span class="p">[]</span>
-
-        <span class="c1"># Discounted return (backwards) - [::-1] will return an array in reverse</span>
-        <span class="k">for</span> <span class="n">R</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rewards</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
-            <span class="n">running_g</span> <span class="o">=</span> <span class="n">R</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma</span> <span class="o">*</span> <span class="n">running_g</span>
-            <span class="n">gs</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">running_g</span><span class="p">)</span>
-
-        <span class="n">deltas</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">gs</span><span class="p">)</span>
-
-        <span class="n">loss</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="c1"># minimize -1 * prob * reward obtained</span>
-        <span class="k">for</span> <span class="n">log_prob</span><span class="p">,</span> <span class="n">delta</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">probs</span><span class="p">,</span> <span class="n">deltas</span><span class="p">):</span>
-            <span class="n">loss</span> <span class="o">+=</span> <span class="n">log_prob</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">*</span> <span class="n">delta</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-
-        <span class="c1"># Update the policy network</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
-        <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
-
-        <span class="c1"># Empty / zero out all episode-centric/related variables</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">probs</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rewards</span> <span class="o">=</span> <span class="p">[]</span>
-</pre></div>
-</div>
-<p>Now lets train the policy using REINFORCE to master the task of Inverted Pendulum.</p>
-<p>Following is the overview of the training procedure</p>
-<blockquote>
-<div><dl>
-<dt>for seed in random seeds</dt><dd><p>reinitialize agent</p>
-<dl>
-<dt>for episode in range of max number of episodes</dt><dd><dl>
-<dt>until episode is done</dt><dd><p>sample action based on current observation</p>
-<p>take action and receive reward and next observation</p>
-<p>store action take, its probability, and the observed reward</p>
-</dd>
-</dl>
-<p>update the policy</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</div></blockquote>
-<p>Note: Deep RL is fairly brittle concerning random seed in a lot of common use cases (<a class="reference external" href="https://spinningup.openai.com/en/latest/spinningup/spinningup.html">https://spinningup.openai.com/en/latest/spinningup/spinningup.html</a>).
-Hence it is important to test out various seeds, which we will be doing.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create and wrap the environment</span>
-<span class="n">env</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="s2">&quot;InvertedPendulum-v4&quot;</span><span class="p">)</span>
-<span class="n">wrapped_env</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">wrappers</span><span class="o">.</span><span class="n">RecordEpisodeStatistics</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>  <span class="c1"># Records episode-reward</span>
-
-<span class="n">total_num_episodes</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">5e3</span><span class="p">)</span>  <span class="c1"># Total number of episodes</span>
-<span class="c1"># Observation-space of InvertedPendulum-v4 (4)</span>
-<span class="n">obs_space_dims</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">observation_space</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="c1"># Action-space of InvertedPendulum-v4 (1)</span>
-<span class="n">action_space_dims</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">rewards_over_seeds</span> <span class="o">=</span> <span class="p">[]</span>
-
-<span class="k">for</span> <span class="n">seed</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">]:</span>  <span class="c1"># Fibonacci seeds</span>
-    <span class="c1"># set seed</span>
-    <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
-    <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
-    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
-
-    <span class="c1"># Reinitialize agent every seed</span>
-    <span class="n">agent</span> <span class="o">=</span> <span class="n">REINFORCE</span><span class="p">(</span><span class="n">obs_space_dims</span><span class="p">,</span> <span class="n">action_space_dims</span><span class="p">)</span>
-    <span class="n">reward_over_episodes</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="k">for</span> <span class="n">episode</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">total_num_episodes</span><span class="p">):</span>
-        <span class="c1"># gymnasium v26 requires users to set seed while resetting the environment</span>
-        <span class="n">obs</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">wrapped_env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
-
-        <span class="n">done</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">while</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
-            <span class="n">action</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">sample_action</span><span class="p">(</span><span class="n">obs</span><span class="p">)</span>
-
-            <span class="c1"># Step return type - `tuple[ObsType, SupportsFloat, bool, bool, dict[str, Any]]`</span>
-            <span class="c1"># These represent the next observation, the reward from the step,</span>
-            <span class="c1"># if the episode is terminated, if the episode is truncated and</span>
-            <span class="c1"># additional info from the step</span>
-            <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">terminated</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">wrapped_env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
-            <span class="n">agent</span><span class="o">.</span><span class="n">rewards</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">reward</span><span class="p">)</span>
-
-            <span class="c1"># End the episode when either truncated or terminated is true</span>
-            <span class="c1">#  - truncated: The episode duration reaches max number of timesteps</span>
-            <span class="c1">#  - terminated: Any of the state space values is no longer finite.</span>
-            <span class="n">done</span> <span class="o">=</span> <span class="n">terminated</span> <span class="ow">or</span> <span class="n">truncated</span>
-
-        <span class="n">reward_over_episodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wrapped_env</span><span class="o">.</span><span class="n">return_queue</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-        <span class="n">agent</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="n">episode</span> <span class="o">%</span> <span class="mi">1000</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">avg_reward</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">wrapped_env</span><span class="o">.</span><span class="n">return_queue</span><span class="p">))</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Episode:&quot;</span><span class="p">,</span> <span class="n">episode</span><span class="p">,</span> <span class="s2">&quot;Average Reward:&quot;</span><span class="p">,</span> <span class="n">avg_reward</span><span class="p">)</span>
-
-    <span class="n">rewards_over_seeds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">reward_over_episodes</span><span class="p">)</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="s2">&quot;LunarLanderContinuous-v2&quot;</span><span class="p">)</span>
+    <span class="n">wrapped_env</span> <span class="o">=</span> <span class="n">DiscreteActions</span><span class="p">(</span>
+        <span class="n">env</span><span class="p">,</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])]</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">wrapped_env</span><span class="o">.</span><span class="n">action_space</span><span class="p">)</span>  <span class="c1"># Discrete(4)</span>
 </pre></div>
 </div>
 </section>
-<section id="plot-learning-curve">
-<h2>Plot learning curve<a class="headerlink" href="#plot-learning-curve" title="Permalink to this heading">#</a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rewards_to_plot</span> <span class="o">=</span> <span class="p">[[</span><span class="n">reward</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">reward</span> <span class="ow">in</span> <span class="n">rewards</span><span class="p">]</span> <span class="k">for</span> <span class="n">rewards</span> <span class="ow">in</span> <span class="n">rewards_over_seeds</span><span class="p">]</span>
-<span class="n">df1</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rewards_to_plot</span><span class="p">)</span><span class="o">.</span><span class="n">melt</span><span class="p">()</span>
-<span class="n">df1</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;variable&quot;</span><span class="p">:</span> <span class="s2">&quot;episodes&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;reward&quot;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">sns</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s2">&quot;darkgrid&quot;</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="s2">&quot;talk&quot;</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="s2">&quot;rainbow&quot;</span><span class="p">)</span>
-<span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;episodes&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;reward&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df1</span><span class="p">)</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
-    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;REINFORCE for InvertedPendulum-v4&quot;</span>
-<span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<section id="inheriting-from-gymnasium-rewardwrapper">
+<h2>Inheriting from <a class="reference internal" href="../../api/wrappers/reward_wrappers/#gymnasium.RewardWrapper" title="gymnasium.RewardWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">gymnasium.RewardWrapper</span></code></a><a class="headerlink" href="#inheriting-from-gymnasium-rewardwrapper" title="Permalink to this heading">#</a></h2>
+<p>Reward wrappers are used to transform the reward that is returned by an environment.
+As for the previous wrappers, you need to specify that transformation by implementing the
+<a class="reference internal" href="../../api/wrappers/reward_wrappers/#gymnasium.RewardWrapper.reward" title="gymnasium.RewardWrapper.reward"><code class="xref py py-meth docutils literal notranslate"><span class="pre">gymnasium.RewardWrapper.reward()</span></code></a> method. Also, you might want to update the reward range of the wrapper.</p>
+<p>Let us look at an example: Sometimes (especially when we do not have control over the reward
+because it is intrinsic), we want to clip the reward to a range to gain some numerical stability.
+To do that, we could, for instance, implement the following wrapper:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">SupportsFloat</span>
+
+
+<span class="k">class</span> <span class="nc">ClipReward</span><span class="p">(</span><span class="n">RewardWrapper</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">min_reward</span><span class="p">,</span> <span class="n">max_reward</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_reward</span> <span class="o">=</span> <span class="n">min_reward</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_reward</span> <span class="o">=</span> <span class="n">max_reward</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reward_range</span> <span class="o">=</span> <span class="p">(</span><span class="n">min_reward</span><span class="p">,</span> <span class="n">max_reward</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">reward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">:</span> <span class="n">SupportsFloat</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SupportsFloat</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_reward</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_reward</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../../_images/reinforce_invpend_gym_v26_fig4.png" src="../../_images/reinforce_invpend_gym_v26_fig4.png" />
-<p>Author: Siddarth Chandrasekar</p>
-<p>License: MIT License</p>
 </section>
-<section id="references">
-<h2>References<a class="headerlink" href="#references" title="Permalink to this heading">#</a></h2>
-<p>[1] Williams, Ronald J.. “Simple statistical gradient-following
-algorithms for connectionist reinforcement learning.” Machine Learning 8
-(2004): 229-256.</p>
-<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-tutorials-reinforce-invpend-gym-v26-py">
+<section id="inheriting-from-gymnasium-wrapper">
+<h2>Inheriting from <a class="reference internal" href="../../api/wrappers/#gymnasium.Wrapper" title="gymnasium.Wrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">gymnasium.Wrapper</span></code></a><a class="headerlink" href="#inheriting-from-gymnasium-wrapper" title="Permalink to this heading">#</a></h2>
+<p>Sometimes you might need to implement a wrapper that does some more complicated modifications (e.g. modify the
+reward based on data in <code class="docutils literal notranslate"><span class="pre">info</span></code> or change the rendering behavior).
+Such wrappers can be implemented by inheriting from <a class="reference internal" href="../../api/wrappers/#gymnasium.Wrapper" title="gymnasium.Wrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">gymnasium.Wrapper</span></code></a>.</p>
+<ul class="simple">
+<li><p>You can set a new action or observation space by defining <code class="docutils literal notranslate"><span class="pre">self.action_space</span></code> or <code class="docutils literal notranslate"><span class="pre">self.observation_space</span></code> in <code class="docutils literal notranslate"><span class="pre">__init__</span></code>, respectively</p></li>
+<li><p>You can set new metadata and reward range by defining <code class="docutils literal notranslate"><span class="pre">self.metadata</span></code> and <code class="docutils literal notranslate"><span class="pre">self.reward_range</span></code> in <code class="docutils literal notranslate"><span class="pre">__init__</span></code>, respectively</p></li>
+<li><p>You can override <a class="reference internal" href="../../api/wrappers/#gymnasium.Wrapper.step" title="gymnasium.Wrapper.step"><code class="xref py py-meth docutils literal notranslate"><span class="pre">gymnasium.Wrapper.step()</span></code></a>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">gymnasium.Wrapper.render()</span></code>, <a class="reference internal" href="../../api/wrappers/#gymnasium.Wrapper.close" title="gymnasium.Wrapper.close"><code class="xref py py-meth docutils literal notranslate"><span class="pre">gymnasium.Wrapper.close()</span></code></a> etc.</p></li>
+</ul>
+<p>If you do this, you can access the environment that was passed
+to your wrapper (which <em>still</em> might be wrapped in some other wrapper) by accessing the attribute <code class="xref py py-attr docutils literal notranslate"><span class="pre">env</span></code>.</p>
+<p>Let’s also take a look at an example for this case. Most MuJoCo environments return a reward that consists
+of different terms: For instance, there might be a term that rewards the agent for completing the task and one term that
+penalizes large actions (i.e. energy usage). Usually, you can pass weight parameters for those terms during
+initialization of the environment. However, <em>Reacher</em> does not allow you to do this! Nevertheless, all individual terms
+of the reward are returned in <cite>info</cite>, so let us build a wrapper for Reacher that allows us to weight those terms:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ReacherRewardWrapper</span><span class="p">(</span><span class="n">Wrapper</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">reward_dist_weight</span><span class="p">,</span> <span class="n">reward_ctrl_weight</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reward_dist_weight</span> <span class="o">=</span> <span class="n">reward_dist_weight</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reward_ctrl_weight</span> <span class="o">=</span> <span class="n">reward_ctrl_weight</span>
+
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+        <span class="n">obs</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">terminated</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+        <span class="n">reward</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reward_dist_weight</span> <span class="o">*</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;reward_dist&quot;</span><span class="p">]</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">reward_ctrl_weight</span> <span class="o">*</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;reward_ctrl&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">terminated</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">info</span>
+</pre></div>
+</div>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-tutorials-implementing-custom-wrappers-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
-<p><a class="reference download internal" download="" href="../../_downloads/13a63d72db29f8035b56e0c8762b90e0/reinforce_invpend_gym_v26.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">reinforce_invpend_gym_v26.py</span></code></a></p>
+<p><a class="reference download internal" download="" href="../../_downloads/6f2a99877a488456d33ac44780187aa4/implementing_custom_wrappers.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">implementing_custom_wrappers.py</span></code></a></p>
 </div>
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
-<p><a class="reference download internal" download="" href="../../_downloads/bbd827c8ce7fa89c011383532a3cf898/reinforce_invpend_gym_v26.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">reinforce_invpend_gym_v26.ipynb</span></code></a></p>
+<p><a class="reference download internal" download="" href="../../_downloads/cbfb989de54c286b47aa60ed45417281/implementing_custom_wrappers.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">implementing_custom_wrappers.ipynb</span></code></a></p>
 </div>
 </div>
 </section>
@@ -704,8 +539,26 @@ algorithms for connectionist reinforcement learning.” Machine Learning 8
       <footer>
         
         <div class="related-pages">
-          
-            
+          <a class="next-page" href="../reinforce_invpend_gym_v26/">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Training using REINFORCE for Mujoco</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+            <a class="prev-page" href="../handling_time_limits/">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Handling Time Limits</div>
+                
+              </div>
+            </a>
         </div>
         <div class="bottom-of-page">
           <div class="left-details">
@@ -739,11 +592,11 @@ algorithms for connectionist reinforcement learning.” Machine Learning 8
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Training using REINFORCE for Mujoco</a><ul>
-<li><a class="reference internal" href="#policy-network">Policy Network</a></li>
-<li><a class="reference internal" href="#building-an-agent">Building an agent</a></li>
-<li><a class="reference internal" href="#plot-learning-curve">Plot learning curve</a></li>
-<li><a class="reference internal" href="#references">References</a></li>
+<li><a class="reference internal" href="#">Implementing Custom Wrappers</a><ul>
+<li><a class="reference internal" href="#inheriting-from-gymnasium-observationwrapper">Inheriting from <code class="xref py py-class docutils literal notranslate"><span class="pre">gymnasium.ObservationWrapper</span></code></a></li>
+<li><a class="reference internal" href="#inheriting-from-gymnasium-actionwrapper">Inheriting from <code class="xref py py-class docutils literal notranslate"><span class="pre">gymnasium.ActionWrapper</span></code></a></li>
+<li><a class="reference internal" href="#inheriting-from-gymnasium-rewardwrapper">Inheriting from <code class="xref py py-class docutils literal notranslate"><span class="pre">gymnasium.RewardWrapper</span></code></a></li>
+<li><a class="reference internal" href="#inheriting-from-gymnasium-wrapper">Inheriting from <code class="xref py py-class docutils literal notranslate"><span class="pre">gymnasium.Wrapper</span></code></a></li>
 </ul>
 </li>
 </ul>

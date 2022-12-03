@@ -348,6 +348,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../tutorials/blackjack_tutorial/">Solving Blackjack with Q-Learning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorials/environment_creation/">Make your own custom environment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorials/handling_time_limits/">Handling Time Limits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/implementing_custom_wrappers/">Implementing Custom Wrappers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorials/reinforce_invpend_gym_v26/">Training using REINFORCE for Mujoco</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
@@ -430,49 +431,49 @@
 </thead>
 <tbody>
 <tr class="row-even"><td><p><a class="reference internal" href="../wrappers/observation_wrappers/#gymnasium.wrappers.TransformObservation" title="gymnasium.wrappers.TransformObservation"><code class="xref py py-class docutils literal notranslate"><span class="pre">wrappers.TransformObservation</span></code></a></p></td>
-<td><p><a class="reference internal" href="wrappers/#gymnasium.experimental.wrappers.LambdaObservationV0" title="gymnasium.experimental.wrappers.LambdaObservationV0"><code class="xref py py-class docutils literal notranslate"><span class="pre">experimental.wrappers.LambdaObservationV0</span></code></a></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">experimental.wrappers.LambdaObservationV0</span></code></p></td>
 <td><p>VectorLambdaObservation</p></td>
 <td><p>No</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../wrappers/observation_wrappers/#gymnasium.wrappers.FilterObservation" title="gymnasium.wrappers.FilterObservation"><code class="xref py py-class docutils literal notranslate"><span class="pre">wrappers.FilterObservation</span></code></a></p></td>
-<td><p>FilterObservation</p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">experimental.wrappers.FilterObservation</span></code></p></td>
 <td><p>VectorFilterObservation (*)</p></td>
 <td><p>Yes</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../wrappers/observation_wrappers/#gymnasium.wrappers.FlattenObservation" title="gymnasium.wrappers.FlattenObservation"><code class="xref py py-class docutils literal notranslate"><span class="pre">wrappers.FlattenObservation</span></code></a></p></td>
-<td><p>FlattenObservation</p></td>
+<td><p><cite>:class:`experimental.wrappers.FlattenObservation</cite></p></td>
 <td><p>VectorFlattenObservation (*)</p></td>
 <td><p>No</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../wrappers/observation_wrappers/#gymnasium.wrappers.GrayScaleObservation" title="gymnasium.wrappers.GrayScaleObservation"><code class="xref py py-class docutils literal notranslate"><span class="pre">wrappers.GrayScaleObservation</span></code></a></p></td>
-<td><p>GrayscaleObservation</p></td>
+<td><p><cite>:class:`experimental.wrappers.GrayscaleObservation</cite></p></td>
 <td><p>VectorGrayscaleObservation (*)</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../wrappers/observation_wrappers/#gymnasium.wrappers.ResizeObservation" title="gymnasium.wrappers.ResizeObservation"><code class="xref py py-class docutils literal notranslate"><span class="pre">wrappers.ResizeObservation</span></code></a></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">experimental.wrappers.ResizeObservation</span></code></p></td>
+<td><p>VectorResizeObservation (*)</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-odd"><td><p>Not Implemented</p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">experimental.wrappers.ReshapeObservation</span></code></p></td>
+<td><p>VectorReshapeObservation (*)</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-even"><td><p>Not Implemented</p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">experimental.wrappers.RescaleObservation</span></code></p></td>
+<td><p>VectorRescaleObservation (*)</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-odd"><td><p>Not Implemented</p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">experimental.wrappers.DtypeObservation</span></code></p></td>
+<td><p>VectorDtypeObservation (*)</p></td>
 <td><p>Yes</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../wrappers/observation_wrappers/#gymnasium.wrappers.PixelObservationWrapper" title="gymnasium.wrappers.PixelObservationWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">wrappers.PixelObservationWrapper</span></code></a></p></td>
 <td><p>PixelObservation</p></td>
-<td><p>VectorPixelObservation (*)</p></td>
+<td><p>VectorPixelObservation</p></td>
 <td><p>No</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../wrappers/observation_wrappers/#gymnasium.wrappers.ResizeObservation" title="gymnasium.wrappers.ResizeObservation"><code class="xref py py-class docutils literal notranslate"><span class="pre">wrappers.ResizeObservation</span></code></a></p></td>
-<td><p>ResizeObservation</p></td>
-<td><p>VectorResizeObservation (*)</p></td>
-<td><p>Yes</p></td>
-</tr>
-<tr class="row-even"><td><p>Not Implemented</p></td>
-<td><p>ReshapeObservation</p></td>
-<td><p>VectorReshapeObservation (*)</p></td>
-<td><p>Yes</p></td>
-</tr>
-<tr class="row-odd"><td><p>Not Implemented</p></td>
-<td><p>RescaleObservation</p></td>
-<td><p>VectorRescaleObservation (*)</p></td>
-<td><p>Yes</p></td>
-</tr>
-<tr class="row-even"><td><p>Not Implemented</p></td>
-<td><p>DtypeObservation</p></td>
-<td><p>VectorDtypeObservation (*)</p></td>
-<td><p>Yes</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">NormalizeObservation</span></code></p></td>
 <td><p>NormalizeObservation</p></td>
@@ -516,7 +517,7 @@
 </thead>
 <tbody>
 <tr class="row-even"><td><p>Not Implemented</p></td>
-<td><p><a class="reference internal" href="wrappers/#gymnasium.experimental.wrappers.LambdaActionV0" title="gymnasium.experimental.wrappers.LambdaActionV0"><code class="xref py py-class docutils literal notranslate"><span class="pre">experimental.wrappers.LambdaActionV0</span></code></a></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">experimental.wrappers.LambdaActionV0</span></code></p></td>
 <td><p>VectorLambdaAction</p></td>
 <td><p>No</p></td>
 </tr>
@@ -556,11 +557,11 @@
 </thead>
 <tbody>
 <tr class="row-even"><td><p><a class="reference internal" href="../wrappers/reward_wrappers/#gymnasium.wrappers.TransformReward" title="gymnasium.wrappers.TransformReward"><code class="xref py py-class docutils literal notranslate"><span class="pre">wrappers.TransformReward</span></code></a></p></td>
-<td><p><a class="reference internal" href="wrappers/#gymnasium.experimental.wrappers.LambdaRewardV0" title="gymnasium.experimental.wrappers.LambdaRewardV0"><code class="xref py py-class docutils literal notranslate"><span class="pre">experimental.wrappers.LambdaRewardV0</span></code></a></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">experimental.wrappers.LambdaRewardV0</span></code></p></td>
 <td><p>VectorLambdaReward</p></td>
 </tr>
 <tr class="row-odd"><td><p>Not Implemented</p></td>
-<td><p><a class="reference internal" href="wrappers/#gymnasium.experimental.wrappers.ClipRewardV0" title="gymnasium.experimental.wrappers.ClipRewardV0"><code class="xref py py-class docutils literal notranslate"><span class="pre">experimental.wrappers.ClipRewardV0</span></code></a></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">experimental.wrappers.ClipRewardV0</span></code></p></td>
 <td><p>VectorClipReward (*)</p></td>
 </tr>
 <tr class="row-even"><td><p>Not Implemented</p></td>
@@ -602,25 +603,25 @@
 <td><p>Moved to <a class="reference external" href="https://github.com/Farama-Foundation/Shimmy/blob/main/shimmy/openai_gym_compatibility.py">shimmy</a></p></td>
 <td><p>Not Implemented</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordEpisodeStatistics</span></code></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../wrappers/misc_wrappers/#gymnasium.wrappers.RecordEpisodeStatistics" title="gymnasium.wrappers.RecordEpisodeStatistics"><code class="xref py py-class docutils literal notranslate"><span class="pre">wrappers.RecordEpisodeStatistics</span></code></a></p></td>
 <td><p>RecordEpisodeStatistics</p></td>
 <td><p>VectorRecordEpisodeStatistics</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">RenderCollection</span></code></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../wrappers/misc_wrappers/#gymnasium.wrappers.RenderCollection" title="gymnasium.wrappers.RenderCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">wrappers.RenderCollection</span></code></a></p></td>
 <td><p>RenderCollection</p></td>
 <td><p>VectorRenderCollection</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">HumanRendering</span></code></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../wrappers/misc_wrappers/#gymnasium.wrappers.HumanRendering" title="gymnasium.wrappers.HumanRendering"><code class="xref py py-class docutils literal notranslate"><span class="pre">wrappers.HumanRendering</span></code></a></p></td>
 <td><p>HumanRendering</p></td>
 <td><p>Not Implemented</p></td>
 </tr>
 <tr class="row-odd"><td><p>Not Implemented</p></td>
-<td><p>JaxToNumpy</p></td>
-<td><p>VectorJaxToNumpy</p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">experimental.wrappers.JaxToNumpy</span></code></p></td>
+<td><p>VectorJaxToNumpy (*)</p></td>
 </tr>
 <tr class="row-even"><td><p>Not Implemented</p></td>
-<td><p>JaxToTorch</p></td>
-<td><p>VectorJaxToTorch</p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">experimental.wrappers.JaxToTorch</span></code></p></td>
+<td><p>VectorJaxToTorch (*)</p></td>
 </tr>
 </tbody>
 </table>
