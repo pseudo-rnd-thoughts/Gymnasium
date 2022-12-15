@@ -9,6 +9,9 @@ from gymnasium.envs.registration import (
 )
 
 
+__all__ = []
+
+
 # Classic
 # ----------------------------------------
 
