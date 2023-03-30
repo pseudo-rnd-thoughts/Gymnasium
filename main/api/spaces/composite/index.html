@@ -257,6 +257,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../experimental/wrappers/">Wrappers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../experimental/vector/">Vectorizing Environment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../experimental/vector_wrappers/">Vector Environment Wrappers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../experimental/vector_utils/">Utility functions for vectorisation</a></li>
 </ul>
 </li>
 </ul>
@@ -404,7 +405,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../environments/atari/zaxxon/">Zaxxon</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../../environments/third_party_environments/">Third-party Environments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../environments/third_party_environments/">Third-Party Environments</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
@@ -426,7 +427,8 @@
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/Farama-Foundation/Gymnasium">Github</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../release_notes/">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gymnasium_release_notes/">Gymnasium Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gym_release_notes/">Gym Release Notes</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/Farama-Foundation/Gymnasium/blob/main/docs/README.md">Contribute to the Docs</a></li>
 </ul>
 
@@ -712,7 +714,7 @@ sampling elements from the base space. The mask is applied for each feature spac
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>node_space</strong> (<em>Union</em><em>[</em><a class="reference internal" href="../fundamental/#gymnasium.spaces.Box" title="gymnasium.spaces.Box"><em>Box</em></a><em>, </em><a class="reference internal" href="../fundamental/#gymnasium.spaces.Discrete" title="gymnasium.spaces.Discrete"><em>Discrete</em></a><em>]</em>) – space of the node features.</p></li>
-<li><p><strong>edge_space</strong> (<em>Union</em><em>[</em><em>None</em><em>, </em><a class="reference internal" href="../fundamental/#gymnasium.spaces.Box" title="gymnasium.spaces.Box"><em>Box</em></a><em>, </em><a class="reference internal" href="../fundamental/#gymnasium.spaces.Discrete" title="gymnasium.spaces.Discrete"><em>Discrete</em></a><em>]</em>) – space of the node features.</p></li>
+<li><p><strong>edge_space</strong> (<em>Union</em><em>[</em><em>None</em><em>, </em><a class="reference internal" href="../fundamental/#gymnasium.spaces.Box" title="gymnasium.spaces.Box"><em>Box</em></a><em>, </em><a class="reference internal" href="../fundamental/#gymnasium.spaces.Discrete" title="gymnasium.spaces.Discrete"><em>Discrete</em></a><em>]</em>) – space of the edge features.</p></li>
 <li><p><strong>seed</strong> – Optionally, you can use this argument to seed the RNG that is used to sample from the space.</p></li>
 </ul>
 </dd>

@@ -8,7 +8,7 @@
     <meta property="og:type" content="website" />
     <meta property="og:description" content="A standard API for reinforcement learning and a diverse set of reference environments (formerly Gym)" />
     <meta property="og:url" content="https://gymnasium.farama.org/api/experimental/vector_wrappers.html" /><meta property="og:image" content="https://gymnasium.farama.org/_static/img/gymnasium-github.png" /><meta name="twitter:card" content="summary_large_image"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-<link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Classic Control" href="../../../environments/classic_control/" /><link rel="prev" title="Vectorizing Environment" href="../vector/" />
+<link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Utility functions for vectorisation" href="../vector_utils/" /><link rel="prev" title="Vectorizing Environment" href="../vector/" />
         <link rel="canonical" href="https://gymnasium.farama.org/api/experimental/vector_wrappers.html" />
 
     <link rel="shortcut icon" href="../../../_static/favicon.png"/><!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07.dev1 -->
@@ -257,6 +257,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../wrappers/">Wrappers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../vector/">Vectorizing Environment</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Vector Environment Wrappers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../vector_utils/">Utility functions for vectorisation</a></li>
 </ul>
 </li>
 </ul>
@@ -404,7 +405,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../environments/atari/zaxxon/">Zaxxon</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../../environments/third_party_environments/">Third-party Environments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../environments/third_party_environments/">Third-Party Environments</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
@@ -426,7 +427,8 @@
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/Farama-Foundation/Gymnasium">Github</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../release_notes/">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gymnasium_release_notes/">Gymnasium Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gym_release_notes/">Gym Release Notes</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/Farama-Foundation/Gymnasium/blob/main/docs/README.md">Contribute to the Docs</a></li>
 </ul>
 
@@ -478,20 +480,103 @@
             
             <section id="vector-environment-wrappers">
 <h1>Vector Environment Wrappers<a class="headerlink" href="#vector-environment-wrappers" title="Permalink to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="gymnasium.experimental.vector.VectorWrapper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gymnasium.experimental.vector.</span></span><span class="sig-name descname"><span class="pre">VectorWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../vector/#gymnasium.experimental.vector.VectorEnv" title="gymnasium.experimental.vector.vector_env.VectorEnv"><span class="pre">VectorEnv</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gymnasium.experimental.vector.VectorWrapper" title="Permalink to this definition">#</a></dt>
+<dd><p>Wraps the vectorized environment to allow a modular transformation.</p>
+<p>This class is the base class for all wrappers for vectorized environments. The subclass
+could override some methods to change the behavior of the original vectorized environment
+without touching the original code.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Don’t forget to call <code class="docutils literal notranslate"><span class="pre">super().__init__(env)</span></code> if the subclass overrides <code class="xref py py-meth docutils literal notranslate"><span class="pre">__init__()</span></code>.</p>
+</div>
+<p>Initialize the vectorized environment wrapper.</p>
+</dd></dl>
+
 <section id="vector-lambda-observation-wrappers">
 <h2>Vector Lambda Observation Wrappers<a class="headerlink" href="#vector-lambda-observation-wrappers" title="Permalink to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="gymnasium.experimental.vector.VectorObservationWrapper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gymnasium.experimental.vector.</span></span><span class="sig-name descname"><span class="pre">VectorObservationWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../vector/#gymnasium.experimental.vector.VectorEnv" title="gymnasium.experimental.vector.vector_env.VectorEnv"><span class="pre">VectorEnv</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gymnasium.experimental.vector.VectorObservationWrapper" title="Permalink to this definition">#</a></dt>
+<dd><p>Wraps the vectorized environment to allow a modular transformation of the observation. Equivalent to <code class="xref py py-class docutils literal notranslate"><span class="pre">gym.ObservationWrapper</span></code> for vectorized environments.</p>
+<p>Initialize the vectorized environment wrapper.</p>
+</dd></dl>
+
 </section>
 <section id="vector-lambda-action-wrappers">
 <h2>Vector Lambda Action Wrappers<a class="headerlink" href="#vector-lambda-action-wrappers" title="Permalink to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="gymnasium.experimental.vector.VectorActionWrapper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gymnasium.experimental.vector.</span></span><span class="sig-name descname"><span class="pre">VectorActionWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../vector/#gymnasium.experimental.vector.VectorEnv" title="gymnasium.experimental.vector.vector_env.VectorEnv"><span class="pre">VectorEnv</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gymnasium.experimental.vector.VectorActionWrapper" title="Permalink to this definition">#</a></dt>
+<dd><p>Wraps the vectorized environment to allow a modular transformation of the actions. Equivalent of <code class="xref py py-class docutils literal notranslate"><span class="pre">ActionWrapper</span></code> for vectorized environments.</p>
+<p>Initialize the vectorized environment wrapper.</p>
+</dd></dl>
+
 </section>
 <section id="vector-lambda-reward-wrappers">
 <h2>Vector Lambda Reward Wrappers<a class="headerlink" href="#vector-lambda-reward-wrappers" title="Permalink to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="gymnasium.experimental.vector.VectorRewardWrapper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gymnasium.experimental.vector.</span></span><span class="sig-name descname"><span class="pre">VectorRewardWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../vector/#gymnasium.experimental.vector.VectorEnv" title="gymnasium.experimental.vector.vector_env.VectorEnv"><span class="pre">VectorEnv</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gymnasium.experimental.vector.VectorRewardWrapper" title="Permalink to this definition">#</a></dt>
+<dd><p>Wraps the vectorized environment to allow a modular transformation of the reward. Equivalent of <code class="xref py py-class docutils literal notranslate"><span class="pre">RewardWrapper</span></code> for vectorized environments.</p>
+<p>Initialize the vectorized environment wrapper.</p>
+</dd></dl>
+
 </section>
 <section id="vector-common-wrappers">
 <h2>Vector Common Wrappers<a class="headerlink" href="#vector-common-wrappers" title="Permalink to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="gymnasium.experimental.wrappers.vector.VectorRecordEpisodeStatistics">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gymnasium.experimental.wrappers.vector.</span></span><span class="sig-name descname"><span class="pre">VectorRecordEpisodeStatistics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../vector/#gymnasium.experimental.vector.VectorEnv" title="gymnasium.experimental.vector.vector_env.VectorEnv"><span class="pre">VectorEnv</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">deque_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gymnasium.experimental.wrappers.vector.VectorRecordEpisodeStatistics" title="Permalink to this definition">#</a></dt>
+<dd><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">wrapped_env.return_queue</span></code> and <code class="xref py py-attr docutils literal notranslate"><span class="pre">wrapped_env.length_queue</span></code> respectively.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>return_queue</strong> – The cumulative rewards of the last <code class="docutils literal notranslate"><span class="pre">deque_size</span></code>-many episodes</p></li>
+<li><p><strong>length_queue</strong> – The lengths of the last <code class="docutils literal notranslate"><span class="pre">deque_size</span></code>-many episodes</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>env</strong> (<a class="reference internal" href="../../env/#gymnasium.Env" title="gymnasium.Env"><em>Env</em></a>) – The environment to apply the wrapper</p></li>
+<li><p><strong>deque_size</strong> – The size of the buffers <code class="xref py py-attr docutils literal notranslate"><span class="pre">return_queue</span></code> and <code class="xref py py-attr docutils literal notranslate"><span class="pre">length_queue</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="vector-only-wrappers">
 <h2>Vector Only Wrappers<a class="headerlink" href="#vector-only-wrappers" title="Permalink to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="gymnasium.experimental.wrappers.vector.VectorListInfo">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gymnasium.experimental.wrappers.vector.</span></span><span class="sig-name descname"><span class="pre">VectorListInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../vector/#gymnasium.experimental.vector.VectorEnv" title="gymnasium.experimental.vector.vector_env.VectorEnv"><span class="pre">VectorEnv</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gymnasium.experimental.wrappers.vector.VectorListInfo" title="Permalink to this definition">#</a></dt>
+<dd><p>Converts infos of vectorized environments from dict to List[dict].</p>
+<p>This wrapper converts the info format of a
+vector environment from a dictionary to a list of dictionaries.
+This wrapper is intended to be used around vectorized
+environments. If using other wrappers that perform
+operation on info like <cite>RecordEpisodeStatistics</cite> this
+need to be the outermost wrapper.</p>
+<p>i.e. <cite>VectorListInfo(RecordEpisodeStatistics(envs))</cite></p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># actual</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">{</span>  
+<span class="gp">... </span>     <span class="s2">&quot;k&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">]),</span>
+<span class="gp">... </span>     <span class="s2">&quot;_k&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">])</span>
+<span class="gp">... </span> <span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># classic</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[{},</span> <span class="p">{},</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">},</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">}]</span>  
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>env</strong> (<a class="reference internal" href="../../env/#gymnasium.Env" title="gymnasium.Env"><em>Env</em></a>) – The environment to apply the wrapper</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 </section>
 
@@ -500,12 +585,12 @@
         <footer>
           
           <div class="related-pages">
-            <a class="next-page" href="../../../environments/classic_control/">
+            <a class="next-page" href="../vector_utils/">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Classic Control</div>
+                <div class="title">Utility functions for vectorisation</div>
               </div>
               <svg class="furo-related-icon">
                 <use href="#svg-arrow-right"></use>
@@ -558,11 +643,27 @@
             <div class="toc-tree">
               <ul>
 <li><a class="reference internal" href="#">Vector Environment Wrappers</a><ul>
-<li><a class="reference internal" href="#vector-lambda-observation-wrappers">Vector Lambda Observation Wrappers</a></li>
-<li><a class="reference internal" href="#vector-lambda-action-wrappers">Vector Lambda Action Wrappers</a></li>
-<li><a class="reference internal" href="#vector-lambda-reward-wrappers">Vector Lambda Reward Wrappers</a></li>
-<li><a class="reference internal" href="#vector-common-wrappers">Vector Common Wrappers</a></li>
-<li><a class="reference internal" href="#vector-only-wrappers">Vector Only Wrappers</a></li>
+<li><a class="reference internal" href="#gymnasium.experimental.vector.VectorWrapper"><code class="docutils literal notranslate"><span class="pre">VectorWrapper</span></code></a></li>
+<li><a class="reference internal" href="#vector-lambda-observation-wrappers">Vector Lambda Observation Wrappers</a><ul>
+<li><a class="reference internal" href="#gymnasium.experimental.vector.VectorObservationWrapper"><code class="docutils literal notranslate"><span class="pre">VectorObservationWrapper</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#vector-lambda-action-wrappers">Vector Lambda Action Wrappers</a><ul>
+<li><a class="reference internal" href="#gymnasium.experimental.vector.VectorActionWrapper"><code class="docutils literal notranslate"><span class="pre">VectorActionWrapper</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#vector-lambda-reward-wrappers">Vector Lambda Reward Wrappers</a><ul>
+<li><a class="reference internal" href="#gymnasium.experimental.vector.VectorRewardWrapper"><code class="docutils literal notranslate"><span class="pre">VectorRewardWrapper</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#vector-common-wrappers">Vector Common Wrappers</a><ul>
+<li><a class="reference internal" href="#gymnasium.experimental.wrappers.vector.VectorRecordEpisodeStatistics"><code class="docutils literal notranslate"><span class="pre">VectorRecordEpisodeStatistics</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#vector-only-wrappers">Vector Only Wrappers</a><ul>
+<li><a class="reference internal" href="#gymnasium.experimental.wrappers.vector.VectorListInfo"><code class="docutils literal notranslate"><span class="pre">VectorListInfo</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
