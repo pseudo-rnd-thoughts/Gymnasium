@@ -19,7 +19,7 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=4297ed78bc2370ec4493f1a6639f04addebc5da5" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=67ddc8aaa908fff6a8eb5c854d313935a27431d3" />
     
     
 
@@ -507,7 +507,7 @@
 <h2>Description<a class="headerlink" href="#description" title="Permalink to this heading">#</a></h2>
 <p>This environment is based on the work by P. Wawrzyński in
 <a class="reference external" href="http://staff.elka.pw.edu.pl/~pwawrzyn/pub-s/0812_LSCLRR.pdf">“A Cat-Like Robot Real-Time Learning to Run”</a>.
-The HalfCheetah is a 2-dimensional robot consisting of 9 links and 8
+The HalfCheetah is a 2-dimensional robot consisting of 9 body parts and 8
 joints connecting them (including two paws). The goal is to apply a torque
 on the joints to make the cheetah run forward (right) as fast as possible,
 with a positive reward allocated based on the distance moved forward and a
@@ -518,7 +518,7 @@ over the front and back thighs (connecting to the torso), shins
 </section>
 <section id="action-space">
 <h2>Action Space<a class="headerlink" href="#action-space" title="Permalink to this heading">#</a></h2>
-<p>The action space is a <code class="docutils literal notranslate"><span class="pre">Box(-1,</span> <span class="pre">1,</span> <span class="pre">(6,),</span> <span class="pre">float32)</span></code>. An action represents the torques applied between <em>links</em>.</p>
+<p>The action space is a <code class="docutils literal notranslate"><span class="pre">Box(-1,</span> <span class="pre">1,</span> <span class="pre">(6,),</span> <span class="pre">float32)</span></code>. An action represents the torques applied at the hinge joints.</p>
 <div class="table-wrapper colwidths-auto docutils container">
 <table class="docutils align-default">
 <thead>
@@ -588,13 +588,13 @@ over the front and back thighs (connecting to the torso), shins
 <h2>Observation Space<a class="headerlink" href="#observation-space" title="Permalink to this heading">#</a></h2>
 <p>Observations consist of positional values of different body parts of the
 cheetah, followed by the velocities of those individual parts (their derivatives) with all the positions ordered before all the velocities.</p>
-<p>By default, observations do not include the x-coordinate of the cheetah’s center of mass. It may
+<p>By default, observations do not include the cheetah’s <code class="docutils literal notranslate"><span class="pre">rootx</span></code>. It may
 be included by passing <code class="docutils literal notranslate"><span class="pre">exclude_current_positions_from_observation=False</span></code> during construction.
-In that case, the observation space will have 18 dimensions where the first dimension
-represents the x-coordinate of the cheetah’s center of mass.
-Regardless of whether <code class="docutils literal notranslate"><span class="pre">exclude_current_positions_from_observation</span></code> was set to true or false, the x-coordinate
+In that case, the observation space will be a <code class="docutils literal notranslate"><span class="pre">Box(-Inf,</span> <span class="pre">Inf,</span> <span class="pre">(18,),</span> <span class="pre">float64)</span></code> where the first element
+represents the <code class="docutils literal notranslate"><span class="pre">rootx</span></code>.
+Regardless of whether <code class="docutils literal notranslate"><span class="pre">exclude_current_positions_from_observation</span></code> was set to true or false, the
 will be returned in <code class="docutils literal notranslate"><span class="pre">info</span></code> with key <code class="docutils literal notranslate"><span class="pre">&quot;x_position&quot;</span></code>.</p>
-<p>However, by default, the observation is a <code class="docutils literal notranslate"><span class="pre">ndarray</span></code> with shape <code class="docutils literal notranslate"><span class="pre">(17,)</span></code> where the elements correspond to the following:</p>
+<p>However, by default, the observation is a <code class="docutils literal notranslate"><span class="pre">Box(-Inf,</span> <span class="pre">Inf,</span> <span class="pre">(17,),</span> <span class="pre">float64)</span></code> where the elements correspond to the following:</p>
 <div class="table-wrapper colwidths-auto docutils container">
 <table class="docutils align-default">
 <thead>
@@ -744,6 +744,14 @@ will be returned in <code class="docutils literal notranslate"><span class="pre"
 <td><p>hinge</p></td>
 <td><p>angular velocity (rad/s)</p></td>
 </tr>
+<tr class="row-odd"><td><p>excluded</p></td>
+<td><p>x-coordinate of the front tip</p></td>
+<td><p>-Inf</p></td>
+<td><p>Inf</p></td>
+<td><p>rootx</p></td>
+<td><p>slide</p></td>
+<td><p>position (m)</p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -885,7 +893,14 @@ initial velocity values of all zeros.</p>
             </div>
             <div class="right-details">
               <div class="icons">
-                
+                <a class="muted-link" href="https://github.com/Farama-Foundation/Gymnasium/"
+                  aria-label="On GitHub">
+                  <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd"
+                      d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z">
+                    </path>
+                  </svg>
+                </a>
               </div>
             </div>
           </div>
@@ -985,6 +1000,7 @@ initial velocity values of all zeros.</p>
     <script src="../../../_static/scripts/furo.js"></script>
     
     <script>
+      // Create menu with Farama projects by using the API at farama.org/api/projects.json
       const createCORSRequest = (method, url) => {
         let xhr = new XMLHttpRequest();
         xhr.responseType = 'json';
@@ -1099,8 +1115,8 @@ initial velocity values of all zeros.</p>
     
     <script>
       const versioningConfig = {
-        githubUser: '',
-        githubRepo: '',
+        githubUser: 'Farama-Foundation',
+        githubRepo: 'Gymnasium',
       };
       fetch('/main/_static/versioning/versioning_menu.html').then(response => {
         if (response.status === 200) {
