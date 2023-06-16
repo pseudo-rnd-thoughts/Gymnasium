@@ -13,21 +13,65 @@
 # limitations under the License.
 """Trains an ant to run in the +x direction."""
 from __future__ import annotations
-from typing import Any
+
 import os.path
+from typing import Any
 
 import jax
 import jax.numpy as jnp
 from brax import base, math
-from brax.envs.base import PipelineEnv, State
+from brax.generalized import pipeline as g_pipeline
 from brax.io import mjcf
+from brax.positional import pipeline as p_pipeline
+from brax.spring import pipeline as s_pipeline
 
 from gymnasium.experimental import FuncEnv
-from gymnasium.experimental.functional_jax_env import FunctionalJaxEnv, FunctionalJaxVectorEnv
+from gymnasium.experimental.functional import (
+    ActType,
+    ObsType,
+    RewardType,
+    StateType,
+    TerminalType,
+)
+from gymnasium.experimental.functional_jax_env import (
+    FunctionalJaxEnv,
+    FunctionalJaxVectorEnv,
+)
 from gymnasium.utils import EzPickle
 
 
-class Ant(PipelineEnv):
+brax_pipelines = {
+    "generalized": g_pipeline,
+    "spring": s_pipeline,
+    "positional": p_pipeline,
+}
+
+
+def pipeline_init(pipeline, sys, q: jnp.ndarray, qd: jnp.ndarray, debug) -> base.State:
+    """Initializes the pipeline state."""
+    return pipeline.init(sys, q, qd, debug)
+
+
+def pipeline_step(
+    pipeline, sys, pipeline_state: Any, action: jnp.ndarray, n_frames, debug
+) -> base.State:
+    """Takes a physics step using the physics pipeline."""
+
+    def f(state, _):
+        return (
+            pipeline.step(sys, state, action, debug),
+            None,
+        )
+
+    return jax.lax.scan(f, pipeline_state, (), n_frames)[0]
+
+
+class AntFunctional(FuncEnv):
+    __pytree_ignore__ = (
+        "backend",
+        "pipeline",
+    )
+
     def __init__(
         self,
         ctrl_cost_weight=0.5,
@@ -40,8 +84,10 @@ class Ant(PipelineEnv):
         reset_noise_scale=0.1,
         exclude_current_positions_from_observation=True,
         backend="generalized",
-        **kwargs,
+        debug=False,
     ):
+        super().__init__()
+
         path = os.path.join(os.path.abspath(__file__), "assets", "ant.xml")
         sys = mjcf.load(path)
 
@@ -58,9 +104,11 @@ class Ant(PipelineEnv):
                 )
             )
 
-        kwargs["n_frames"] = kwargs.get("n_frames", n_frames)
-
-        super().__init__(sys=sys, backend=backend, **kwargs)
+        self.sys = sys
+        self.backend = backend
+        self.pipeline = brax_pipelines[backend]
+        self.n_frames = n_frames
+        self.debug = debug
 
         self._ctrl_cost_weight = ctrl_cost_weight
         self._use_contact_forces = use_contact_forces
@@ -77,7 +125,7 @@ class Ant(PipelineEnv):
         if self._use_contact_forces:
             raise NotImplementedError("use_contact_forces not implemented.")
 
-    def reset(self, rng: jnp.ndarray) -> State:
+    def initial(self, rng: Any) -> StateType:
         """Resets the environment to an initial state."""
         rng, rng1, rng2 = jax.random.split(rng, 3)
 
@@ -87,10 +135,10 @@ class Ant(PipelineEnv):
         )
         qd = hi * jax.random.normal(rng2, (self.sys.qd_size(),))
 
-        pipeline_state = self.pipeline_init(q, qd)
-        obs = self._get_obs(pipeline_state)
+        return pipeline_init(self.pipeline, self.sys, q, qd, self.debug)
 
-        reward, done, zero = jnp.zeros(3)
+    def state_info(self, state: StateType) -> dict:
+        zero = jnp.zeros(1)
         metrics = {
             "reward_forward": zero,
             "reward_survive": zero,
@@ -103,90 +151,89 @@ class Ant(PipelineEnv):
             "y_velocity": zero,
             "forward_reward": zero,
         }
-        return State(pipeline_state, obs, reward, done, metrics)
+        return metrics
 
-    def step(self, state: State, action: jnp.ndarray) -> State:
-        """Run one timestep of the environment's dynamics."""
-        pipeline_state0 = state.pipeline_state
-        pipeline_state = self.pipeline_step(pipeline_state0, action)
+    def transition(self, state: StateType, action: ActType, rng: Any) -> StateType:
+        return pipeline_step(
+            self.pipeline, self.sys, state, action, self.n_frames, self.debug
+        )
 
-        velocity = (pipeline_state.x.pos[0] - pipeline_state0.x.pos[0]) / self.dt
+    def step_info(
+        self, state: StateType, action: ActType, next_state: StateType
+    ) -> dict:
+        velocity = (next_state.x.pos[0] - state.x.pos[0]) / self.dt
         forward_reward = velocity[0]
 
-        min_z, max_z = self._healthy_z_range
-        is_healthy = jnp.where(pipeline_state.x.pos[0, 2] < min_z, x=0.0, y=1.0)
-        is_healthy = jnp.where(pipeline_state.x.pos[0, 2] > max_z, x=0.0, y=is_healthy)
         if self._terminate_when_unhealthy:
             healthy_reward = self._healthy_reward
         else:
+            min_z, max_z = self._healthy_z_range
+            is_healthy = jnp.where(next_state.x.pos[0, 2] < min_z, x=0.0, y=1.0)
+            is_healthy = jnp.where(next_state.x.pos[0, 2] > max_z, x=0.0, y=is_healthy)
             healthy_reward = self._healthy_reward * is_healthy
+
         ctrl_cost = self._ctrl_cost_weight * jnp.sum(jnp.square(action))
         contact_cost = 0.0
 
-        obs = self._get_obs(pipeline_state)
-        reward = forward_reward + healthy_reward - ctrl_cost - contact_cost
-        done = 1.0 - is_healthy if self._terminate_when_unhealthy else 0.0
-        state.metrics.update(
+        return dict(
             reward_forward=forward_reward,
             reward_survive=healthy_reward,
             reward_ctrl=-ctrl_cost,
             reward_contact=-contact_cost,
-            x_position=pipeline_state.x.pos[0, 0],
-            y_position=pipeline_state.x.pos[0, 1],
-            distance_from_origin=math.safe_norm(pipeline_state.x.pos[0]),
+            x_position=next_state.x.pos[0, 0],
+            y_position=next_state.x.pos[0, 1],
+            distance_from_origin=math.safe_norm(next_state.x.pos[0]),
             x_velocity=velocity[0],
             y_velocity=velocity[1],
             forward_reward=forward_reward,
         )
-        return state.replace(
-            pipeline_state=pipeline_state, obs=obs, reward=reward, done=done
-        )
 
-    def _get_obs(self, pipeline_state: base.State) -> jnp.ndarray:
+    def observation(self, state: StateType) -> ObsType:
         """Observe ant body position and velocities."""
-        qpos = pipeline_state.q
-        qvel = pipeline_state.qd
+        qpos, qvel = state.q, state.qd
 
         if self._exclude_current_positions_from_observation:
-            qpos = pipeline_state.q[2:]
+            qpos = state.q[2:]
 
         return jnp.concatenate([qpos] + [qvel])
 
-
-class AntFunctional(FuncEnv):
-
-    def initial(self, rng: Any) -> StateType:
-        pass
-
-    def transition(self, state: StateType, action: ActType, rng: Any) -> StateType:
-        pass
-
-    def observation(self, state: StateType) -> ObsType:
-        pass
-
-
     def terminal(self, state: StateType) -> TerminalType:
-        pass
+        min_z, max_z = self._healthy_z_range
+
+        is_healthy = jnp.where(state.x.pos[0, 2] < min_z, x=0.0, y=1.0)
+        is_healthy = jnp.where(state.x.pos[0, 2] > max_z, x=0.0, y=is_healthy)
+
+        if self._terminate_when_unhealthy:
+            return 1.0 - is_healthy
+        else:
+            return 0.0
 
     def reward(
         self, state: StateType, action: ActType, next_state: StateType
     ) -> RewardType:
-        pass
+        velocity = (next_state.x.pos[0] - state.x.pos[0]) / self.dt
+        forward_reward = velocity[0]
 
-    def render_init(self, **kwargs) -> RenderStateType:
-        pass
+        if self._terminate_when_unhealthy:
+            healthy_reward = self._healthy_reward
+        else:
+            min_z, max_z = self._healthy_z_range
+            is_healthy = jnp.where(next_state.x.pos[0, 2] < min_z, x=0.0, y=1.0)
+            is_healthy = jnp.where(next_state.x.pos[0, 2] > max_z, x=0.0, y=is_healthy)
+            healthy_reward = self._healthy_reward * is_healthy
 
-    def render_image(
-        self, state: StateType, render_state: RenderStateType
-    ) -> tuple[RenderStateType, np.ndarray]:
-        pass
+        ctrl_cost = self._ctrl_cost_weight * jnp.sum(jnp.square(action))
+        contact_cost = 0.0
 
-    def render_close(self, render_state: RenderStateType):
-        pass
+        return forward_reward + healthy_reward - ctrl_cost - contact_cost
+
+    @property
+    def dt(self) -> jnp.ndarray:
+        """The timestep used for each env step."""
+        return self.sys.dt * self.n_frames
 
 
 class AntJaxEnv(FunctionalJaxEnv, EzPickle):
-
     def __int__(self, render_mode: str | None = None, **kwargs: Any):
         EzPickle.__init__(self, render_mode=render_mode, **kwargs)
 
@@ -194,24 +241,22 @@ class AntJaxEnv(FunctionalJaxEnv, EzPickle):
         env.transform(jax.jit)
 
         FunctionalJaxEnv.__init__(
-            self,
-            env,
-            metadata=self.metadata,
-            render_mode=render_mode
+            self, env, metadata=self.metadata, render_mode=render_mode
         )
 
 
 class AntJaxVectorEnv(FunctionalJaxVectorEnv, EzPickle):
-
-    def __init__(self,
-                 num_envs: int,
-                 render_mode: str | None = None,
-                 max_episode_steps: int = 1000,
-                 **kwargs):
+    def __init__(
+        self,
+        num_envs: int,
+        render_mode: str | None = None,
+        max_episode_steps: int = 1000,
+        **kwargs: Any,
+    ):
         EzPickle.__init__(
             self,
             num_envs=num_envs,
             render_mode=render_mode,
             max_episode_steps=max_episode_steps,
-            **kwargs
+            **kwargs,
         )
