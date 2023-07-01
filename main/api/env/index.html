@@ -19,7 +19,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?digest=6342a809aabeb35cfac296000cfa245808bc1d78" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?digest=093e2efd5a2c7b46ab7c7157e45f5f05a1e0a463" />
     
     
 
@@ -701,7 +701,8 @@ in the environment initialised, i.e., <code class="docutils literal notranslate"
 <dt class="sig sig-object py" id="gymnasium.Env.close">
 <span class="sig-prename descclassname"><span class="pre">gymnasium.Env.</span></span><span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gymnasium.Env.close" title="Permalink to this definition">#</a></dt>
 <dd><p>After the user has finished using the environment, close contains the code necessary to “clean up” the environment.</p>
-<p>This is critical for closing rendering windows, database or HTTP connections.</p>
+<p>This is critical for closing rendering windows, database or HTTP connections.
+Calling <code class="docutils literal notranslate"><span class="pre">close</span></code> on an already closed environment has no effect and won’t raise an error.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -729,7 +730,7 @@ in the environment initialised, i.e., <code class="docutils literal notranslate"
 </section>
 <section id="implementing-environments">
 <h3>Implementing environments<a class="headerlink" href="#implementing-environments" title="Permalink to this heading">#</a></h3>
-<p>When implementing an environment, the :meth:Env.reset and <a class="reference internal" href="#gymnasium.Env.step" title="gymnasium.Env.step"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Env.step()</span></code></a> functions much be created describing the
+<p>When implementing an environment, the <a class="reference internal" href="#gymnasium.Env.reset" title="gymnasium.Env.reset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Env.reset()</span></code></a> and <a class="reference internal" href="#gymnasium.Env.step" title="gymnasium.Env.step"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Env.step()</span></code></a> functions much be created describing the
 dynamics of the environment.
 For more information see the environment creation tutorial.</p>
 </section>
