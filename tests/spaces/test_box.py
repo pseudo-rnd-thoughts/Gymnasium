@@ -151,6 +151,9 @@ def test_shape_errors(low, high, shape, error_type, message):
         # unsigned int
         (-1, 100, np.uint8),
         (0, 300, np.uint8),
+        # boolean
+        (-1, 1, np.bool_),
+        (0, 2, np.bool_),
         # array inputs
         (
             np.array([-1, 0]),
@@ -200,10 +203,13 @@ def test_out_of_bounds_error(low, high, dtype):
         (np.array([-np.inf, 0]), 1, np.uint8),
         (0, np.inf, np.uint8),
         (0, np.array([1, np.inf]), np.uint8),
+        # boolean
+        (-np.inf, 1, np.bool_),
+        (0, np.inf, np.bool_),
     ],
 )
 def test_invalid_low_high(low, high, dtype):
-    if dtype == np.uint8:
+    if dtype == np.uint8 or dtype == np.bool_:
         with pytest.raises(
             ValueError, match=re.escape("Box unsigned int dtype don't support")
         ):
@@ -248,6 +254,8 @@ def test_invalid_low_high(low, high, dtype):
         (0, 1, np.uint32),
         (0, 1, np.uint16),
         (0, 1, np.uint8),
+        # boolean
+        (0, 1, np.bool_),
     ],
 )
 def test_valid_low_high(low, high, dtype):

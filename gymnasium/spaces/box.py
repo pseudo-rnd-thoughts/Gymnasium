@@ -131,11 +131,13 @@ class Box(Space[NDArray[Any]]):
         #  * nan
         #  * unsign int inf and -inf
 
-        if self.dtype.kind == "f":
+        if self.dtype == np.bool_:
+            dtype_min, dtype_max = 0, 1
+        elif np.issubdtype(self.dtype, np.floating):
             dtype_min = float(np.finfo(self.dtype).min)
             dtype_max = float(np.finfo(self.dtype).max)
         else:
-            assert self.dtype.kind in {"i", "u"}  # integer and unsigned integer
+            assert np.issubdtype(self.dtype, np.integer)
             dtype_min = int(np.iinfo(self.dtype).min)
             dtype_max = int(np.iinfo(self.dtype).max)
 
@@ -148,7 +150,7 @@ class Box(Space[NDArray[Any]]):
             elif np.isneginf(low):
                 if self.dtype.kind == "i":  # signed int
                     low = np.iinfo(self.dtype).min
-                elif self.dtype.kind == "u":  # unsigned int
+                elif self.dtype.kind in {"u", "b"}:  # unsigned int
                     raise ValueError(
                         f"Box unsigned int dtype don't support `-np.inf`, low={low}"
                     )
@@ -165,7 +167,8 @@ class Box(Space[NDArray[Any]]):
                 )
             elif not (
                 np.issubdtype(low.dtype, np.floating)
-                or np.issubdtype(high.dtype, np.integer)
+                or np.issubdtype(low.dtype, np.integer)
+                or low.dtype == np.bool_
             ):
                 raise ValueError(
                     f"Box low must be a floating or integer dtype, actual dtype={low.dtype}"
@@ -179,7 +182,7 @@ class Box(Space[NDArray[Any]]):
             if np.any(neginf):
                 if self.dtype.kind == "i":  # signed int
                     low[neginf] = np.iinfo(self.dtype).min
-                elif self.dtype.kind == "u":  # unsigned int
+                elif self.dtype.kind in {"u", "b"}:  # unsigned int
                     raise ValueError(
                         f"Box unsigned int dtype don't support `-np.inf`, low={low}"
                     )
@@ -208,7 +211,7 @@ class Box(Space[NDArray[Any]]):
             elif np.isposinf(high):
                 if self.dtype.kind == "i":  # signed int
                     high = np.iinfo(self.dtype).max
-                elif self.dtype.kind == "u":  # unsigned int
+                elif self.dtype.kind in {"u", "b"}:  # unsigned int
                     raise ValueError(
                         f"Box unsigned int dtype don't support `np.inf`, high={high}"
                     )
@@ -226,6 +229,7 @@ class Box(Space[NDArray[Any]]):
             elif not (
                 np.issubdtype(high.dtype, np.floating)
                 or np.issubdtype(high.dtype, np.integer)
+                or high.dtype == np.bool_
             ):
                 raise ValueError(
                     f"Box high must be a floating or integer dtype, actual dtype={high.dtype}"
@@ -239,7 +243,7 @@ class Box(Space[NDArray[Any]]):
             if np.any(posinf):
                 if self.dtype.kind == "i":  # signed int
                     high[posinf] = np.iinfo(self.dtype).max
-                elif self.dtype.kind == "u":  # unsigned int
+                elif self.dtype.kind in {"u", "b"}:  # unsigned int
                     raise ValueError(
                         f"Box unsigned int dtype don't support `np.inf`, high={high}"
                     )
