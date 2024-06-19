@@ -5,7 +5,7 @@ permalink: https://perma.cc/C9ZM-652R
 """
 
 import math
-from typing import Optional, Tuple, Union
+from typing import Optional, Union
 
 import numpy as np
 
@@ -204,7 +204,7 @@ class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
         if not terminated:
             if self._sutton_barto_reward:
                 reward = 0.0
-            elif not self._sutton_barto_reward:
+            else:
                 reward = 1.0
         elif self.steps_beyond_terminated is None:
             # Pole just fell!
@@ -425,7 +425,7 @@ class CartPoleVectorEnv(VectorEnv):
 
     def step(
         self, action: np.ndarray
-    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict]:
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict]:
         assert self.action_space.contains(
             action
         ), f"{action!r} ({type(action)}) invalid"

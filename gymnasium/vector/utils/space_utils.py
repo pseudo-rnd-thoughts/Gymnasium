@@ -8,9 +8,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable, Iterator
 from copy import deepcopy
 from functools import singledispatch
-from typing import Any, Iterable, Iterator
+from typing import Any
 
 import numpy as np
 

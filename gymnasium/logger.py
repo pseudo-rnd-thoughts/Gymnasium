@@ -2,7 +2,7 @@
 
 import sys
 import warnings
-from typing import Optional, Type
+from typing import Optional
 
 from gymnasium.utils import colorize
 
@@ -41,7 +41,7 @@ def info(msg: str, *args: object):
 def warn(
     msg: str,
     *args: object,
-    category: Optional[Type[Warning]] = None,
+    category: Optional[type[Warning]] = None,
     stacklevel: int = 1,
 ):
     """Raises a warning to the user if the min_level <= WARN.
