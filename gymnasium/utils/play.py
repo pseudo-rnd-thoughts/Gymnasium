@@ -27,8 +27,8 @@ try:
 
     matplotlib.use("TkAgg")
     import matplotlib.pyplot as plt
-except ImportError:
-    logger.warn('matplotlib is not installed, run `pip install "gymnasium[other]"`')
+except ImportError as e:
+    logger.warn(f'matplotlib is not installed, run `pip install "gymnasium[other]"` ({e})')
     matplotlib, plt = None, None
 
 
