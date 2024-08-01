@@ -11,7 +11,7 @@
 <link rel="index" title="Index" href="../../genindex/" /><link rel="search" title="Search" href="../../search/" /><link rel="next" title="Wrappers" href="wrappers/" /><link rel="prev" title="Reward Wrappers" href="../wrappers/reward_wrappers/" />
         <link rel="canonical" href="https://gymnasium.farama.org/api/vector.html" />
 
-    <link rel="shortcut icon" href="../../_static/favicon.png"/><!-- Generated with Sphinx 7.3.7 and Furo 2023.08.19.dev1 -->
+    <link rel="shortcut icon" href="../../_static/favicon.png"/><!-- Generated with Sphinx 7.4.7 and Furo 2023.08.19.dev1 -->
         <title>Vectorize - Gymnasium Documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=3e7f4c72" />
@@ -517,16 +517,13 @@ array for each key. To use the old info style, utilise the <code class="xref py 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">envs</span><span class="o">.</span><span class="n">action_space</span>
 <span class="go">MultiDiscrete([2 2 2])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">envs</span><span class="o">.</span><span class="n">observation_space</span>
-<span class="go">Box([[-4.80000019e+00 -3.40282347e+38 -4.18879032e-01 -3.40282347e+38</span>
-<span class="go">   0.00000000e+00]</span>
-<span class="go"> [-4.80000019e+00 -3.40282347e+38 -4.18879032e-01 -3.40282347e+38</span>
-<span class="go">   0.00000000e+00]</span>
-<span class="go"> [-4.80000019e+00 -3.40282347e+38 -4.18879032e-01 -3.40282347e+38</span>
-<span class="go">   0.00000000e+00]], [[4.80000019e+00 3.40282347e+38 4.18879032e-01 3.40282347e+38</span>
+<span class="go">Box([[-4.80000019        -inf -0.41887903        -inf  0.        ]</span>
+<span class="go"> [-4.80000019        -inf -0.41887903        -inf  0.        ]</span>
+<span class="go"> [-4.80000019        -inf -0.41887903        -inf  0.        ]], [[4.80000019e+00            inf 4.18879032e-01            inf</span>
 <span class="go">  5.00000000e+02]</span>
-<span class="go"> [4.80000019e+00 3.40282347e+38 4.18879032e-01 3.40282347e+38</span>
+<span class="go"> [4.80000019e+00            inf 4.18879032e-01            inf</span>
 <span class="go">  5.00000000e+02]</span>
-<span class="go"> [4.80000019e+00 3.40282347e+38 4.18879032e-01 3.40282347e+38</span>
+<span class="go"> [4.80000019e+00            inf 4.18879032e-01            inf</span>
 <span class="go">  5.00000000e+02]], (3, 5), float64)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">observations</span><span class="p">,</span> <span class="n">infos</span> <span class="o">=</span> <span class="n">envs</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">123</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">observations</span>
@@ -555,8 +552,9 @@ array for each key. To use the old info style, utilise the <code class="xref py 
 </div>
 <p>To avoid having to wait for all sub-environments to terminated before resetting, implementations will autoreset
 sub-environments on episode end (<cite>terminated or truncated is True</cite>). As a result, when adding observations
-to a replay buffer, this requires a knowning where the observation (and info) for each sub-environment are the first
-observation from an autoreset. We recommend using an additional variable to store this information.</p>
+to a replay buffer, this requires knowing when an observation (and info) for each sub-environment are the first
+observation from an autoreset. We recommend using an additional variable to store this information such as
+<code class="docutils literal notranslate"><span class="pre">has_autoreset</span> <span class="pre">=</span> <span class="pre">np.logical_or(terminated,</span> <span class="pre">truncated)</span></code>.</p>
 <p>The Vector Environments have the additional attributes for users to understand the implementation</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#gymnasium.vector.VectorEnv.num_envs" title="gymnasium.vector.VectorEnv.num_envs"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_envs</span></code></a> - The number of sub-environment in the vector environment</p></li>
@@ -958,7 +956,7 @@ the seed will take the value -1.</p>
         })()
       </script>
 
-    <script src="../../_static/documentation_options.js?v=31d51385"></script>
+    <script src="../../_static/documentation_options.js?v=3596a5a1"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=7660844c"></script>

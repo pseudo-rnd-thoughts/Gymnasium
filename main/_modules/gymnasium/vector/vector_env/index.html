@@ -10,7 +10,7 @@
     <meta property="og:url" content="https://gymnasium.farama.org/_modules/gymnasium/vector/vector_env.html" /><meta property="og:image" content="https://gymnasium.farama.org/_static/img/gymnasium-github.png" /><meta name="twitter:card" content="summary_large_image"><link rel="index" title="Index" href="../../../../genindex/" /><link rel="search" title="Search" href="../../../../search/" />
         <link rel="canonical" href="https://gymnasium.farama.org/_modules/gymnasium/vector/vector_env.html" />
 
-    <link rel="shortcut icon" href="../../../../_static/favicon.png"/><!-- Generated with Sphinx 7.3.7 and Furo 2023.08.19.dev1 -->
+    <link rel="shortcut icon" href="../../../../_static/favicon.png"/><!-- Generated with Sphinx 7.4.7 and Furo 2023.08.19.dev1 -->
         <title>gymnasium.vector.vector_env - Gymnasium Documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=3e7f4c72" />
@@ -471,6 +471,7 @@
             
             <h1>Source code for gymnasium.vector.vector_env</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Base class for vectorized environments.&quot;&quot;&quot;</span>
+
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span>
@@ -532,16 +533,13 @@
 <span class="sd">        &gt;&gt;&gt; envs.action_space</span>
 <span class="sd">        MultiDiscrete([2 2 2])</span>
 <span class="sd">        &gt;&gt;&gt; envs.observation_space</span>
-<span class="sd">        Box([[-4.80000019e+00 -3.40282347e+38 -4.18879032e-01 -3.40282347e+38</span>
-<span class="sd">           0.00000000e+00]</span>
-<span class="sd">         [-4.80000019e+00 -3.40282347e+38 -4.18879032e-01 -3.40282347e+38</span>
-<span class="sd">           0.00000000e+00]</span>
-<span class="sd">         [-4.80000019e+00 -3.40282347e+38 -4.18879032e-01 -3.40282347e+38</span>
-<span class="sd">           0.00000000e+00]], [[4.80000019e+00 3.40282347e+38 4.18879032e-01 3.40282347e+38</span>
+<span class="sd">        Box([[-4.80000019        -inf -0.41887903        -inf  0.        ]</span>
+<span class="sd">         [-4.80000019        -inf -0.41887903        -inf  0.        ]</span>
+<span class="sd">         [-4.80000019        -inf -0.41887903        -inf  0.        ]], [[4.80000019e+00            inf 4.18879032e-01            inf</span>
 <span class="sd">          5.00000000e+02]</span>
-<span class="sd">         [4.80000019e+00 3.40282347e+38 4.18879032e-01 3.40282347e+38</span>
+<span class="sd">         [4.80000019e+00            inf 4.18879032e-01            inf</span>
 <span class="sd">          5.00000000e+02]</span>
-<span class="sd">         [4.80000019e+00 3.40282347e+38 4.18879032e-01 3.40282347e+38</span>
+<span class="sd">         [4.80000019e+00            inf 4.18879032e-01            inf</span>
 <span class="sd">          5.00000000e+02]], (3, 5), float64)</span>
 <span class="sd">        &gt;&gt;&gt; observations, infos = envs.reset(seed=123)</span>
 <span class="sd">        &gt;&gt;&gt; observations</span>
@@ -569,8 +567,9 @@
 
 <span class="sd">    To avoid having to wait for all sub-environments to terminated before resetting, implementations will autoreset</span>
 <span class="sd">    sub-environments on episode end (`terminated or truncated is True`). As a result, when adding observations</span>
-<span class="sd">    to a replay buffer, this requires a knowning where the observation (and info) for each sub-environment are the first</span>
-<span class="sd">    observation from an autoreset. We recommend using an additional variable to store this information.</span>
+<span class="sd">    to a replay buffer, this requires knowing when an observation (and info) for each sub-environment are the first</span>
+<span class="sd">    observation from an autoreset. We recommend using an additional variable to store this information such as</span>
+<span class="sd">    ``has_autoreset = np.logical_or(terminated, truncated)``.</span>
 
 <span class="sd">    The Vector Environments have the additional attributes for users to understand the implementation</span>
 
@@ -666,7 +665,8 @@
 <span class="sd">            array([False, False, False])</span>
 <span class="sd">            &gt;&gt;&gt; infos</span>
 <span class="sd">            {}</span>
-<span class="sd">        &quot;&quot;&quot;</span></div>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span><span class="si">}</span><span class="s2"> step function is not implemented.&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="VectorEnv.render">
@@ -1226,7 +1226,7 @@
         })()
       </script>
 
-    <script src="../../../../_static/documentation_options.js?v=31d51385"></script>
+    <script src="../../../../_static/documentation_options.js?v=3596a5a1"></script>
     <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/furo.js?v=7660844c"></script>

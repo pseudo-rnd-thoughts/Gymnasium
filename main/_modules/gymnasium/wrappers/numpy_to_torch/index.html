@@ -10,7 +10,7 @@
     <meta property="og:url" content="https://gymnasium.farama.org/_modules/gymnasium/wrappers/numpy_to_torch.html" /><meta property="og:image" content="https://gymnasium.farama.org/_static/img/gymnasium-github.png" /><meta name="twitter:card" content="summary_large_image"><link rel="index" title="Index" href="../../../../genindex/" /><link rel="search" title="Search" href="../../../../search/" />
         <link rel="canonical" href="https://gymnasium.farama.org/_modules/gymnasium/wrappers/numpy_to_torch.html" />
 
-    <link rel="shortcut icon" href="../../../../_static/favicon.png"/><!-- Generated with Sphinx 7.3.7 and Furo 2023.08.19.dev1 -->
+    <link rel="shortcut icon" href="../../../../_static/favicon.png"/><!-- Generated with Sphinx 7.4.7 and Furo 2023.08.19.dev1 -->
         <title>gymnasium.wrappers.numpy_to_torch - Gymnasium Documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=3e7f4c72" />
@@ -471,6 +471,7 @@
             
             <h1>Source code for gymnasium.wrappers.numpy_to_torch</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Helper functions and wrapper class for converting between PyTorch and NumPy.&quot;&quot;&quot;</span>
+
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span> <span class="nn">functools</span>
@@ -507,10 +508,15 @@
 
 
 <span class="nd">@torch_to_numpy</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">)</span>
-<span class="nd">@torch_to_numpy</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">_number_torch_to_numpy</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Number</span> <span class="o">|</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a python number (int, float, complex) and torch.Tensor to a numpy array.&quot;&quot;&quot;</span>
+<span class="k">def</span> <span class="nf">_number_to_numpy</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a python number (int, float, complex) to a numpy array.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+
+<span class="nd">@torch_to_numpy</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_torch_to_numpy</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a torch.Tensor to a numpy array.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">numpy</span><span class="p">(</span><span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 
 <span class="nd">@torch_to_numpy</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">)</span>
@@ -565,9 +571,9 @@
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;_make&quot;</span><span class="p">):</span>
         <span class="c1"># namedtuple - underline used to prevent potential name conflicts</span>
         <span class="c1"># noinspection PyProtectedMember</span>
-        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">_make</span><span class="p">(</span><span class="n">numpy_to_torch</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">_make</span><span class="p">(</span><span class="n">numpy_to_torch</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)(</span><span class="n">numpy_to_torch</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)(</span><span class="n">numpy_to_torch</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="NumpyToTorch">
@@ -772,7 +778,7 @@
         })()
       </script>
 
-    <script src="../../../../_static/documentation_options.js?v=31d51385"></script>
+    <script src="../../../../_static/documentation_options.js?v=3596a5a1"></script>
     <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/furo.js?v=7660844c"></script>

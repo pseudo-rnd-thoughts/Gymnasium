@@ -10,7 +10,7 @@
     <meta property="og:url" content="https://gymnasium.farama.org/_modules/gymnasium/wrappers/rendering.html" /><meta property="og:image" content="https://gymnasium.farama.org/_static/img/gymnasium-github.png" /><meta name="twitter:card" content="summary_large_image"><link rel="index" title="Index" href="../../../../genindex/" /><link rel="search" title="Search" href="../../../../search/" />
         <link rel="canonical" href="https://gymnasium.farama.org/_modules/gymnasium/wrappers/rendering.html" />
 
-    <link rel="shortcut icon" href="../../../../_static/favicon.png"/><!-- Generated with Sphinx 7.3.7 and Furo 2023.08.19.dev1 -->
+    <link rel="shortcut icon" href="../../../../_static/favicon.png"/><!-- Generated with Sphinx 7.4.7 and Furo 2023.08.19.dev1 -->
         <title>gymnasium.wrappers.rendering - Gymnasium Documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=3e7f4c72" />
@@ -476,6 +476,7 @@
 <span class="sd">* ``RecordVideo`` - Records a video of the environments</span>
 <span class="sd">* ``HumanRendering`` - Provides human rendering of environments with ``&quot;rgb_array&quot;``</span>
 <span class="sd">&quot;&quot;&quot;</span>
+
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
@@ -952,16 +953,16 @@
         <span class="n">gym</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">RecordConstructorArgs</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">gym</span><span class="o">.</span><span class="n">Wrapper</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">)</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">screen_size</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Has to be initialized before asserts, as self.window is used in auto close</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clock</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="k">assert</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">render_mode</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ACCEPTED_RENDER_MODES</span>
         <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Expected env.render_mode to be one of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ACCEPTED_RENDER_MODES</span><span class="si">}</span><span class="s2"> but got &#39;</span><span class="si">{</span><span class="n">env</span><span class="o">.</span><span class="n">render_mode</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
         <span class="k">assert</span> <span class="p">(</span>
             <span class="s2">&quot;render_fps&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">metadata</span>
         <span class="p">),</span> <span class="s2">&quot;The base environment must specify &#39;render_fps&#39; to be used with the HumanRendering wrapper&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">screen_size</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">window</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">clock</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="s2">&quot;human&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;render_modes&quot;</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
@@ -1159,7 +1160,7 @@
         })()
       </script>
 
-    <script src="../../../../_static/documentation_options.js?v=31d51385"></script>
+    <script src="../../../../_static/documentation_options.js?v=3596a5a1"></script>
     <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/furo.js?v=7660844c"></script>

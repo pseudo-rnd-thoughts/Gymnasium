@@ -10,7 +10,7 @@
     <meta property="og:url" content="https://gymnasium.farama.org/_modules/gymnasium/wrappers/vector/dict_info_to_list.html" /><meta property="og:image" content="https://gymnasium.farama.org/_static/img/gymnasium-github.png" /><meta name="twitter:card" content="summary_large_image"><link rel="index" title="Index" href="../../../../../genindex/" /><link rel="search" title="Search" href="../../../../../search/" />
         <link rel="canonical" href="https://gymnasium.farama.org/_modules/gymnasium/wrappers/vector/dict_info_to_list.html" />
 
-    <link rel="shortcut icon" href="../../../../../_static/favicon.png"/><!-- Generated with Sphinx 7.3.7 and Furo 2023.08.19.dev1 -->
+    <link rel="shortcut icon" href="../../../../../_static/favicon.png"/><!-- Generated with Sphinx 7.4.7 and Furo 2023.08.19.dev1 -->
         <title>gymnasium.wrappers.vector.dict_info_to_list - Gymnasium Documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo.css?v=3e7f4c72" />
@@ -471,6 +471,7 @@
             
             <h1>Source code for gymnasium.wrappers.vector.dict_info_to_list</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Wrapper that converts the info format for vec envs into the list format.&quot;&quot;&quot;</span>
+
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
@@ -510,7 +511,6 @@
 <span class="sd">    Example for vector environments:</span>
 <span class="sd">        &gt;&gt;&gt; import numpy as np</span>
 <span class="sd">        &gt;&gt;&gt; import gymnasium as gym</span>
-<span class="sd">        &gt;&gt;&gt; from gymnasium.spaces import Dict, Box</span>
 <span class="sd">        &gt;&gt;&gt; envs = gym.make_vec(&quot;CartPole-v1&quot;, num_envs=3)</span>
 <span class="sd">        &gt;&gt;&gt; obs, info = envs.reset(seed=123)</span>
 <span class="sd">        &gt;&gt;&gt; info</span>
@@ -523,18 +523,18 @@
 <span class="sd">    Another example for vector environments:</span>
 <span class="sd">        &gt;&gt;&gt; import numpy as np</span>
 <span class="sd">        &gt;&gt;&gt; import gymnasium as gym</span>
-<span class="sd">        &gt;&gt;&gt; envs = gym.make_vec(&quot;HalfCheetah-v4&quot;, num_envs=3)</span>
+<span class="sd">        &gt;&gt;&gt; envs = gym.make_vec(&quot;HalfCheetah-v4&quot;, num_envs=2)</span>
 <span class="sd">        &gt;&gt;&gt; _ = envs.reset(seed=123)</span>
 <span class="sd">        &gt;&gt;&gt; _ = envs.action_space.seed(123)</span>
 <span class="sd">        &gt;&gt;&gt; _, _, _, _, infos = envs.step(envs.action_space.sample())</span>
 <span class="sd">        &gt;&gt;&gt; infos</span>
-<span class="sd">        {&#39;x_position&#39;: array([0.03332211, 0.10172355, 0.08920531]), &#39;_x_position&#39;: array([ True,  True,  True]), &#39;x_velocity&#39;: array([-0.06296527,  0.89345848,  0.37710836]), &#39;_x_velocity&#39;: array([ True,  True,  True]), &#39;reward_run&#39;: array([-0.06296527,  0.89345848,  0.37710836]), &#39;_reward_run&#39;: array([ True,  True,  True]), &#39;reward_ctrl&#39;: array([-0.24503503, -0.21944423, -0.20672209]), &#39;_reward_ctrl&#39;: array([ True,  True,  True])}</span>
+<span class="sd">        {&#39;x_position&#39;: array([0.03332211, 0.10172355]), &#39;_x_position&#39;: array([ True,  True]), &#39;x_velocity&#39;: array([-0.06296527,  0.89345848]), &#39;_x_velocity&#39;: array([ True,  True]), &#39;reward_run&#39;: array([-0.06296527,  0.89345848]), &#39;_reward_run&#39;: array([ True,  True]), &#39;reward_ctrl&#39;: array([-0.24503504, -0.21944423], dtype=float32), &#39;_reward_ctrl&#39;: array([ True,  True])}</span>
 <span class="sd">        &gt;&gt;&gt; envs = DictInfoToList(envs)</span>
 <span class="sd">        &gt;&gt;&gt; _ = envs.reset(seed=123)</span>
 <span class="sd">        &gt;&gt;&gt; _ = envs.action_space.seed(123)</span>
 <span class="sd">        &gt;&gt;&gt; _, _, _, _, infos = envs.step(envs.action_space.sample())</span>
 <span class="sd">        &gt;&gt;&gt; infos</span>
-<span class="sd">        [{&#39;x_position&#39;: 0.03332210900362942, &#39;x_velocity&#39;: -0.06296527291998533, &#39;reward_run&#39;: -0.06296527291998533, &#39;reward_ctrl&#39;: -0.2450350284576416}, {&#39;x_position&#39;: 0.10172354684460168, &#39;x_velocity&#39;: 0.8934584807363618, &#39;reward_run&#39;: 0.8934584807363618, &#39;reward_ctrl&#39;: -0.21944422721862794}, {&#39;x_position&#39;: 0.08920531470057845, &#39;x_velocity&#39;: 0.3771083596080768, &#39;reward_run&#39;: 0.3771083596080768, &#39;reward_ctrl&#39;: -0.20672209262847902}]</span>
+<span class="sd">        [{&#39;x_position&#39;: np.float64(0.0333221090036294), &#39;x_velocity&#39;: np.float64(-0.06296527291998574), &#39;reward_run&#39;: np.float64(-0.06296527291998574), &#39;reward_ctrl&#39;: np.float32(-0.24503504)}, {&#39;x_position&#39;: np.float64(0.10172354684460168), &#39;x_velocity&#39;: np.float64(0.8934584807363618), &#39;reward_run&#39;: np.float64(0.8934584807363618), &#39;reward_ctrl&#39;: np.float32(-0.21944423)}]</span>
 
 <span class="sd">    Change logs:</span>
 <span class="sd">     * v0.24.0 - Initially added as ``VectorListInfo``</span>
@@ -723,7 +723,7 @@
         })()
       </script>
 
-    <script src="../../../../../_static/documentation_options.js?v=31d51385"></script>
+    <script src="../../../../../_static/documentation_options.js?v=3596a5a1"></script>
     <script src="../../../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../../_static/scripts/furo.js?v=7660844c"></script>
