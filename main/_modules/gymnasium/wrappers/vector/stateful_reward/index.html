@@ -414,11 +414,11 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../tutorials/third-party-tutorials/">Third-Party Tutorials</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://www.comet.com/docs/v2/integrations/ml-frameworks/gymnasium/?utm_source=gymnasium&amp;utm_medium=partner&amp;utm_campaign=partner_gymnasium_2023&amp;utm_content=docs_gymnasium">Comet Tutorial</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/Farama-Foundation/Gymnasium">Github</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://arxiv.org/abs/2407.17032">Paper</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../gymnasium_release_notes/">Gymnasium Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../gym_release_notes/">Gym Release Notes</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/Farama-Foundation/Gymnasium/blob/main/docs/README.md">Contribute to the Docs</a></li>
@@ -493,13 +493,19 @@
 <div class="viewcode-block" id="NormalizeReward">
 <a class="viewcode-back" href="../../../../../api/vector/wrappers/#gymnasium.wrappers.vector.NormalizeReward">[docs]</a>
 <span class="k">class</span> <span class="nc">NormalizeReward</span><span class="p">(</span><span class="n">VectorWrapper</span><span class="p">,</span> <span class="n">gym</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">RecordConstructorArgs</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;This wrapper will normalize immediate rewards s.t. their exponential moving average has a fixed variance.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;This wrapper will scale rewards s.t. the discounted returns have a mean of 0 and std of 1.</span>
 
+<span class="sd">    In a nutshell, the rewards are divided through by the standard deviation of a rolling discounted sum of the reward.</span>
 <span class="sd">    The exponential moving average will have variance :math:`(1 - \gamma)^2`.</span>
 
 <span class="sd">    The property `_update_running_mean` allows to freeze/continue the running mean calculation of the reward</span>
 <span class="sd">    statistics. If `True` (default), the `RunningMeanStd` will get updated every time `self.normalize()` is called.</span>
 <span class="sd">    If False, the calculated statistics are used but not updated anymore; this may be used during evaluation.</span>
+
+<span class="sd">    Important note:</span>
+<span class="sd">        Contrary to what the name suggests, this wrapper does not normalize the rewards to have a mean of 0 and a standard</span>
+<span class="sd">        deviation of 1. Instead, it scales the rewards such that **discounted returns** have approximately unit variance.</span>
+<span class="sd">        See [Engstrom et al.](https://openreview.net/forum?id=r1etN1rtPB) on &quot;reward scaling&quot; for more information.</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        The scaling depends on past trajectories and rewards will not be scaled correctly if the wrapper was newly</span>
