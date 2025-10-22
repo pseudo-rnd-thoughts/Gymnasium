@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - run: |
-          docker build -f bin/all-py.Dockerfile \
+          docker build --no-cache -f bin/all-py.Dockerfile \
             --build-arg PYTHON_VERSION="${{ matrix.python-version }}" \
             --build-arg NUMPY_VERSION="${{ matrix.numpy-version }}" \
             --tag gymnasium-all-docker .
@@ -30,7 +30,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - run: |
-           docker build -f bin/necessary-py.Dockerfile \
+           docker build --no-cache -f bin/necessary-py.Dockerfile \
              --build-arg PYTHON_VERSION='3.10' \
              --tag gymnasium-necessary-docker .
       - name: Run tests

@@ -32,9 +32,9 @@ class Discrete(Space[IntType]):
         np.int64(1)
         >>> observation_space.sample(probability=np.array([0,0.3,0.7], dtype=np.float64))
         np.int64(1)
-        >>> observation_space = Discrete(3, start=-1, seed=42, dtype=np.int32) # specify dtype for samples
+        >>> observation_space = Discrete(3, seed=42, dtype=np.int32) # specify dtype for samples
         >>> observation_space.sample()
-        np.int32(1)
+        np.int32(0)
     """
 
     def __init__(
@@ -50,9 +50,9 @@ class Discrete(Space[IntType]):
 
         Args:
             n (int): The number of elements of this space.
-            dtype: The space type, for example, ``int``, ``np.int64``, ``np.int32``, or ``np.uint8``.
             seed: Optionally, you can use this argument to seed the RNG that is used to sample from the ``Dict`` space.
             start (int): The smallest element of this space.
+            dtype: The space type, for example, ``int``, ``np.int64``, ``np.int32``, or ``np.uint8``.
         """
         assert np.issubdtype(
             type(n), np.integer
@@ -64,7 +64,7 @@ class Discrete(Space[IntType]):
 
         # determine dtype
         if dtype is None:
-            raise TypeError(f"Invalid Discrete dtype, cannot be None.")
+            raise TypeError("Invalid Discrete dtype, cannot be None.")
         self.dtype = np.dtype(dtype)
 
         #  * check that dtype is an accepted dtype
@@ -169,9 +169,13 @@ class Discrete(Space[IntType]):
 
     def __repr__(self) -> str:
         """Gives a string representation of this space."""
+        info = [str(self.n)]
         if self.start != 0:
-            return f"Discrete({self.n}, start={self.start})"
-        return f"Discrete({self.n})"
+            info.append(f"start={self.start}")
+        if self.dtype != np.int64:
+            info.append(f"dtype={self.dtype}")
+
+        return f"Discrete({', '.join(info)})"
 
     def __eq__(self, other: Any) -> bool:
         """Check whether ``other`` is equivalent to this instance."""

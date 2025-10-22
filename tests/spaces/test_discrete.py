@@ -121,15 +121,14 @@ def test_invalid_probability_mask_values():
     ],
 )
 def test_dtype(dtype, sample_dtype):
-    space = Discrete(n=5, dtype=dtype, start=2)
+    space = Discrete(n=5, dtype=dtype)
 
     sample = space.sample()
-    sample_mask = space.sample(mask=np.array([0, 1, 0, 0, 0], dtype=np.int8))
-    print(f"{sample=}, {sample_mask=}")
-    print(f"{type(sample)=}, {type(sample_mask)=}")
     assert isinstance(sample, sample_dtype), type(sample)
+
+    sample_mask = space.sample(mask=np.array([0, 1, 0, 0, 0], dtype=np.int8))
     assert isinstance(sample_mask, sample_dtype), type(sample_mask)
-    # test with probability
+
     sample_prob = space.sample(probability=np.array([0.2, 0.2, 0.2, 0.2, 0.2]))
     assert isinstance(sample_prob, sample_dtype), type(sample_prob)
 

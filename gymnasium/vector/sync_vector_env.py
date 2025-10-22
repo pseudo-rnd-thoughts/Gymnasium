@@ -133,6 +133,7 @@ class SyncVectorEnv(VectorEnv):
                     env.observation_space == self.single_observation_space
                 ), f"SyncVectorEnv(..., observation_mode='same') however the sub-environments observation spaces are not equivalent. single_observation_space={self.single_observation_space}, sub-environment observation_space={env.observation_space}. If this is intentional, use `observation_mode='different'` instead."
             else:
+                # observation_mode == "different"
                 assert is_space_dtype_shape_equiv(
                     env.observation_space, self.single_observation_space
                 ), f"SyncVectorEnv(..., observation_mode='different' or custom space) however the sub-environments observation spaces do not share a common shape and dtype, single_observation_space={self.single_observation_space}, sub-environment observation space={env.observation_space}"
