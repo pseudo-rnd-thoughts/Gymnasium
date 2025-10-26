@@ -151,10 +151,13 @@ class Discrete(Space[IntType]):
             )
         # uniform sampling
         else:
-            return self.start + self.np_random.integers(self.n, dtype=self.dtype)
+            return self.start + self.np_random.integers(self.n, dtype=self.dtype.type)
 
     def contains(self, x: Any) -> bool:
-        """Return boolean specifying if x is a valid member of this space."""
+        """Return boolean specifying if x is a valid member of this space.
+
+        Also checks if the given value, when provided as an int, can be cast to the space's dtype.
+        """
         if isinstance(x, int):
             as_np = np.dtype(self.dtype).type(x)
 
@@ -165,7 +168,9 @@ class Discrete(Space[IntType]):
         else:
             return False
 
-        return bool(self.start <= as_np < self.start + self.n)
+        value_is_in = bool(self.start <= as_np < self.start + self.n)
+
+        return value_is_in and np.can_cast(as_np.dtype, self.dtype)
 
     def __repr__(self) -> str:
         """Gives a string representation of this space."""
