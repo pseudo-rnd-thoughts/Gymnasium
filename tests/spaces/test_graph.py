@@ -34,6 +34,17 @@ def test_node_space_sample():
         sample = space.sample(num_edges=5)
         assert sample in space
 
+    # Change the node_space or edge_space to a non-Box or discrete space.
+    # This should not happen, test is primarily to increase coverage.
+    with pytest.raises(
+        TypeError,
+        match=re.escape(
+            "The space provided to `batch_space` is not a gymnasium Space instance, type: <class 'str'>, abc"
+        ),
+    ):
+        space.node_space = "abc"
+        space.sample()
+
 
 def test_edge_space_sample():
     space = Graph(node_space=Discrete(3), edge_space=Discrete(3))
@@ -148,9 +159,9 @@ def test_probability_node_sampling():
     counts = np.bincount(samples, minlength=3)
     empirical_distribution = counts / num_samples
 
-    assert np.allclose(empirical_distribution, probability, atol=0.05), (
-        f"Empirical distribution {empirical_distribution} does not match expected probability {probability}"
-    )
+    assert np.allclose(
+        empirical_distribution, probability, atol=0.05
+    ), f"Empirical distribution {empirical_distribution} does not match expected probability {probability}"
 
 
 def test_probability_edge_sampling():
@@ -175,9 +186,9 @@ def test_probability_edge_sampling():
     counts = np.bincount(samples, minlength=3)
     empirical_distribution = counts / num_samples
 
-    assert np.allclose(empirical_distribution, probability, atol=0.05), (
-        f"Empirical distribution {empirical_distribution} does not match expected probability {probability}"
-    )
+    assert np.allclose(
+        empirical_distribution, probability, atol=0.05
+    ), f"Empirical distribution {empirical_distribution} does not match expected probability {probability}"
 
 
 def test_probability_node_and_edge_sampling():
@@ -212,10 +223,10 @@ def test_probability_node_and_edge_sampling():
     node_empirical_distribution = node_counts / num_samples
     edge_empirical_distribution = edge_counts / num_samples
 
-    assert np.allclose(node_empirical_distribution, node_probability, atol=0.05), (
-        f"Node empirical distribution {node_empirical_distribution} does not match expected probability {node_probability}"
-    )
+    assert np.allclose(
+        node_empirical_distribution, node_probability, atol=0.05
+    ), f"Node empirical distribution {node_empirical_distribution} does not match expected probability {node_probability}"
 
-    assert np.allclose(edge_empirical_distribution, edge_probability, atol=0.05), (
-        f"Edge empirical distribution {edge_empirical_distribution} does not match expected probability {edge_probability}"
-    )
+    assert np.allclose(
+        edge_empirical_distribution, edge_probability, atol=0.05
+    ), f"Edge empirical distribution {edge_empirical_distribution} does not match expected probability {edge_probability}"
