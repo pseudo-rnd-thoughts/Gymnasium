@@ -379,7 +379,7 @@
             
             <div class="sphx-glr-example-title admonition note">
 <p class="admonition-title">Note</p>
-<p>This tutorial is compatible with Gymnasium version 1.2.1.</p>
+<p>This tutorial is compatible with Gymnasium version 1.2.3.</p>
 </div>
 <section id="action-masking-in-the-taxi-environment">
 <span id="sphx-glr-tutorials-training-agents-action-masking-taxi-py"></span><h1>Action Masking in the Taxi Environment<a class="headerlink" href="#action-masking-in-the-taxi-environment" title="Link to this heading">¶</a></h1>
@@ -416,7 +416,6 @@ This mask is a binary array where 1 indicates a valid action and 0 indicates an 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">gymnasium</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gym</span>
-
 
 <span class="c1"># Base random seed for reproducibility</span>
 <span class="n">BASE_RANDOM_SEED</span> <span class="o">=</span> <span class="mi">58922320</span>
@@ -587,7 +586,7 @@ We’ll use multiple random seeds to ensure robust statistical comparison.</p>
 
 <span class="c1"># Plot individual runs with low alpha</span>
 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">masked_results</span><span class="p">,</span> <span class="n">unmasked_results</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
-    <span class="nb">zip</span><span class="p">(</span><span class="n">masked_results_list</span><span class="p">,</span> <span class="n">unmasked_results_list</span><span class="p">)</span>
+    <span class="nb">zip</span><span class="p">(</span><span class="n">masked_results_list</span><span class="p">,</span> <span class="n">unmasked_results_list</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="p">):</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
         <span class="n">masked_results</span><span class="p">[</span><span class="s2">&quot;episode_rewards&quot;</span><span class="p">],</span>
@@ -698,7 +697,7 @@ invalid actions.</p>
           <div class="bottom-of-page">
             <div class="left-details">
               <div class="copyright">
-                Copyright &#169; 2025 Farama Foundation
+                Copyright &#169; 2026 Farama Foundation
               </div>
               <!--
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
@@ -826,7 +825,7 @@ invalid actions.</p>
         })()
       </script>
 
-    <script src="../../../_static/documentation_options.js?v=e86ceb7b"></script>
+    <script src="../../../_static/documentation_options.js?v=c9fd93b6"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=7660844c"></script>
