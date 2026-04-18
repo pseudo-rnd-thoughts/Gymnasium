@@ -1,30 +1,103 @@
-"""Tests for rainy Taxi stochastic transition logic.
-
-Covers two bugs reported in the rainy-taxi variant:
-  - #1509: Lateral moves are computed even when the primary N/S move is blocked
-           by a grid boundary, inconsistent with the E/W wall-blocked behaviour.
-  - #1510: Left/right are swapped for south and east headings, and N/S lateral
-           moves are incorrectly gated by an east/west wall check.
-
-The grid and its wall layout used in assertions:
-
-    +---------+
-    |R: | : :G|   row 0
-    | : | : : |   row 1
-    | : : : : |   row 2
-    | | : | : |   row 3
-    |Y| : |B: |   row 4
-    +---------+
-      0 1 2 3 4   col
-
-Interior east walls (positions where moving east is blocked):
-    (0,1)→(0,2), (1,1)→(1,2), (3,0)→(3,1), (3,2)→(3,3),
-    (4,0)→(4,1), (4,2)→(4,3)
-"""
-
 import pytest
 
 from gymnasium.envs.toy_text.taxi import TaxiEnv
+
+
+def test_taxi_action_mask():
+    env = TaxiEnv()
+
+    for state in env.P:
+        mask = env.action_mask(state)
+        for action, possible in enumerate(mask):
+            _, next_state, _, _ = env.P[state][action][0]
+            if possible:
+                assert state != next_state
+            else:
+                assert state == next_state
+
+
+def test_taxi_encode_decode_roundtrip():
+    env = TaxiEnv()
+
+    for state in env.P:
+        assert env.encode(*env.decode(state)) == state
+
+
+@pytest.mark.parametrize("is_rainy", [False, True])
+def test_taxi_disallowed_transitions(is_rainy):
+    """No transition in P crosses an interior wall, with or without `is_rainy`."""
+    disallowed_transitions = {
+        ((0, 1), (0, 3)),
+        ((0, 3), (0, 1)),
+        ((1, 0), (1, 2)),
+        ((1, 2), (1, 0)),
+        ((3, 1), (3, 3)),
+        ((3, 3), (3, 1)),
+        ((3, 3), (3, 5)),
+        ((3, 5), (3, 3)),
+        ((4, 1), (4, 3)),
+        ((4, 3), (4, 1)),
+        ((4, 3), (4, 5)),
+        ((4, 5), (4, 3)),
+    }
+    env = TaxiEnv(is_rainy=is_rainy)
+
+    for state, state_dict in env.P.items():
+        start_row, start_col, _, _ = env.decode(state)
+        for transitions in state_dict.values():
+            for _, new_state, _, _ in transitions:
+                end_row, end_col, _, _ = env.decode(new_state)
+                assert (
+                    (start_row, start_col),
+                    (end_row, end_col),
+                ) not in disallowed_transitions
+
+
+@pytest.mark.parametrize(
+    "kwargs,movement_probs",
+    [
+        pytest.param({}, [1.0], id="dry"),
+        pytest.param({"is_rainy": True}, [0.8, 0.1, 0.1], id="rainy"),
+        pytest.param(
+            {"is_rainy": True, "rainy_probability": 0.5},
+            [0.5, 0.25, 0.25],
+            id="rainy-p=0.5",
+        ),
+        pytest.param(
+            {"is_rainy": True, "rainy_probability": 1.0},
+            [1.0, 0.0, 0.0],
+            id="rainy-p=1.0",
+        ),
+    ],
+)
+def test_transition_probabilities(kwargs, movement_probs):
+    """Every (state, action) entry in P has the expected probability tuple.
+
+    Movement actions (0-3) carry `movement_probs` (ordering: ahead, left, right).
+    Pickup/dropoff (4, 5) always carry [1.0]. `fickle_passenger` does not touch
+    P — its cases here just confirm the tunable rainy behaviour is unaffected.
+    """
+    env = TaxiEnv(**kwargs)
+    for state_dict in env.P.values():
+        for action, transitions in state_dict.items():
+            probs = [t[0] for t in transitions]
+            expected = movement_probs if action <= 3 else [1.0]
+            assert probs == pytest.approx(expected)
+
+
+@pytest.mark.parametrize(
+    "kwargs,valid_probs",
+    [
+        pytest.param({}, [1.0], id="dry"),
+        pytest.param({"is_rainy": True}, [0.8, 0.1], id="rainy"),
+    ],
+)
+def test_step_info_prob(kwargs, valid_probs):
+    """`info["prob"]` returned from step() matches one of the P-branch probabilities."""
+    env = TaxiEnv(**kwargs)
+    env.reset()
+    _, _, _, _, info = env.step(0)
+    assert any(info["prob"] == pytest.approx(p) for p in valid_probs)
 
 
 def _lateral_positions(env, row, col, action, pass_idx=0, dest_idx=1):
@@ -48,121 +121,69 @@ def rainy_env():
     return TaxiEnv(is_rainy=True)
 
 
-def test_rainy_lateral_south_left_is_east_right_is_west(rainy_env):
-    """Moving south: left neighbour is to the east, right is to the west."""
-    ahead, left, right = _lateral_positions(rainy_env, row=1, col=3, action=0)
-    assert ahead == (2, 3)
-    assert left == (1, 4), f"left of south should be east (1, 4), got {left}"
-    assert right == (1, 2), f"right of south should be west (1, 2), got {right}"
+@pytest.mark.parametrize(
+    "row,col,action,ahead,left,right",
+    [
+        # Directional convention: left/right relative to heading, from (1, 3).
+        #   south → left=east,  right=west
+        #   north → left=west,  right=east
+        #   east  → left=north, right=south
+        #   west  → left=south, right=north
+        pytest.param(1, 3, 0, (2, 3), (1, 4), (1, 2), id="south-lateral"),
+        pytest.param(1, 3, 1, (0, 3), (1, 2), (1, 4), id="north-lateral"),
+        pytest.param(1, 3, 2, (1, 4), (0, 3), (2, 3), id="east-lateral"),
+        pytest.param(1, 3, 3, (1, 2), (2, 3), (0, 3), id="west-lateral"),
+        # wall variant: N/S lateral must not be gated by the E/W wall check.
+        # At (1, 4) going west, the south lateral to (2, 4) is open even though the
+        # outer grid wall sits at desc[*, 10]; at (2, 1) going east, the north
+        # lateral to (1, 1) is open even though desc[2, 4] = '|' (east wall).
+        pytest.param(
+            1, 4, 3, (1, 3), (2, 4), (0, 4), id="west-south-lateral-at-right-edge"
+        ),
+        pytest.param(
+            2, 1, 2, (2, 2), (1, 1), (3, 1), id="east-north-lateral-past-east-wall"
+        ),
+        # when the primary move is blocked (wall or boundary), no drift.
+        pytest.param(4, 3, 0, (4, 3), (4, 3), (4, 3), id="south-boundary-blocked"),
+        pytest.param(0, 3, 1, (0, 3), (0, 3), (0, 3), id="north-boundary-blocked"),
+        pytest.param(0, 1, 2, (0, 1), (0, 1), (0, 1), id="east-wall-blocked"),
+        # Lateral that would pass through an interior wall stays put.
+        # At (0, 2) going south, the west lateral to (0, 1) is blocked by
+        # desc[1, 4] = '|' while the primary and east lateral remain open.
+        pytest.param(
+            0, 2, 0, (1, 2), (0, 3), (0, 2), id="south-west-lateral-wall-blocked"
+        ),
+    ],
+)
+def test_rainy_transition_targets(rainy_env, row, col, action, ahead, left, right):
+    """Validate rainy (ahead, left, right) target cells across directional, wall, and boundary cases.
 
-
-def test_rainy_lateral_north_left_is_west_right_is_east(rainy_env):
-    """Moving north: left neighbour is to the west, right is to the east."""
-    ahead, left, right = _lateral_positions(rainy_env, row=1, col=3, action=1)
-    assert ahead == (0, 3)
-    assert left == (1, 2), f"left of north should be west (1, 2), got {left}"
-    assert right == (1, 4), f"right of north should be east (1, 4), got {right}"
-
-
-def test_rainy_lateral_east_left_is_north_right_is_south(rainy_env):
-    """Moving east: left neighbour is to the north, right is to the south."""
-    ahead, left, right = _lateral_positions(rainy_env, row=1, col=3, action=2)
-    assert ahead == (1, 4)
-    assert left == (0, 3), f"left of east should be north (0, 3), got {left}"
-    assert right == (2, 3), f"right of east should be south (2, 3), got {right}"
-
-
-def test_rainy_lateral_west_left_is_south_right_is_north(rainy_env):
-    """Moving west: left neighbour is to the south, right is to the north."""
-    ahead, left, right = _lateral_positions(rainy_env, row=1, col=3, action=3)
-    assert ahead == (1, 2)
-    assert left == (2, 3), f"left of west should be south (2, 3), got {left}"
-    assert right == (0, 3), f"right of west should be north (0, 3), got {right}"
-
-
-# ---------------------------------------------------------------------------
-# Issue #1510 (wall variant) — N/S lateral moves must not be gated by
-# east/west wall checks at the destination cell.
-#
-# When the primary action is east or west, the two lateral moves are
-# north and south.  North/south movement has no walls; only the grid
-# boundary can prevent it.  The offset-based wall check used for E/W
-# movement must not be applied here.
-# ---------------------------------------------------------------------------
-
-
-def test_rainy_west_south_lateral_not_blocked_at_right_edge(rainy_env):
-    """Taxi at (1, 4) moving west: the southward lateral to (2, 4) must be open.
-
-    The rightmost column has an outer wall at desc[*, 10].  An incorrect
-    east/west wall check on a south movement reads that boundary character
-    and spuriously blocks the move.
+    Covers left/right convention and N/S laterals not gated by E/W wall
+    checks, no lateral drift when the primary move is blocked, and
+    the lateral-into-interior-wall case.
     """
-    ahead, left, right = _lateral_positions(rainy_env, row=1, col=4, action=3)
-    assert ahead == (1, 3)
-    # left of west = south; (2, 4) is a valid cell with no wall between rows
-    assert left == (2, 4), (
-        f"south lateral from (1, 4) going west should reach (2, 4), got {left}"
-    )
-    assert right == (0, 4)
+    got_ahead, got_left, got_right = _lateral_positions(rainy_env, row, col, action)
+    assert got_ahead == ahead
+    assert got_left == left
+    assert got_right == right
 
 
-def test_rainy_east_north_lateral_not_blocked_by_upper_east_wall(rainy_env):
-    """Taxi at (2, 1) moving east: the northward lateral to (1, 1) must be open.
-
-    There is an east wall between (1, 1) and (1, 2), recorded in the desc as
-    desc[2, 4] = '|'.  An incorrect wall check reads this character when
-    testing whether the taxi can move north to (1, 1), and wrongly blocks it.
-    """
-    ahead, left, right = _lateral_positions(rainy_env, row=2, col=1, action=2)
-    assert ahead == (2, 2)
-    # left of east = north; row boundary is not an issue here
-    assert left == (1, 1), (
-        f"north lateral from (2, 1) going east should reach (1, 1), got {left}"
-    )
-    # right of east = south
-    assert right == (3, 1), (
-        f"south lateral from (2, 1) going east should reach (3, 1), got {right}"
-    )
-
-
-# ---------------------------------------------------------------------------
-# Issue #1509 — When the primary move is impossible, no lateral drift
-#
-# East/west primary moves blocked by an interior wall produce all three
-# transitions staying at the current cell (the if-block is skipped entirely).
-# North/south primary moves blocked by the grid boundary must behave the
-# same way: no lateral movement should occur.
-# ---------------------------------------------------------------------------
-
-
-def test_rainy_south_at_bottom_boundary_no_lateral_drift(rainy_env):
-    """Taxi at row 4 (bottom boundary) moving south: all outcomes stay put.
-
-    The primary south move is blocked by the grid edge.  Neither left nor
-    right lateral moves should be computed, matching the wall-blocked E/W
-    behaviour.
-    """
-    ahead, left, right = _lateral_positions(rainy_env, row=4, col=3, action=0)
-    assert ahead == (4, 3)
-    assert left == (4, 3), (
-        f"blocked south at boundary should not drift; left went to {left}"
-    )
-    assert right == (4, 3), (
-        f"blocked south at boundary should not drift; right went to {right}"
-    )
-
-
-def test_rainy_north_at_top_boundary_no_lateral_drift(rainy_env):
-    """Taxi at row 0 (top boundary) moving north: all outcomes stay put.
-
-    Same consistency requirement as the south-boundary case above.
-    """
-    ahead, left, right = _lateral_positions(rainy_env, row=0, col=3, action=1)
-    assert ahead == (0, 3)
-    assert left == (0, 3), (
-        f"blocked north at boundary should not drift; left went to {left}"
-    )
-    assert right == (0, 3), (
-        f"blocked north at boundary should not drift; right went to {right}"
-    )
+@pytest.mark.parametrize(
+    "fickle_probability,should_change",
+    [
+        pytest.param(1.0, True, id="p=1.0-always-changes"),
+        pytest.param(0.0, False, id="p=0.0-never-changes"),
+    ],
+)
+def test_fickle_probability_extremes(fickle_probability, should_change):
+    """Fickle at the extremes: p=1.0 always changes destination, p=0.0 never does."""
+    env = TaxiEnv(fickle_passenger=True, fickle_probability=fickle_probability)
+    env.reset(seed=0)
+    _, _, pass_idx, orig_dest_idx = env.decode(env.s)
+    env.s = env.encode(*env.locs[pass_idx], pass_idx, orig_dest_idx)
+    env.step(4)  # pickup at the passenger's source
+    # Movement direction that's guaranteed not to be a no-op from any source loc.
+    action = 0 if env.locs[pass_idx][0] == 0 else 1
+    state, *_ = env.step(action)
+    _, _, _, new_dest_idx = env.decode(state)
+    assert (new_dest_idx != orig_dest_idx) == should_change
