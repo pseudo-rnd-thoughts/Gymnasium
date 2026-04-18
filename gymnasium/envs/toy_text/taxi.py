@@ -217,15 +217,21 @@ class TaxiEnv(Env):
         new_state = self.encode(new_row, new_col, new_pass_idx, dest_idx)
         self.P[state][action].append((1.0, new_state, reward, terminated))
 
-    def _calc_new_position(self, row, col, movement, offset=0):
-        """Calculates the new position for a row and col to the movement."""
+    def _calc_new_position(self, row, col, movement):
+        """Calculates the new position for a row and col to the movement.
+
+        East/west moves are checked against the interior wall characters in
+        ``self.desc``; north/south moves have no walls so only the grid
+        boundary clamp applies.
+        """
         dr, dc = movement
         new_row = max(0, min(row + dr, self.max_row))
         new_col = max(0, min(col + dc, self.max_col))
-        if self.desc[1 + new_row, 2 * new_col + offset] == b":":
-            return new_row, new_col
-        else:  # Default to current position if not traversable
-            return row, col
+        if dc == 1 and self.desc[1 + new_row, 2 * new_col] != b":":
+            return row, col  # east wall blocks
+        if dc == -1 and self.desc[1 + new_row, 2 * new_col + 2] != b":":
+            return row, col  # west wall blocks
+        return new_row, new_col
 
     def _build_rainy_transitions(self, row, col, pass_idx, dest_idx, action):
         """Computes the next action for a state (row, col, pass_idx, dest_idx) and action for `is_rainy`."""
@@ -236,16 +242,25 @@ class TaxiEnv(Env):
         reward = -1  # default reward when there is no pickup/dropoff
         terminated = False
 
+        # (forward, left, right) relative to each heading.
+        # Left/right follow the standard navigation convention:
+        #   south → left=east,  right=west
+        #   north → left=west,  right=east
+        #   east  → left=north, right=south
+        #   west  → left=south, right=north
         moves = {
-            0: ((1, 0), (0, -1), (0, 1)),  # Down
-            1: ((-1, 0), (0, -1), (0, 1)),  # Up
-            2: ((0, 1), (1, 0), (-1, 0)),  # Right
-            3: ((0, -1), (1, 0), (-1, 0)),  # Left
+            0: ((1, 0), (0, 1), (0, -1)),  # Down  (south): left=east,  right=west
+            1: ((-1, 0), (0, -1), (0, 1)),  # Up   (north): left=west,  right=east
+            2: ((0, 1), (-1, 0), (1, 0)),   # Right (east):  left=north, right=south
+            3: ((0, -1), (1, 0), (-1, 0)),  # Left  (west):  left=south, right=north
         }
 
-        # Check if movement is allowed
+        # Check if the primary move is possible.  When it is not (wall or grid
+        # boundary), no lateral drift occurs either — consistent across all four
+        # directions.
         if (
-            action in {0, 1}
+            (action == 0 and row < self.max_row)
+            or (action == 1 and row > 0)
             or (action == 2 and self.desc[1 + row, 2 * col + 2] == b":")
             or (action == 3 and self.desc[1 + row, 2 * col] == b":")
         ):
@@ -253,7 +268,7 @@ class TaxiEnv(Env):
             new_row = max(0, min(row + dr, self.max_row))
             new_col = max(0, min(col + dc, self.max_col))
 
-            left_pos = self._calc_new_position(row, col, moves[action][1], offset=2)
+            left_pos = self._calc_new_position(row, col, moves[action][1])
             right_pos = self._calc_new_position(row, col, moves[action][2])
         elif action == 4:  # pickup
             new_pass_idx, reward = self._pickup(taxi_loc, new_pass_idx, reward)
