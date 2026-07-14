@@ -14,7 +14,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.png"/><!-- Generated with Sphinx 7.4.7 and Furo 2023.08.19.dev1 -->
         <title>Lunar Lander - Gymnasium Documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=3e7f4c72" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=5b1a364e" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=61a4c737" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
@@ -453,9 +453,8 @@ force applied to its center of mass.</p>
 <ol class="arabic simple">
 <li><p>the lander crashes (the lander body gets in contact with the moon);</p></li>
 <li><p>the lander gets outside of the viewport (<code class="docutils literal notranslate"><span class="pre">x</span></code> coordinate is greater than 1);</p></li>
-<li><p>the lander is not awake. From the <a class="reference external" href="https://box2d.org/documentation/md__d_1__git_hub_box2d_docs_dynamics.html#autotoc_md61">Box2D docs</a>,
-a body which is not awake is a body which doesn’t move and doesn’t
-collide with any other body:</p></li>
+<li><p>the lander is not awake. From the <a class="reference external" href="https://box2d.org/documentation/md_simulation.html">Box2D docs</a>,
+a body which is not awake is a body which doesn’t move and doesn’t collide with any other body:</p></li>
 </ol>
 <blockquote>
 <div><p>When Box2D determines that a body (or group of bodies) has come to rest,
@@ -689,7 +688,7 @@ This in turn results in an orientation dependent torque being applied to the lan
         })()
       </script>
 
-    <script src="../../../_static/documentation_options.js?v=c9fd93b6"></script>
+    <script src="../../../_static/documentation_options.js?v=0559ecf3"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=7660844c"></script>
@@ -755,14 +754,6 @@ This in turn results in an orientation dependent torque being applied to the lan
         const jsonResponse = xhr.response;
         const sections = {
           "Core Projects": [],
-          "Mature Projects": {
-            "Documentation": [],
-            "Repositories": [],
-          },
-          "Incubating Projects": {
-            "Documentation": [],
-            "Repositories": [],
-          },
           "Foundation": [
             {
               name: "About",
@@ -776,7 +767,14 @@ This in turn results in an orientation dependent torque being applied to the lan
               name: "Donate",
               link: "https://farama.org/donations"
             }
-          ]
+          ],
+          "Mature Projects": {
+            "Documentation": [],
+          },
+          "Incubating Projects": {
+            "Documentation": [],
+            "Repositories": [],
+          }
         }
 
         // Categorize projects
@@ -792,8 +790,6 @@ This in turn results in an orientation dependent torque being applied to the lan
           } else if (projectJson.type == "mature") {
             if (projectJson.website !== null) {
               sections["Mature Projects"]["Documentation"].push(projectJson)
-            } else {
-              sections["Mature Projects"]["Repositories"].push(projectJson)
             }
           } else {
             if (projectJson.website !== null) {
@@ -805,6 +801,13 @@ This in turn results in an orientation dependent torque being applied to the lan
         })
 
         const menuContainer = document.querySelector(".farama-header-menu__body");
+
+        const stackedColumnElem = Object.assign(
+          document.createElement('div'), {
+            style: 'display: flex; flex-direction: column;'
+          }
+        );
+        const stackedKeys = new Set(["Core Projects", "Foundation"]);
 
         Object.keys(sections).forEach((key, i) => {
           const sectionElem = Object.assign(
@@ -849,7 +852,14 @@ This in turn results in an orientation dependent torque being applied to the lan
             const ulElem = createProjectsList(projects, true);
             sectionElem.appendChild(ulElem);
           }
-          menuContainer.appendChild(sectionElem)
+          if (stackedKeys.has(key)) {
+            if (!stackedColumnElem.parentNode) {
+              menuContainer.appendChild(stackedColumnElem);
+            }
+            stackedColumnElem.appendChild(sectionElem);
+          } else {
+            menuContainer.appendChild(sectionElem);
+          }
         });
       }
 

@@ -14,7 +14,7 @@
     <link rel="shortcut icon" href="../../_static/favicon.png"/><!-- Generated with Sphinx 7.4.7 and Furo 2023.08.19.dev1 -->
         <title>External Environments - Gymnasium Documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=3e7f4c72" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=5b1a364e" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
@@ -450,11 +450,12 @@ goal-RL (<a class="reference external" href="https://robotics.farama.org/">Gymna
 <section id="cybersecurity-environments">
 <h3>Cybersecurity environments<a class="headerlink" href="#cybersecurity-environments" title="Link to this heading">¶</a></h3>
 <p><em>Interacting with systems and cybersecurity tools.</em></p>
-<ul class="simple">
+<ul>
 <li><p><a class="reference external" href="https://github.com/j-klawson/security-gym">Security-Gym</a>
-<a class="reference external" href="https://gymnasium.farama.org/"><img alt="Gymnasium" src="https://img.shields.io/badge/Gymnasium-%E2%89%A51.0.0-blue" /></a></p></li>
-</ul>
+<a class="reference external" href="https://gymnasium.farama.org/"><img alt="Gymnasium" src="https://img.shields.io/badge/Gymnasium-%E2%89%A51.0.0-blue" /></a></p>
 <p>A gymnasium environment that sends continuous Linux server log data and kernel events to simulate an environment where an agent runs continually on the Linux server. The action space supports actions an agent can take to react to cybersecurity attacks on the server.</p>
+</li>
+</ul>
 </section>
 <section id="economic-financial-environments">
 <h3>Economic / Financial environments<a class="headerlink" href="#economic-financial-environments" title="Link to this heading">¶</a></h3>
@@ -463,12 +464,17 @@ goal-RL (<a class="reference external" href="https://robotics.farama.org/">Gymna
 <li><p><a class="reference external" href="https://github.com/AminHP/gym-anytrading">gym-anytrading: Financial trading environments for FOREX and STOCKS</a></p>
 <p>AnyTrading is a collection of Gym environments for reinforcement learning-based trading algorithms with a great focus on simplicity, flexibility, and comprehensiveness.</p>
 </li>
+<li><p><a class="reference external" href="https://github.com/r2barati/gym-invmgmt">gym-invmgmt: Inventory management and supply chain optimization environments</a></p>
+<p><img alt="Gymnasium version dependency" src="https://img.shields.io/badge/Gymnasium-%3E%3D0.26.0-blue" />
+<img alt="GitHub stars" src="https://img.shields.io/github/stars/r2barati/gym-invmgmt" /></p>
+<p>gym-invmgmt provides Gymnasium-compatible multi-echelon inventory-management environments for supply-chain optimization research. It includes configurable network topologies, production capacities, lead times, backlog penalties, non-stationary demand generation, YAML-defined custom networks, and tools for evaluating optimization, heuristic, and reinforcement-learning controllers.</p>
+</li>
 <li><p><a class="reference external" href="https://github.com/AminHP/gym-mtsim">gym-mtsim: Financial trading for MetaTrader 5 platform</a></p>
 <p>MtSim is a simulator for the <a class="reference external" href="https://www.metatrader5.com/">MetaTrader 5</a> trading platform for reinforcement learning-based trading algorithms.</p>
 </li>
-<li><p><a class="reference external" href="https://gym-trading-env.readthedocs.io/">gym-trading-env: Trading Environment</a></p>
+<li><p><a class="reference external" href="https://gym-trading-env.readthedocs.io/en/latest/">gym-trading-env: Trading Environment</a></p>
 <p><img alt="Gymnasium version dependency" src="https://img.shields.io/badge/Gymnasium-v0.28.1-blue" />
-<img alt="Github stars" src="https://img.shields.io/github/stars/ClementPerroud/Gym-Trading-Env" /></p>
+<img alt="GitHub stars" src="https://img.shields.io/github/stars/ClementPerroud/Gym-Trading-Env" /></p>
 <p>Gym Trading Env simulates stock (or crypto) market from historical data. It was designed to be fast and easily customizable.</p>
 </li>
 </ul>
@@ -497,7 +503,7 @@ goal-RL (<a class="reference external" href="https://robotics.farama.org/">Gymna
 </section>
 <section id="game-environments">
 <h3>Game environments<a class="headerlink" href="#game-environments" title="Link to this heading">¶</a></h3>
-<p><em>Board Games, Video Games and all other interactive entrainment mediums.</em></p>
+<p><em>Board Games, Video Games and all other interactive entertainment mediums.</em></p>
 <ul>
 <li><p><a class="reference external" href="https://github.com/markov-labs/RL-Minesweeper">Advanced Minesweeper Environment</a></p>
 <p><img alt="Gymnasium version dependency" src="https://img.shields.io/badge/Gymnasium-v1.1.1-blue" />
@@ -591,6 +597,11 @@ goal-RL (<a class="reference external" href="https://robotics.farama.org/">Gymna
 <img alt="GitHub stars" src="https://img.shields.io/github/stars/JacopoPan/aerial-autonomy-stack" /></p>
 <p>Multi-drone PX4 and ArduPilot ROS2 control of quadrotors and VTOL planes in Gazebo Sim, with YOLO, LiDAR, Dockerized Gym simulation, and JetPack deployment.</p>
 </li>
+<li><p><a class="reference external" href="https://github.com/ARRC-Rocket/BalloonPoppingChallenge">Balloon Popping Challenge: A 6-DoF Rocket GNC Simulation Gymnasium Environment</a></p>
+<p><img alt="Gymnasium version dependency" src="https://img.shields.io/badge/Gymnasium-v1.2.3-blue" />
+<img alt="GitHub stars" src="https://img.shields.io/github/stars/ARRC-Rocket/BalloonPoppingChallenge" /></p>
+<p>Balloon Popping Challenge is a 6-DoF rocket guidance, navigation, and control (GNC) simulation environment. The environment is designed to simulate an active controlled rocket to pop balloons scattered in the sky. The simulator incorporates realistic physics, including atmospheric conditions and rocket dynamics, to provide a challenging platform for developing and testing GNC algorithms. This project is based on <a class="reference external" href="https://github.com/ARRC-Rocket/BalloonPoppingChallenge">ActiveRocketPy</a>, a fork of open-source software <a class="reference external" href="https://github.com/RocketPy-Team/RocketPy">RocketPy</a>.</p>
+</li>
 <li><p><a class="reference external" href="https://avslab.github.io/bsk_rl/">BSK-RL: Environments for Spacecraft Planning and Scheduling</a></p>
 <p><img alt="Gymnasium version dependency" src="https://img.shields.io/badge/Gymnasium-v0.28.1-blue" />
 <img alt="GitHub stars" src="https://img.shields.io/github/stars/AVSLab/bsk_rl" /></p>
@@ -598,6 +609,11 @@ goal-RL (<a class="reference external" href="https://robotics.farama.org/">Gymna
 </li>
 <li><p><a class="reference external" href="https://github.com/lucasBertola/Connect-4-Gym-env-Reinforcement-learning">Connect-4-gym : An environment for practicing self playing</a></p>
 <p>Connect-4-Gym is an environment designed for creating AIs that learn by playing against themselves and assigning them an Elo rating. This environment can be used to train and evaluate reinforcement learning agents on the classic board game Connect Four.</p>
+</li>
+<li><p><a class="reference external" href="https://github.com/dfki-ric/deformable_gym">deformable_gym: RL environments for grasping deformable objects</a></p>
+<p>A collection of gymnasium environments for learning to grasp 3D deformable objects built with PyBullet and Mujoco.</p>
+<p><img alt="Gymnasium version dependency" src="https://img.shields.io/badge/Gymnasium-v1.0.0-blue" />
+<img alt="GitHub stars" src="https://img.shields.io/github/stars/dfki-ric/deformable_gym" /></p>
 </li>
 <li><p><a class="reference external" href="https://github.com/GongXudong/fly-craft">FlyCraft: A Fixed-wing UAV Environment</a></p>
 <p><img alt="Gymnasium version dependency" src="https://img.shields.io/badge/Gymnasium-v0.28.1-blue" />
@@ -612,7 +628,7 @@ goal-RL (<a class="reference external" href="https://robotics.farama.org/">Gymna
 <img alt="GitHub stars" src="https://img.shields.io/github/stars/duburcqa/jiminy" /></p>
 <p>gym-jiminy presents an extension of the initial Gym for robotics using <a class="reference external" href="https://github.com/duburcqa/jiminy">Jiminy</a>, an extremely fast and light-weight simulator for poly-articulated systems using Pinocchio for physics evaluation and Meshcat for web-based 3D rendering.</p>
 </li>
-<li><p><a class="reference external" href="https://github.com/JacopoPan/gym-pybullet-drones">gym-pybullet-drones: Environments for quadcopter control</a></p>
+<li><p><a class="reference external" href="https://github.com/utiasDSL/gym-pybullet-drones">gym-pybullet-drones: Environments for quadcopter control</a></p>
 <p><img alt="Gymnasium version dependency" src="https://img.shields.io/badge/Gymnasium-v1.2.2-blue" />
 <img alt="GitHub stars" src="https://img.shields.io/github/stars/JacopoPan/gym-pybullet-drones" /></p>
 <p>A simple environment using <a class="reference external" href="https://github.com/bulletphysics/bullet3">PyBullet</a> to simulate the dynamics of a <a class="reference external" href="https://www.bitcraze.io/documentation/hardware/crazyflie_2_1/crazyflie_2_1-datasheet.pdf">Bitcraze Crazyflie 2.x</a> nanoquadrotor.</p>
@@ -627,20 +643,25 @@ goal-RL (<a class="reference external" href="https://robotics.farama.org/">Gymna
 <img alt="GitHub stars" src="https://img.shields.io/github/stars/gustavo-moura/itomori" /></p>
 <p>Itomori is an environment for risk-aware UAV flight, it provides tools to solve Chance-Constrained Markov Decision Processes (CCMDP). The env allows to simulate, visualize, and evaluate UAV navigation in complex and risky environments, incorporating variables like GPS uncertainty, collision risk, and adaptive flight planning. Itomori is intended to support UAV path-planning research by offering adjustable parameters, detailed visualizations, and insights into agent behavior in uncertain environments.</p>
 </li>
+<li><p><a class="reference external" href="https://github.com/markub3327/MarsExplorer-Gymnasium">MarsExplorer-Gymnasium: Gymnasium-compatible Mars rover exploration environment</a></p>
+<p><img alt="Gymnasium version dependency" src="https://img.shields.io/badge/Gymnasium-v1.2.3-blue" />
+<img alt="GitHub stars" src="https://img.shields.io/github/stars/markub3327/MarsExplorer-Gymnasium" /></p>
+<p>MarsExplorer-Gymnasium is a fully Gymnasium-compatible environment for autonomous Mars rover exploration. It enables research on terrain coverage, navigation, and exploration efficiency in unknown, procedurally generated landscapes, supporting modern deep reinforcement learning algorithms through the standard Gymnasium API.</p>
+</li>
 <li><p><a class="reference external" href="https://github.com/kuds/mesozoic-labs">Mesozoic Labs: Robotic Dinosaur Locomotion</a></p>
 <p><img alt="Gymnasium version dependency" src="https://img.shields.io/badge/Gymnasium-v1.2.1-blue" />
 <img alt="GitHub stars" src="https://img.shields.io/github/stars/kuds/mesozoic-labs" /></p>
 <p>Mesozoic Labs is a reinforcement learning research project that trains robotic dinosaurs (Velociraptor, T-Rex, Brachiosaurus) to walk, run, and hunt using MuJoCo physics simulation, curriculum learning, and algorithms like PPO and SAC.</p>
 </li>
-<li><p><a class="reference external" href="https://github.com/NVIDIA-Omniverse/OmniIsaacGymEnvs/">OmniIsaacGymEnvs: Gym environments for NVIDIA Omniverse Isaac </a></p>
-<p>Reinforcement Learning Environments for <a class="reference external" href="https://docs.omniverse.nvidia.com/app_isaacsim/app_isaacsim/overview.html">Omniverse Isaac simulator</a>.</p>
+<li><p><a class="reference external" href="https://github.com/isaac-sim/OmniIsaacGymEnvs">OmniIsaacGymEnvs: Gym environments for NVIDIA Omniverse Isaac</a></p>
+<p>Reinforcement Learning Environments for <a class="reference external" href="https://developer.nvidia.com/isaac/sim">Omniverse Isaac simulator</a>.</p>
 </li>
 <li><p><a class="reference external" href="https://github.com/qgallouedec/panda-gym/">panda-gym: Robotics environments using the PyBullet physics engine</a></p>
 <p><img alt="Gymnasium version dependency" src="https://img.shields.io/badge/Gymnasium-v0.26.3-blue" />
 <img alt="GitHub stars" src="https://img.shields.io/github/stars/qgallouedec/panda-gym" /></p>
 <p>PyBullet based simulations of a robotic arm moving objects.</p>
 </li>
-<li><p><a class="reference external" href="https://jjshoots.github.io/PyFlyt/index.html#">PyFlyt: UAV Flight Simulator Environments for Reinforcement Learning Research</a></p>
+<li><p><a class="reference external" href="https://taijunjet.com/PyFlyt/index.html">PyFlyt: UAV Flight Simulator Environments for Reinforcement Learning Research</a></p>
 <p>A library for testing reinforcement learning algorithms on various UAVs.
 It is built on the <a class="reference external" href="https://github.com/bulletphysics/bullet3">Bullet</a> physics engine, offers flexible rendering options, time-discrete steppable physics, Python bindings, and support for custom drones of any configuration, be it biplanes, quadcopters, rockets, and anything you can think of.</p>
 </li>
@@ -651,20 +672,20 @@ It is built on the <a class="reference external" href="https://github.com/bullet
 <li><p><a class="reference external" href="https://github.com/utiasDSL/safe-control-gym">safe-control-gym: Evaluate safety of RL algorithms</a></p>
 <p>Evaluate safety, robustness and generalization via PyBullet based CartPole and Quadrotor environments—with <a class="reference external" href="https://web.casadi.org">CasADi</a> (symbolic) <em>a priori</em> dynamics and constraints.</p>
 </li>
-<li><p><a class="reference external" href="https://github.com/PKU-MARL/safety-gymnasium">Safety-Gymnasium: Ensuring safety in real-world RL scenarios</a></p>
+<li><p><a class="reference external" href="https://github.com/PKU-Alignment/safety-gymnasium">Safety-Gymnasium: Ensuring safety in real-world RL scenarios</a></p>
 <p><img alt="Gymnasium version dependency" src="https://img.shields.io/badge/Gymnasium-v0.28.1-blue" />
 <img alt="GitHub stars" src="https://img.shields.io/github/stars/PKU-MARL/safety-gymnasium" /></p>
 <p>Highly scalable and customizable Safe Reinforcement Learning library.</p>
 </li>
-<li><p><a class="reference external" href="https://github.com/dfki-ric/deformable_gym">deformable_gym: RL environments for grasping deformable objects</a></p>
-<p>A collection of gymnasium environments for learning to grasp 3D deformable objects built with PyBullet and Mujoco.</p>
-<p><img alt="Gymnasium version dependency" src="https://img.shields.io/badge/Gymnasium-v1.0.0-blue" />
-<img alt="GitHub stars" src="https://img.shields.io/github/stars/dfki-ric/deformable_gym" /></p>
+<li><p><a class="reference external" href="https://github.com/ludwigstr/WireHarness-MultiAgent-RL">WireHarness-MultiAgent-RL: Centralized multi-robot wire handling in MuJoCo</a></p>
+<p><img alt="Gymnasium version dependency" src="https://img.shields.io/badge/Gymnasium-%3E%3D0.29-blue" />
+<img alt="GitHub stars" src="https://img.shields.io/github/stars/ludwigstr/WireHarness-MultiAgent-RL" /></p>
+<p>MuJoCo-based Gymnasium environment for centralized multi-robot wire handling. A single policy controls five planar movers via a joint action space to navigate cable harnesses to target configurations on an assembly board without causing collisions.</p>
 </li>
-<li><p><a class="reference external" href="https://github.com/markub3327/MarsExplorer-Gymnasium">MarsExplorer-Gymnasium: Gymnasium-compatible Mars rover exploration environment</a></p>
-<p><img alt="Gymnasium version dependency" src="https://img.shields.io/badge/Gymnasium-v1.2.3-blue" />
-<img alt="GitHub stars" src="https://img.shields.io/github/stars/markub3327/MarsExplorer-Gymnasium" /></p>
-<p>MarsExplorer-Gymnasium is a fully Gymnasium-compatible environment for autonomous Mars rover exploration. It enables research on terrain coverage, navigation, and exploration efficiency in unknown, procedurally generated landscapes, supporting modern deep reinforcement learning algorithms through the standard Gymnasium API.</p>
+<li><p><a class="reference external" href="https://github.com/KishanThummar007/WireHarness-MultiGripper-RL">WireHarness-MultiGripper-RL: Multi-branch wire-harness picking with a multi-gripper in MuJoCo</a></p>
+<p><img alt="Gymnasium version dependency" src="https://img.shields.io/badge/Gymnasium-%3E%3D1.0-blue" />
+<img alt="GitHub stars" src="https://img.shields.io/github/stars/KishanThummar007/WireHarness-MultiGripper-RL" /></p>
+<p>MuJoCo-based Gymnasium environment with deformable cable physics for robotic wire-harness picking. A multi-gripper end-effector navigates a dense multi-branch harness to reach and grasp connector housings while minimizing induced wire stress and collisions.</p>
 </li>
 </ul>
 </section>
@@ -733,7 +754,7 @@ The suite includes a diverse set of tasks exposing RL algorithms to a variety of
 <section id="third-party-environments-using-gym">
 <h2>Third-Party Environments using Gym<a class="headerlink" href="#third-party-environments-using-gym" title="Link to this heading">¶</a></h2>
 <p>There are a large number of third-party environments using various versions of <a class="reference external" href="https://github.com/openai/gym">Gym</a>.
-Many of these can be adapted to work with gymnasium (see <a class="reference external" href="https://gymnasium.farama.org/content/gym_compatibility/">Compatibility with Gym</a>), but are not guaranteed to be fully functional.</p>
+Many of these can be adapted to work with gymnasium (see <a class="reference external" href="https://gymnasium.farama.org/introduction/migration_guide/">Compatibility with Gym</a>), but are not guaranteed to be fully functional.</p>
 <section id="video-game-environments">
 <h3>Video Game environments<a class="headerlink" href="#video-game-environments" title="Link to this heading">¶</a></h3>
 <ul>
@@ -747,7 +768,7 @@ Many of these can be adapted to work with gymnasium (see <a class="reference ext
 <p>Gym (and PettingZoo) wrappers for arbitrary and premade environments with the Unity game engine.</p>
 </li>
 <li><p><a class="reference external" href="https://github.com/222464/PGE">PGE: Parallel Game Engine</a></p>
-<p>Uses The <a class="reference external" href="https://www.o3de.org/">Open 3D Engine</a> for AI simulations and can interoperate with the Gym. Uses <a class="reference external" href="https://github.com/bulletphysics/bullet3">PyBullet</a> physics.</p>
+<p>Uses The <a class="reference external" href="https://o3de.org">Open 3D Engine</a> for AI simulations and can interoperate with the Gym. Uses <a class="reference external" href="https://github.com/bulletphysics/bullet3">PyBullet</a> physics.</p>
 </li>
 </ul>
 </section>
@@ -778,7 +799,7 @@ Many of these can be adapted to work with gymnasium (see <a class="reference ext
 <h3>Autonomous Driving environments<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
 <ul>
 <li><p><a class="reference external" href="https://github.com/duckietown/gym-duckietown">gym-duckietown: Lane-following for self-driving cars</a></p>
-<p>A lane-following simulator built for the <a class="reference external" href="http://duckietown.org/">Duckietown</a> project (small-scale self-driving car course).</p>
+<p>A lane-following simulator built for the <a class="reference external" href="https://duckietown.com/">Duckietown</a> project (small-scale self-driving car course).</p>
 </li>
 <li><p><a class="reference external" href="https://commonroad.in.tum.de/tools/commonroad-rl">CommonRoad-RL: Motion planning for traffic scenarios </a></p>
 <p>A Gym for solving motion planning problems for various traffic scenarios compatible with <a class="reference external" href="https://commonroad.in.tum.de/scenarios">CommonRoad benchmarks</a>, which provides configurable rewards, action spaces, and observation spaces.</p>
@@ -995,7 +1016,7 @@ Many of these can be adapted to work with gymnasium (see <a class="reference ext
         })()
       </script>
 
-    <script src="../../_static/documentation_options.js?v=c9fd93b6"></script>
+    <script src="../../_static/documentation_options.js?v=0559ecf3"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=7660844c"></script>
@@ -1059,14 +1080,6 @@ Many of these can be adapted to work with gymnasium (see <a class="reference ext
         const jsonResponse = xhr.response;
         const sections = {
           "Core Projects": [],
-          "Mature Projects": {
-            "Documentation": [],
-            "Repositories": [],
-          },
-          "Incubating Projects": {
-            "Documentation": [],
-            "Repositories": [],
-          },
           "Foundation": [
             {
               name: "About",
@@ -1080,7 +1093,14 @@ Many of these can be adapted to work with gymnasium (see <a class="reference ext
               name: "Donate",
               link: "https://farama.org/donations"
             }
-          ]
+          ],
+          "Mature Projects": {
+            "Documentation": [],
+          },
+          "Incubating Projects": {
+            "Documentation": [],
+            "Repositories": [],
+          }
         }
 
         // Categorize projects
@@ -1096,8 +1116,6 @@ Many of these can be adapted to work with gymnasium (see <a class="reference ext
           } else if (projectJson.type == "mature") {
             if (projectJson.website !== null) {
               sections["Mature Projects"]["Documentation"].push(projectJson)
-            } else {
-              sections["Mature Projects"]["Repositories"].push(projectJson)
             }
           } else {
             if (projectJson.website !== null) {
@@ -1109,6 +1127,13 @@ Many of these can be adapted to work with gymnasium (see <a class="reference ext
         })
 
         const menuContainer = document.querySelector(".farama-header-menu__body");
+
+        const stackedColumnElem = Object.assign(
+          document.createElement('div'), {
+            style: 'display: flex; flex-direction: column;'
+          }
+        );
+        const stackedKeys = new Set(["Core Projects", "Foundation"]);
 
         Object.keys(sections).forEach((key, i) => {
           const sectionElem = Object.assign(
@@ -1153,7 +1178,14 @@ Many of these can be adapted to work with gymnasium (see <a class="reference ext
             const ulElem = createProjectsList(projects, true);
             sectionElem.appendChild(ulElem);
           }
-          menuContainer.appendChild(sectionElem)
+          if (stackedKeys.has(key)) {
+            if (!stackedColumnElem.parentNode) {
+              menuContainer.appendChild(stackedColumnElem);
+            }
+            stackedColumnElem.appendChild(sectionElem);
+          } else {
+            menuContainer.appendChild(sectionElem);
+          }
         });
       }
 

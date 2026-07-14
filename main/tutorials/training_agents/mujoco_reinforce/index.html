@@ -14,7 +14,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.png"/><!-- Generated with Sphinx 7.4.7 and Furo 2023.08.19.dev1 -->
         <title>Training using REINFORCE for Mujoco - Gymnasium Documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=3e7f4c72" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=5b1a364e" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=61a4c737" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
@@ -379,7 +379,7 @@
             
             <div class="sphx-glr-example-title admonition note">
 <p class="admonition-title">Note</p>
-<p>This tutorial is compatible with Gymnasium version 1.2.3.</p>
+<p>This tutorial is compatible with Gymnasium version 1.3.0.</p>
 </div>
 <section id="training-using-reinforce-for-mujoco">
 <span id="sphx-glr-tutorials-training-agents-mujoco-reinforce-py"></span><h1>Training using REINFORCE for Mujoco<a class="headerlink" href="#training-using-reinforce-for-mujoco" title="Link to this heading">¶</a></h1>
@@ -611,15 +611,16 @@ Hence it is important to test out various seeds, which we will be doing.</p>
     <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
     <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
     <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;--------- Random Seed </span><span class="si">{</span><span class="n">seed</span><span class="si">}</span><span class="s2"> ---------&quot;</span><span class="p">)</span>
 
     <span class="c1"># Reinitialize agent every seed</span>
     <span class="n">agent</span> <span class="o">=</span> <span class="n">REINFORCE</span><span class="p">(</span><span class="n">obs_space_dims</span><span class="p">,</span> <span class="n">action_space_dims</span><span class="p">)</span>
     <span class="n">reward_over_episodes</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">for</span> <span class="n">episode</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">total_num_episodes</span><span class="p">):</span>
-        <span class="c1"># gymnasium v26 requires users to set seed while resetting the environment</span>
-        <span class="n">obs</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">wrapped_env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+    <span class="c1"># Reset the environment with set seed to obtain initial observation</span>
+    <span class="n">obs</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">wrapped_env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
 
+    <span class="k">for</span> <span class="n">episode</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">total_num_episodes</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
         <span class="n">done</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">while</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
             <span class="n">action</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">sample_action</span><span class="p">(</span><span class="n">obs</span><span class="p">)</span>
@@ -638,6 +639,7 @@ Hence it is important to test out various seeds, which we will be doing.</p>
             <span class="n">done</span> <span class="o">=</span> <span class="n">terminated</span> <span class="ow">or</span> <span class="n">truncated</span>
 
         <span class="n">reward_over_episodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wrapped_env</span><span class="o">.</span><span class="n">return_queue</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">obs</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">wrapped_env</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
         <span class="n">agent</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">episode</span> <span class="o">%</span> <span class="mi">1000</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -839,7 +841,7 @@ algorithms for connectionist reinforcement learning.” Machine Learning 8
         })()
       </script>
 
-    <script src="../../../_static/documentation_options.js?v=c9fd93b6"></script>
+    <script src="../../../_static/documentation_options.js?v=0559ecf3"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=7660844c"></script>
@@ -903,14 +905,6 @@ algorithms for connectionist reinforcement learning.” Machine Learning 8
         const jsonResponse = xhr.response;
         const sections = {
           "Core Projects": [],
-          "Mature Projects": {
-            "Documentation": [],
-            "Repositories": [],
-          },
-          "Incubating Projects": {
-            "Documentation": [],
-            "Repositories": [],
-          },
           "Foundation": [
             {
               name: "About",
@@ -924,7 +918,14 @@ algorithms for connectionist reinforcement learning.” Machine Learning 8
               name: "Donate",
               link: "https://farama.org/donations"
             }
-          ]
+          ],
+          "Mature Projects": {
+            "Documentation": [],
+          },
+          "Incubating Projects": {
+            "Documentation": [],
+            "Repositories": [],
+          }
         }
 
         // Categorize projects
@@ -940,8 +941,6 @@ algorithms for connectionist reinforcement learning.” Machine Learning 8
           } else if (projectJson.type == "mature") {
             if (projectJson.website !== null) {
               sections["Mature Projects"]["Documentation"].push(projectJson)
-            } else {
-              sections["Mature Projects"]["Repositories"].push(projectJson)
             }
           } else {
             if (projectJson.website !== null) {
@@ -953,6 +952,13 @@ algorithms for connectionist reinforcement learning.” Machine Learning 8
         })
 
         const menuContainer = document.querySelector(".farama-header-menu__body");
+
+        const stackedColumnElem = Object.assign(
+          document.createElement('div'), {
+            style: 'display: flex; flex-direction: column;'
+          }
+        );
+        const stackedKeys = new Set(["Core Projects", "Foundation"]);
 
         Object.keys(sections).forEach((key, i) => {
           const sectionElem = Object.assign(
@@ -997,7 +1003,14 @@ algorithms for connectionist reinforcement learning.” Machine Learning 8
             const ulElem = createProjectsList(projects, true);
             sectionElem.appendChild(ulElem);
           }
-          menuContainer.appendChild(sectionElem)
+          if (stackedKeys.has(key)) {
+            if (!stackedColumnElem.parentNode) {
+              menuContainer.appendChild(stackedColumnElem);
+            }
+            stackedColumnElem.appendChild(sectionElem);
+          } else {
+            menuContainer.appendChild(sectionElem);
+          }
         });
       }
 
