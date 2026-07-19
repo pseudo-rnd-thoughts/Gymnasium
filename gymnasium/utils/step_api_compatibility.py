@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import SupportsFloat
+from typing import SupportsFloat, cast
 
 import numpy as np
 
@@ -44,7 +44,7 @@ def convert_to_terminated_truncated_step_api(
 
         # Cases to handle - info single env /  info vector env (list) / info vector env (dict)
         if is_vector_env is False:
-            truncated = infos.pop("TimeLimit.truncated", False)  # ty:ignore[too-many-positional-arguments]
+            truncated = cast(dict, infos).pop("TimeLimit.truncated", False)
             return (
                 observations,
                 rewards,
@@ -64,7 +64,7 @@ def convert_to_terminated_truncated_step_api(
                 infos,
             )
         elif isinstance(infos, dict):
-            num_envs = len(dones)
+            num_envs = len(cast(np.ndarray, dones))
             truncated = infos.pop("TimeLimit.truncated", np.zeros(num_envs, dtype=bool))
             return (
                 observations,
@@ -100,7 +100,7 @@ def convert_to_done_step_api(
         # Cases to handle - info single env /  info vector env (list) / info vector env (dict)
         if is_vector_env is False:
             if truncated or terminated:
-                infos["TimeLimit.truncated"] = truncated and not terminated
+                cast(dict, infos)["TimeLimit.truncated"] = truncated and not terminated
             return (
                 observations,
                 rewards,
@@ -109,8 +109,11 @@ def convert_to_done_step_api(
             )
         elif isinstance(infos, list):
             for info, env_truncated, env_terminated in zip(
-                infos, truncated, terminated, strict=True
-            ):  # ty:ignore[not-iterable]
+                infos,
+                cast(np.ndarray, truncated),
+                cast(np.ndarray, terminated),
+                strict=True,
+            ):
                 if env_truncated or env_terminated:
                     info["TimeLimit.truncated"] = env_truncated and not env_terminated
             return (

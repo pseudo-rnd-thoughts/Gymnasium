@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Any, SupportsFloat
+from typing import Any, SupportsFloat, cast
 
 import numpy as np
 
 import gymnasium as gym
-from gymnasium.core import ActType, ObsType, WrapperActType, WrapperObsType
+from gymnasium.core import ActType, ObsType
 from gymnasium.error import InvalidBound, InvalidProbability
 
 __all__ = ["StickyAction", "RepeatAction"]
@@ -117,11 +117,14 @@ class StickyAction(
         ):
             # if a new series starts, randomly sample its duration
             if self.num_repeats == 0:
-                self.num_repeats = self.np_random.integers(
-                    self.repeat_action_duration_range[0],
-                    self.repeat_action_duration_range[1] + 1,
+                self.num_repeats = cast(
+                    int,
+                    self.np_random.integers(
+                        self.repeat_action_duration_range[0],
+                        self.repeat_action_duration_range[1] + 1,
+                    ),
                 )
-            action = self.last_action
+            action = cast(ActType, self.last_action)
             self.is_sticky_actions = True
             self.repeats_taken += 1
 
@@ -188,8 +191,8 @@ class RepeatAction(
         self.num_repeats = num_repeats
 
     def step(
-        self, action: WrapperActType
-    ) -> tuple[WrapperObsType, SupportsFloat, bool, bool, dict[str, Any]]:
+        self, action: ActType
+    ) -> tuple[ObsType, SupportsFloat, bool, bool, dict[str, Any]]:
         """Step the environment, repeating the action for ``num_repeats`` steps.
 
         The reward returned is the sum of rewards from all inner steps.

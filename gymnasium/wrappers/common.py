@@ -12,11 +12,11 @@ from __future__ import annotations
 import time
 from collections import deque
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, SupportsFloat
+from typing import TYPE_CHECKING, Any, SupportsFloat, cast
 
 import gymnasium as gym
 from gymnasium import logger
-from gymnasium.core import ActType, ObsType, RenderFrame, WrapperObsType
+from gymnasium.core import ActType, ObsType, RenderFrame
 from gymnasium.error import ResetNeeded
 from gymnasium.utils.passive_env_checker import (
     check_action_space,
@@ -111,7 +111,7 @@ class TimeLimit(
         gym.Wrapper.__init__(self, env)
 
         self._max_episode_steps = max_episode_steps
-        self._elapsed_steps = None
+        self._elapsed_steps: int | None = None
 
     def step(
         self, action: ActType
@@ -127,7 +127,7 @@ class TimeLimit(
 
         """
         observation, reward, terminated, truncated, info = self.env.step(action)
-        self._elapsed_steps += 1
+        self._elapsed_steps = cast(int, self._elapsed_steps) + 1
 
         if self._elapsed_steps >= self._max_episode_steps:
             truncated = True
@@ -195,7 +195,7 @@ class Autoreset(
 
     def reset(
         self, *, seed: int | None = None, options: dict[str, Any] | None = None
-    ) -> tuple[WrapperObsType, dict[str, Any]]:
+    ) -> tuple[ObsType, dict[str, Any]]:
         """Resets the environment and sets autoreset to False preventing."""
         self.autoreset = False
         return super().reset(seed=seed, options=options)
@@ -516,7 +516,7 @@ class RecordEpisodeStatistics(
         """Steps through the environment, recording the episode statistics."""
         obs, reward, terminated, truncated, info = super().step(action)
 
-        self.episode_returns += reward
+        self.episode_returns += cast(float, reward)
         self.episode_lengths += 1
 
         if terminated or truncated:

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections import deque
 from collections.abc import Callable, Iterable
-from typing import TYPE_CHECKING, Any, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast
 
 import numpy as np
 
@@ -36,7 +36,7 @@ try:
     import matplotlib.pyplot as plt
 except ImportError:
     logger.warn('matplotlib is not installed, run `pip install "gymnasium[other]"`')
-    matplotlib, plt = None, None
+    matplotlib, plt = None, None  # ty: ignore[invalid-assignment]
 
 
 _ObsT_contra = TypeVar("_ObsT_contra", contravariant=True)
@@ -56,7 +56,7 @@ class PlayableGame:
     original_video_size: tuple[int, int]
     video_size: tuple[int, int]
     screen: Surface
-    pressed_keys: list[int]
+    pressed_keys: set[int]
     running: bool
 
     def __init__(
@@ -359,7 +359,10 @@ def play(
                 rendered = rendered[-1]
             assert isinstance(rendered, np.ndarray)
             display_arr(
-                game.screen, rendered, transpose=transpose, video_size=game.video_size
+                game.screen,
+                cast(np.typing.NDArray[np.uint8], rendered),
+                transpose=transpose,
+                video_size=game.video_size,
             )
 
         # process pygame events

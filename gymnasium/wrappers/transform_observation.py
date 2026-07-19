@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Sequence
-from typing import Any, Final
+from typing import Any, Final, cast
 
 import numpy as np
 
@@ -146,6 +146,7 @@ class FilterObservation(
                 raise TypeError(
                     f"All filter keys must be strings for a Dict space, got {filter_keys}"
                 )
+            filter_keys = cast("Sequence[str]", filter_keys)
 
             if any(
                 key not in env.observation_space.spaces.keys() for key in filter_keys
@@ -182,6 +183,7 @@ class FilterObservation(
                 raise TypeError(
                     f"All filter keys must be integers for a Tuple space, got {filter_keys}"
                 )
+            filter_keys = cast("Sequence[int]", filter_keys)
             if len(set(filter_keys)) != len(filter_keys):
                 raise ValueError(f"Duplicate keys exist, filter_keys: {filter_keys}")
 
@@ -854,9 +856,13 @@ class DiscretizeObservation(
         ]
 
         if self.multidiscrete:
-            self.observation_space = spaces.MultiDiscrete(self.bins)
+            self.observation_space = cast(
+                "spaces.Space[WrapperObsType]", spaces.MultiDiscrete(self.bins)
+            )
         else:
-            self.observation_space = spaces.Discrete(np.prod(self.bins))
+            self.observation_space = cast(
+                "spaces.Space[WrapperObsType]", spaces.Discrete(np.prod(self.bins))
+            )
 
     def observation(self, observation):
         """Discretizes the observation."""

@@ -101,12 +101,15 @@ class FuncEnv(
 
     def transform(self, func: Callable[[Callable], Callable]):
         """Functional transformations."""
-        self.initial = func(self.initial)
-        self.transition = func(self.transition)
-        self.observation = func(self.observation)
-        self.reward = func(self.reward)
-        self.terminal = func(self.terminal)
-        self.state_info = func(self.state_info)
+        # Dynamically replace the bound methods with transformed callables. These
+        # per-instance reassignments of methods defined on the class cannot be
+        # expressed statically, so the invalid-assignment warnings are suppressed.
+        self.initial = func(self.initial)  # ty: ignore[invalid-assignment]
+        self.transition = func(self.transition)  # ty: ignore[invalid-assignment]
+        self.observation = func(self.observation)  # ty: ignore[invalid-assignment]
+        self.reward = func(self.reward)  # ty: ignore[invalid-assignment]
+        self.terminal = func(self.terminal)  # ty: ignore[invalid-assignment]
+        self.state_info = func(self.state_info)  # ty: ignore[invalid-assignment]
         self.step_info = func(self.transition_info)
 
     def render_image(
