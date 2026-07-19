@@ -16,10 +16,10 @@ from gymnasium.error import DependencyNotInstalled
 from gymnasium.vector import AutoresetMode, VectorEnv
 from gymnasium.vector.utils import batch_space
 
-_VecBool: TypeAlias = np.ndarray[tuple[int], np.dtype[np.bool_]]
-_VecInt: TypeAlias = np.ndarray[tuple[int], np.dtype[np.integer]]
-_VecF32: TypeAlias = np.ndarray[tuple[int], np.dtype[np.float32]]
-_MatF32: TypeAlias = np.ndarray[tuple[int, int], np.dtype[np.float32]]
+VectorBoolArray: TypeAlias = np.ndarray[tuple[int], np.dtype[np.bool_]]
+VectorIntArray: TypeAlias = np.ndarray[tuple[int], np.dtype[np.integer]]
+VectorFloat32Array: TypeAlias = np.ndarray[tuple[int], np.dtype[np.float32]]
+VectorFloat32Matrix: TypeAlias = np.ndarray[tuple[int, int], np.dtype[np.float32]]
 
 
 class CartPoleEnv(gym.Env[np.ndarray, int | np.ndarray]):
@@ -235,7 +235,7 @@ class CartPoleEnv(gym.Env[np.ndarray, int | np.ndarray]):
         *,
         seed: int | None = None,
         options: dict[str, Any] | None = None,
-    ) -> tuple[_VecF32, dict[str, Any]]:
+    ) -> tuple[VectorFloat32Array, dict[str, Any]]:
         super().reset(seed=seed)
         # Note that if you use custom reset bounds, it may lead to out-of-bound
         # state/observations.
@@ -357,7 +357,9 @@ class CartPoleEnv(gym.Env[np.ndarray, int | np.ndarray]):
             self.isopen = False
 
 
-class CartPoleVectorEnv(VectorEnv[_MatF32, _VecInt, _VecF32, _VecBool]):
+class CartPoleVectorEnv(
+    VectorEnv[VectorFloat32Matrix, VectorIntArray, VectorFloat32Array, VectorBoolArray]
+):
     metadata = {
         "render_modes": ["rgb_array"],
         "render_fps": 50,
@@ -424,8 +426,14 @@ class CartPoleVectorEnv(VectorEnv[_MatF32, _VecInt, _VecF32, _VecBool]):
         self.steps_beyond_terminated = None
 
     def step(
-        self, action: _VecInt
-    ) -> tuple[_MatF32, _VecF32, _VecBool, _VecBool, dict[str, Any]]:
+        self, action: VectorIntArray
+    ) -> tuple[
+        VectorFloat32Matrix,
+        VectorFloat32Array,
+        VectorBoolArray,
+        VectorBoolArray,
+        dict[str, Any],
+    ]:
         assert self.action_space.contains(action), (
             f"{action!r} ({type(action)}) invalid"
         )
@@ -494,7 +502,7 @@ class CartPoleVectorEnv(VectorEnv[_MatF32, _VecInt, _VecF32, _VecBool]):
         *,
         seed: int | None = None,
         options: dict[str, Any] | None = None,
-    ) -> tuple[_MatF32, dict[str, Any]]:
+    ) -> tuple[VectorFloat32Matrix, dict[str, Any]]:
         super().reset(seed=seed)
         # Note that if you use custom reset bounds, it may lead to out-of-bound
         # state/observations.

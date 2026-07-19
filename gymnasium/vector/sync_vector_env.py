@@ -24,12 +24,12 @@ from gymnasium.vector.vector_env import AutoresetMode, VectorEnv
 __all__ = ["SyncVectorEnv"]
 
 
-_VecBool: TypeAlias = np.ndarray[tuple[int], np.dtype[np.bool_]]
-_VecF64: TypeAlias = np.ndarray[tuple[int], np.dtype[np.float64]]
+VectorBoolArray: TypeAlias = np.ndarray[tuple[int], np.dtype[np.bool_]]
+VectorFloat32Array: TypeAlias = np.ndarray[tuple[int], np.dtype[np.float64]]
 
 
 class SyncVectorEnv(
-    VectorEnv[VectorObsType, VectorActType, _VecF64, _VecBool],
+    VectorEnv[VectorObsType, VectorActType, VectorFloat32Array, VectorBoolArray],
     Generic[VectorObsType, VectorActType],
 ):
     """Vectorized environment that serially runs multiple environments.
@@ -285,7 +285,13 @@ class SyncVectorEnv(
 
     def step(
         self, actions: VectorActType
-    ) -> tuple[VectorObsType, _VecF64, _VecBool, _VecBool, dict[str, Any]]:
+    ) -> tuple[
+        VectorObsType,
+        VectorFloat32Array,
+        VectorBoolArray,
+        VectorBoolArray,
+        dict[str, Any],
+    ]:
         """Steps through each of the environments returning the batched results.
 
         Returns:

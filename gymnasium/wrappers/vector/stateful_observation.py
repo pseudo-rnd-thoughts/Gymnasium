@@ -13,7 +13,7 @@ import numpy.typing as npt
 import gymnasium as gym
 from gymnasium.logger import warn
 from gymnasium.spaces import Box
-from gymnasium.typing import BoolArrayType, RewardArrayType, VectorActType
+from gymnasium.typing import VectorActType, VectorBoolType, VectorRewardType
 from gymnasium.vector.utils import batch_space
 from gymnasium.vector.vector_env import (
     AutoresetMode,
@@ -28,20 +28,20 @@ __all__ = ["NormalizeObservation"]
 # Shape-generic: the batched vector observation is (num_envs, *obs_shape), so
 # the rank depends on the sub-environment's observation (2-D for CartPole,
 # higher for images).
-_ArrF32: TypeAlias = npt.NDArray[np.float32]
-_ArrFloat: TypeAlias = npt.NDArray[np.floating]
+VectorFloat32Array: TypeAlias = npt.NDArray[np.float32]
+VectorFloatingArray: TypeAlias = npt.NDArray[np.floating]
 
 
 class NormalizeObservation(
     VectorObservationWrapper[
-        _ArrF32,
+        VectorFloat32Array,
         VectorActType,
-        RewardArrayType,
-        BoolArrayType,
-        _ArrFloat,
+        VectorRewardType,
+        VectorBoolType,
+        VectorFloatingArray,
     ],
     gym.utils.RecordConstructorArgs,
-    Generic[VectorActType, RewardArrayType, BoolArrayType],
+    Generic[VectorActType, VectorRewardType, VectorBoolType],
 ):
     """This wrapper will normalize observations s.t. each coordinate is centered with unit variance.
 
@@ -89,7 +89,9 @@ class NormalizeObservation(
 
     def __init__(
         self,
-        env: VectorEnv[_ArrFloat, VectorActType, RewardArrayType, BoolArrayType],
+        env: VectorEnv[
+            VectorFloatingArray, VectorActType, VectorRewardType, VectorBoolType
+        ],
         epsilon: float = 1e-8,
     ) -> None:
         """This wrapper will normalize observations s.t. each coordinate is centered with unit variance.
@@ -143,7 +145,7 @@ class NormalizeObservation(
         *,
         seed: int | None = None,
         options: dict[str, Any] | None = None,
-    ) -> tuple[_ArrF32, dict[str, Any]]:
+    ) -> tuple[VectorFloat32Array, dict[str, Any]]:
         """Reset function for `NormalizeObservationWrapper` which is disabled for partial resets."""
         if options is not None and "reset_mask" in options:
             if not np.all(options["reset_mask"]):
@@ -152,7 +154,7 @@ class NormalizeObservation(
                 )
         return super().reset(seed=seed, options=options)
 
-    def observations(self, observations: _ArrFloat) -> _ArrF32:
+    def observations(self, observations: VectorFloatingArray) -> VectorFloat32Array:
         """Defines the vector observation normalization function.
 
         Args:

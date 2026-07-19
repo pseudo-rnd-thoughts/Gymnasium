@@ -8,10 +8,10 @@ import numpy as np
 import torch
 
 from gymnasium.typing import (
-    BoolArrayType,
-    RewardArrayType,
     VectorActType,
+    VectorBoolType,
     VectorObsType,
+    VectorRewardType,
 )
 from gymnasium.vector import VectorEnv
 from gymnasium.wrappers.numpy_to_torch import Device
@@ -21,8 +21,8 @@ __all__ = ["NumpyToTorch"]
 
 
 class NumpyToTorch(
-    ArrayConversion[VectorObsType, VectorActType, RewardArrayType, BoolArrayType],
-    Generic[VectorObsType, VectorActType, RewardArrayType, BoolArrayType],
+    ArrayConversion[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
+    Generic[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
 ):
     """Wraps a numpy-based environment so that it can be interacted with through PyTorch Tensors.
 

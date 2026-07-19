@@ -17,10 +17,10 @@ from gymnasium.core import RenderFrame
 from gymnasium.error import DependencyNotInstalled
 from gymnasium.logger import warn
 from gymnasium.typing import (
-    BoolArrayType,
-    RewardArrayType,
     VectorActType,
+    VectorBoolType,
     VectorObsType,
+    VectorRewardType,
 )
 from gymnasium.vector import VectorEnv, VectorWrapper
 
@@ -29,9 +29,9 @@ if TYPE_CHECKING:
 
 
 class HumanRendering(
-    VectorWrapper[VectorObsType, VectorActType, RewardArrayType, BoolArrayType],
+    VectorWrapper[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
     gym.utils.RecordConstructorArgs,
-    Generic[VectorObsType, VectorActType, RewardArrayType, BoolArrayType],
+    Generic[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
 ):
     """Adds support for Human-based Rendering for Vector-based environments."""
 
@@ -52,7 +52,7 @@ class HumanRendering(
 
     def __init__(
         self,
-        env: VectorEnv[VectorObsType, VectorActType, RewardArrayType, BoolArrayType],
+        env: VectorEnv[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
         screen_size: tuple[int, int] | None = None,
     ) -> None:
         """Constructor for Human Rendering of Vector-based environments.
@@ -90,7 +90,7 @@ class HumanRendering(
     def step(
         self, actions: VectorActType
     ) -> tuple[
-        VectorObsType, RewardArrayType, BoolArrayType, BoolArrayType, dict[str, Any]
+        VectorObsType, VectorRewardType, VectorBoolType, VectorBoolType, dict[str, Any]
     ]:
         """Perform a step in the base environment and render a frame to the screen."""
         result = super().step(actions)
@@ -222,9 +222,11 @@ class HumanRendering(
 
 
 class RecordVideo(
-    VectorWrapper[VectorObsType, VectorActType, RewardArrayType, npt.NDArray[np.bool_]],
+    VectorWrapper[
+        VectorObsType, VectorActType, VectorRewardType, npt.NDArray[np.bool_]
+    ],
     gym.utils.RecordConstructorArgs,
-    Generic[VectorObsType, VectorActType, RewardArrayType],
+    Generic[VectorObsType, VectorActType, VectorRewardType],
 ):
     """Adds support for video recording for Vector-based environments.
 
@@ -278,7 +280,7 @@ class RecordVideo(
     def __init__(
         self,
         env: VectorEnv[
-            VectorObsType, VectorActType, RewardArrayType, npt.NDArray[np.bool_]
+            VectorObsType, VectorActType, VectorRewardType, npt.NDArray[np.bool_]
         ],
         video_folder: str,
         video_aspect_ratio: tuple[int, int] = (1, 1),
@@ -466,7 +468,7 @@ class RecordVideo(
         self, actions: VectorActType
     ) -> tuple[
         VectorObsType,
-        RewardArrayType,
+        VectorRewardType,
         npt.NDArray[np.bool_],
         npt.NDArray[np.bool_],
         dict[str, Any],

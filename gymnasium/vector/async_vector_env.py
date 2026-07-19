@@ -43,10 +43,10 @@ from gymnasium.vector.vector_env import AutoresetMode, VectorEnv
 __all__ = ["AsyncVectorEnv", "AsyncState"]
 
 
-_VecBool: TypeAlias = np.ndarray[tuple[int], np.dtype[np.bool_]]
-_VecF64: TypeAlias = np.ndarray[tuple[int], np.dtype[np.float64]]
+VectorBoolArray: TypeAlias = np.ndarray[tuple[int], np.dtype[np.bool_]]
+VectorFloat32Array: TypeAlias = np.ndarray[tuple[int], np.dtype[np.float64]]
 
-_ErrorInfo: TypeAlias = tuple[int, type[BaseException], BaseException, str]
+ErrorInfo: TypeAlias = tuple[int, type[BaseException], BaseException, str]
 
 
 class AsyncState(Enum):
@@ -59,7 +59,7 @@ class AsyncState(Enum):
 
 
 class AsyncVectorEnv(
-    VectorEnv[VectorObsType, VectorActType, _VecF64, _VecBool],
+    VectorEnv[VectorObsType, VectorActType, VectorFloat32Array, VectorBoolArray],
     Generic[VectorObsType, VectorActType],
 ):
     """Vectorized environment that runs multiple environments in parallel.
@@ -129,7 +129,7 @@ class AsyncVectorEnv(
         ],
     ]
     processes: list[multiprocessing.Process]
-    error_queue: Queue[_ErrorInfo]
+    error_queue: Queue[ErrorInfo]
 
     def __init__(
         self,
@@ -434,7 +434,13 @@ class AsyncVectorEnv(
 
     def step(
         self, actions: VectorActType
-    ) -> tuple[VectorObsType, _VecF64, _VecBool, _VecBool, dict[str, Any]]:
+    ) -> tuple[
+        VectorObsType,
+        VectorFloat32Array,
+        VectorBoolArray,
+        VectorBoolArray,
+        dict[str, Any],
+    ]:
         """Take an action for each parallel environment.
 
         Args:
@@ -473,7 +479,13 @@ class AsyncVectorEnv(
 
     def step_wait(
         self, timeout: float | None = None
-    ) -> tuple[VectorObsType, _VecF64, _VecBool, _VecBool, dict[str, Any]]:
+    ) -> tuple[
+        VectorObsType,
+        VectorFloat32Array,
+        VectorBoolArray,
+        VectorBoolArray,
+        dict[str, Any],
+    ]:
         """Wait for the calls to :obj:`step` in each sub-environment to finish.
 
         Args:
@@ -787,7 +799,7 @@ def _async_worker(
     pipe: Connection,
     parent_pipe: Connection,
     shared_memory: SynchronizedArray | dict[str, Any] | tuple[Any, ...],
-    error_queue: Queue[_ErrorInfo],
+    error_queue: Queue[ErrorInfo],
     autoreset_mode: AutoresetMode,
 ) -> None:
     env = env_fn()

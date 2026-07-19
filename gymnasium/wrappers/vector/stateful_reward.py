@@ -18,12 +18,12 @@ from gymnasium.wrappers.utils import RunningMeanStd
 __all__ = ["NormalizeReward"]
 
 
-_VecBool: TypeAlias = np.ndarray[tuple[int], np.dtype[np.bool_]]
-_VecF64: TypeAlias = np.ndarray[tuple[int], np.dtype[np.float64]]
+VectorBoolArray: TypeAlias = np.ndarray[tuple[int], np.dtype[np.bool_]]
+VectorFloat32Array: TypeAlias = np.ndarray[tuple[int], np.dtype[np.float64]]
 
 
 class NormalizeReward(
-    VectorWrapper[VectorObsType, VectorActType, _VecF64, _VecBool],
+    VectorWrapper[VectorObsType, VectorActType, VectorFloat32Array, VectorBoolArray],
     gym.utils.RecordConstructorArgs,
     Generic[VectorObsType, VectorActType],
 ):
@@ -131,7 +131,13 @@ class NormalizeReward(
 
     def step(
         self, actions: VectorActType
-    ) -> tuple[VectorObsType, _VecF64, _VecBool, _VecBool, dict[str, Any]]:
+    ) -> tuple[
+        VectorObsType,
+        VectorFloat32Array,
+        VectorBoolArray,
+        VectorBoolArray,
+        dict[str, Any],
+    ]:
         """Steps through the environment, normalizing the reward returned."""
         obs, reward, terminated, truncated, info = super().step(actions)
         active = ~self._prev_dones.astype(bool)

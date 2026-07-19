@@ -7,10 +7,10 @@ from typing import Any, Generic
 
 import gymnasium as gym
 from gymnasium.typing import (
-    BoolArrayType,
-    RewardArrayType,
     VectorActType,
+    VectorBoolType,
     VectorObsType,
+    VectorRewardType,
 )
 from gymnasium.vector import VectorEnv, VectorWrapper
 from gymnasium.wrappers.array_conversion import (
@@ -23,9 +23,9 @@ __all__ = ["ArrayConversion"]
 
 
 class ArrayConversion(
-    VectorWrapper[VectorObsType, VectorActType, RewardArrayType, BoolArrayType],
+    VectorWrapper[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
     gym.utils.RecordConstructorArgs,
-    Generic[VectorObsType, VectorActType, RewardArrayType, BoolArrayType],
+    Generic[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
 ):
     """Wraps a vector environment returning Array API compatible arrays so that it can be interacted with through a specific framework.
 
@@ -44,7 +44,7 @@ class ArrayConversion(
 
     def __init__(
         self,
-        env: VectorEnv[VectorObsType, VectorActType, RewardArrayType, BoolArrayType],
+        env: VectorEnv[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
         env_xp: ModuleType,
         target_xp: ModuleType,
         env_device: Device | None = None,
@@ -69,7 +69,7 @@ class ArrayConversion(
     def step(
         self, actions: VectorActType
     ) -> tuple[
-        VectorObsType, RewardArrayType, BoolArrayType, BoolArrayType, dict[str, Any]
+        VectorObsType, VectorRewardType, VectorBoolType, VectorBoolType, dict[str, Any]
     ]:
         """Transforms the action to the specified xp module array type.
 

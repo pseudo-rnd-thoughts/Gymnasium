@@ -5,7 +5,7 @@ used to parameterise Gymnasium's generic classes (precedent: :mod:`numpy.typing`
 Downstream code and Gymnasium's own modules should import these names from here
 rather than redefining their own copies.
 
-All of the TypeVars are **invariant** and declare ``default=Any`` (PEP 696), so a
+All the TypeVars are **invariant** and declare ``default=Any`` (PEP 696), so a
 class may be subscripted with as few or as many arguments as desired and any
 omitted argument falls back to ``Any``.
 
@@ -23,15 +23,22 @@ import numpy as np
 from typing_extensions import TypeVar
 
 __all__ = [
+    # Single Agent Env
     "ObsType",
     "ActType",
     "RenderFrame",
     "WrapperObsType",
     "WrapperActType",
+    # Vector Env
     "VectorObsType",
     "VectorActType",
-    "RewardArrayType",
-    "BoolArrayType",
+    "VectorRewardType",
+    "VectorBoolType",
+    "VectorWrappedObsType",
+    "VectorWrappedActType",
+    "VectorWrappedRewardType",
+    # Deprecated
+    "ArrayType",
 ]
 
 # Single-environment vocabulary
@@ -57,8 +64,20 @@ VectorObsType = TypeVar("VectorObsType", default=Any)
 VectorActType = TypeVar("VectorActType", default=Any)
 """The batched action type of a :class:`~gymnasium.vector.VectorEnv`."""
 
-RewardArrayType = TypeVar("RewardArrayType", default=Any)
+VectorRewardType = TypeVar("VectorRewardType", default=Any)
 """The batched reward array type of a :class:`~gymnasium.vector.VectorEnv`, typically ``np.ndarray`` of ``float64``."""
 
-BoolArrayType = TypeVar("BoolArrayType", default=Any)
+VectorBoolType = TypeVar("VectorBoolType", default=Any)
 """The batched termination/truncation array type of a :class:`~gymnasium.vector.VectorEnv`, typically ``np.ndarray`` of ``bool``."""
+
+# `Wrapped` variants are the wrapped (inner) environment's types for wrappers that
+# transform observations, actions or rewards. They default to the wrapper's own type
+# so that a same-type wrapper doesn't need to repeat itself.
+VectorWrappedObsType = TypeVar("VectorWrappedObsType", default=VectorObsType)
+VectorWrappedActType = TypeVar("VectorWrappedActType", default=VectorActType)
+VectorWrappedRewardType = TypeVar("VectorWrappedRewardType", default=VectorRewardType)
+
+# Deprecated: kept for backwards compatibility with downstream code that does
+# `from gymnasium.vector.vector_env import ArrayType`. Prefer the dedicated
+# reward/bool array TypeVars above.
+ArrayType = TypeVar("ArrayType", default=Any)

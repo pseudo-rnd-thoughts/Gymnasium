@@ -180,9 +180,7 @@ def play(
     fps: int | None = None,
     zoom: float | None = None,
     callback: Callable | None = None,
-    # `dict` is invariant in its key type, so `Any` accepts the tuple/str/int key
-    # formats, which are validated at runtime below
-    keys_to_action: dict[Any, ActType] | None = None,
+    keys_to_action: dict[tuple[str | int, ...] | str | int, ActType] | None = None,
     seed: int | None = None,
     noop: ActType | int = 0,
     wait_on_player: bool = False,

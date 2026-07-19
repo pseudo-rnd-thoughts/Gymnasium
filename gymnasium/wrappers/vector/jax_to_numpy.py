@@ -9,10 +9,10 @@ import numpy as np
 
 from gymnasium.error import DependencyNotInstalled
 from gymnasium.typing import (
-    BoolArrayType,
-    RewardArrayType,
     VectorActType,
+    VectorBoolType,
     VectorObsType,
+    VectorRewardType,
 )
 from gymnasium.vector import VectorEnv
 from gymnasium.wrappers.vector.array_conversion import ArrayConversion
@@ -21,8 +21,8 @@ __all__ = ["JaxToNumpy"]
 
 
 class JaxToNumpy(
-    ArrayConversion[VectorObsType, VectorActType, RewardArrayType, BoolArrayType],
-    Generic[VectorObsType, VectorActType, RewardArrayType, BoolArrayType],
+    ArrayConversion[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
+    Generic[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
 ):
     """Wraps a jax vector environment so that it can be interacted with through numpy arrays.
 
@@ -39,7 +39,7 @@ class JaxToNumpy(
 
     def __init__(
         self,
-        env: VectorEnv[VectorObsType, VectorActType, RewardArrayType, BoolArrayType],
+        env: VectorEnv[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
     ) -> None:
         """Wraps an environment such that the input and outputs are numpy arrays.
 

@@ -7,10 +7,10 @@ from typing import Any, Generic
 import numpy as np
 
 from gymnasium.typing import (
-    BoolArrayType,
-    RewardArrayType,
     VectorActType,
+    VectorBoolType,
     VectorObsType,
+    VectorRewardType,
 )
 from gymnasium.vector.vector_env import VectorEnv, VectorWrapper
 
@@ -18,8 +18,8 @@ __all__ = ["DictInfoToList"]
 
 
 class DictInfoToList(
-    VectorWrapper[VectorObsType, VectorActType, RewardArrayType, BoolArrayType],
-    Generic[VectorObsType, VectorActType, RewardArrayType, BoolArrayType],
+    VectorWrapper[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
+    Generic[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
 ):
     """Converts infos of vectorized environments from ``dict`` to ``List[dict]``.
 
@@ -76,7 +76,7 @@ class DictInfoToList(
 
     def __init__(
         self,
-        env: VectorEnv[VectorObsType, VectorActType, RewardArrayType, BoolArrayType],
+        env: VectorEnv[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
     ) -> None:
         """This wrapper will convert the info into the list format.
 
@@ -90,9 +90,9 @@ class DictInfoToList(
         self, actions: VectorActType
     ) -> tuple[
         VectorObsType,
-        RewardArrayType,
-        BoolArrayType,
-        BoolArrayType,
+        VectorRewardType,
+        VectorBoolType,
+        VectorBoolType,
         list[dict[str, Any]],
     ]:  # ty:ignore[invalid-method-override]
         """Steps through the environment, convert dict info to list."""
