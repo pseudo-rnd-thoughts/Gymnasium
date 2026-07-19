@@ -118,7 +118,9 @@ class Env(Generic[ObsType, ActType]):
         *,
         seed: int | None = None,
         options: dict[str, Any] | None = None,
-    ) -> tuple[ObsType, dict[str, Any]]:
+        # Base implementation only seeds the RNG and returns `None`; subclasses override it to
+        # return the documented observation/info tuple.
+    ) -> tuple[ObsType, dict[str, Any]]:  # ty: ignore[invalid-return-type]
         """Resets the environment to an initial internal state, returning an initial observation and info.
 
         This method generates a new starting state often with some randomness to ensure that the agent explores the
@@ -305,9 +307,9 @@ class Wrapper(
         If you inherit from :class:`Wrapper`, don't forget to call ``super().__init__(env)``
     """
 
-    env: Env[WrapperObsType, WrapperActType]
+    env: Env[ObsType, ActType]
 
-    def __init__(self, env: Env[WrapperObsType, WrapperActType]):
+    def __init__(self, env: Env[ObsType, ActType]):
         """Wraps an environment to allow a modular transformation of the :meth:`step` and :meth:`reset` methods.
 
         Args:
@@ -327,13 +329,17 @@ class Wrapper(
         self, action: WrapperActType
     ) -> tuple[WrapperObsType, SupportsFloat, bool, bool, dict[str, Any]]:
         """Uses the :meth:`step` of the :attr:`env` that can be overwritten to change the returned data."""
-        return self.env.step(action)
+        # The base wrapper is an identity pass-through; the inner env's `ObsType`/`ActType`
+        # cannot be statically proven equal to the wrapper's `WrapperObsType`/`WrapperActType`.
+        return self.env.step(action)  # ty: ignore[invalid-return-type, invalid-argument-type]
 
     def reset(
         self, *, seed: int | None = None, options: dict[str, Any] | None = None
     ) -> tuple[WrapperObsType, dict[str, Any]]:
         """Uses the :meth:`reset` of the :attr:`env` that can be overwritten to change the returned data."""
-        return self.env.reset(seed=seed, options=options)
+        # Identity pass-through: the inner env's `ObsType` cannot be statically proven equal
+        # to the wrapper's `WrapperObsType`.
+        return self.env.reset(seed=seed, options=options)  # ty: ignore[invalid-return-type]
 
     def render(self) -> RenderFrame | list[RenderFrame] | None:
         """Uses the :meth:`render` of the :attr:`env` that can be overwritten to change the returned data."""
