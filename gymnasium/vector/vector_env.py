@@ -155,7 +155,9 @@ class VectorEnv(
         *,
         seed: int | None = None,
         options: dict[str, Any] | None = None,
-    ) -> tuple[VectorObsType, dict[str, Any]]:  # type: ignore
+        # Base implementation only seeds the RNG and returns `None`; subclasses override it to
+        # return the documented observation/info tuple.
+    ) -> tuple[VectorObsType, dict[str, Any]]:  # ty: ignore[invalid-return-type]
         """Reset all parallel environments and return a batch of initial observations and info.
 
         Args:
@@ -568,7 +570,7 @@ class VectorObservationWrapper(
 
     env: VectorEnv[
         VectorWrappedObsType, VectorActType, VectorRewardType, VectorBoolType
-    ]  # ty:ignore[invalid-assignment]
+    ]
 
     def __init__(
         self,
@@ -646,7 +648,7 @@ class VectorActionWrapper(
 
     env: VectorEnv[
         VectorObsType, VectorWrappedActType, VectorRewardType, VectorBoolType
-    ]  # ty:ignore[invalid-assignment]
+    ]
 
     def step(
         self, actions: VectorActType

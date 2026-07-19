@@ -169,8 +169,9 @@ include = [
     "gymnasium/utils/**",
     "gymnasium/experimental/**",
     "gymnasium/wrappers/**",
+    "gymnasium/vector/**",
+    # "gymnasium/envs/**",
 ]
-exclude = ["gymnasium/wrappers/vector/**"]
 
 [tool.ty.overrides.rules]
 invalid-argument-type = "error"
