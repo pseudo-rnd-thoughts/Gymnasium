@@ -11,6 +11,12 @@ from typing_extensions import Self, TypeVar
 import gymnasium as gym
 from gymnasium.core import RenderFrame
 from gymnasium.logger import warn
+from gymnasium.typing import (
+    BoolArrayType,
+    RewardArrayType,
+    VectorActType,
+    VectorObsType,
+)
 from gymnasium.utils import seeding
 
 if TYPE_CHECKING:
@@ -23,17 +29,29 @@ __all__ = [
     "VectorActionWrapper",
     "VectorRewardWrapper",
     "AutoresetMode",
+    "VectorObsType",
+    "VectorActType",
+    "RewardArrayType",
+    "BoolArrayType",
+    "ArrayType",
 ]
 
-_ObsT_co = TypeVar("_ObsT_co", covariant=True, default=Any)
-_ObsT_contra = TypeVar("_ObsT_contra", contravariant=True, default=_ObsT_co)
-_ActT = TypeVar("_ActT", default=Any)
-_ActT_contra = TypeVar("_ActT_contra", contravariant=True, default=Any)
-_RewardArrT_co = TypeVar("_RewardArrT_co", covariant=True, default=Any)
-_RewardArrT_contra = TypeVar(
-    "_RewardArrT_contra", contravariant=True, default=_RewardArrT_co
-)
-_BoolArrT_co = TypeVar("_BoolArrT_co", covariant=True, default=Any)
+# The batched observation, action, reward and termination/truncation types of a
+# `VectorEnv[VectorObsType, VectorActType, RewardArrayType, BoolArrayType]` are the
+# shared (invariant) TypeVars imported from `gymnasium.typing`; they are re-exported
+# here for backwards compatibility.
+
+# `Wrapped` variants are the wrapped (inner) environment's types for wrappers that
+# transform observations, actions or rewards. They default to the wrapper's own type
+# so that a same-type wrapper doesn't need to repeat itself.
+VectorWrappedObsType = TypeVar("VectorWrappedObsType", default=VectorObsType)
+VectorWrappedActType = TypeVar("VectorWrappedActType", default=VectorActType)
+WrappedRewardArrayType = TypeVar("WrappedRewardArrayType", default=RewardArrayType)
+
+# Deprecated: kept for backwards compatibility with downstream code that does
+# `from gymnasium.vector.vector_env import ArrayType`. Prefer the dedicated
+# reward/bool array TypeVars above.
+ArrayType = TypeVar("ArrayType", default=Any)
 
 
 class AutoresetMode(Enum):
@@ -44,7 +62,7 @@ class AutoresetMode(Enum):
     DISABLED = "Disabled"
 
 
-class VectorEnv(Generic[_ObsT_co, _ActT_contra, _RewardArrT_co, _BoolArrT_co]):
+class VectorEnv(Generic[VectorObsType, VectorActType, RewardArrayType, BoolArrayType]):
     """Base class for vectorized environments to run multiple independent copies of the same environment in parallel.
 
     Vector environments can provide a linear speed-up in the steps taken per second through sampling multiple
@@ -129,8 +147,8 @@ class VectorEnv(Generic[_ObsT_co, _ActT_contra, _RewardArrT_co, _BoolArrT_co]):
     render_mode: str | None = None
     closed: bool = False
 
-    observation_space: gym.Space[_ObsT_co]
-    action_space: gym.Space[_ActT_contra]
+    observation_space: gym.Space[VectorObsType]
+    action_space: gym.Space[VectorActType]
     single_observation_space: gym.Space
     single_action_space: gym.Space
 
@@ -144,7 +162,7 @@ class VectorEnv(Generic[_ObsT_co, _ActT_contra, _RewardArrT_co, _BoolArrT_co]):
         *,
         seed: int | None = None,
         options: dict[str, Any] | None = None,
-    ) -> tuple[_ObsT_co, dict[str, Any]]:  # type: ignore
+    ) -> tuple[VectorObsType, dict[str, Any]]:  # type: ignore
         """Reset all parallel environments and return a batch of initial observations and info.
 
         Args:
@@ -170,8 +188,10 @@ class VectorEnv(Generic[_ObsT_co, _ActT_contra, _RewardArrT_co, _BoolArrT_co]):
             self._np_random, self._np_random_seed = seeding.np_random(seed)
 
     def step(
-        self, actions: _ActT_contra
-    ) -> tuple[_ObsT_co, _RewardArrT_co, _BoolArrT_co, _BoolArrT_co, dict[str, Any]]:
+        self, actions: VectorActType
+    ) -> tuple[
+        VectorObsType, RewardArrayType, BoolArrayType, BoolArrayType, dict[str, Any]
+    ]:
         """Take an action for each parallel environment.
 
         Args:
@@ -357,8 +377,8 @@ class VectorEnv(Generic[_ObsT_co, _ActT_contra, _RewardArrT_co, _BoolArrT_co]):
 
 
 class VectorWrapper(
-    VectorEnv[_ObsT_co, _ActT_contra, _RewardArrT_co, _BoolArrT_co],
-    Generic[_ObsT_co, _ActT_contra, _RewardArrT_co, _BoolArrT_co],
+    VectorEnv[VectorObsType, VectorActType, RewardArrayType, BoolArrayType],
+    Generic[VectorObsType, VectorActType, RewardArrayType, BoolArrayType],
 ):
     """Wraps the vectorized environment to allow a modular transformation.
 
@@ -370,17 +390,17 @@ class VectorWrapper(
         Don't forget to call ``super().__init__(env)`` if the subclass overrides :meth:`__init__`.
     """
 
-    env: VectorEnv[_ObsT_co, _ActT_contra, _RewardArrT_co, _BoolArrT_co]
+    env: VectorEnv[VectorObsType, VectorActType, RewardArrayType, BoolArrayType]
 
-    _observation_space: gym.Space[_ObsT_co] | None
-    _action_space: gym.Space[_ActT_contra] | None
+    _observation_space: gym.Space[VectorObsType] | None
+    _action_space: gym.Space[VectorActType] | None
     _single_observation_space: gym.Space | None
     _single_action_space: gym.Space | None
     _metadata: dict[str, Any] | None
 
     def __init__(
         self,
-        env: VectorEnv[_ObsT_co, _ActT_contra, _RewardArrT_co, _BoolArrT_co],
+        env: VectorEnv[VectorObsType, VectorActType, RewardArrayType, BoolArrayType],
     ) -> None:
         """Initialize the vectorized environment wrapper.
 
@@ -401,13 +421,15 @@ class VectorWrapper(
 
     def reset(
         self, *, seed: int | None = None, options: dict[str, Any] | None = None
-    ) -> tuple[_ObsT_co, dict[str, Any]]:
+    ) -> tuple[VectorObsType, dict[str, Any]]:
         """Reset all environment using seed and options."""
         return self.env.reset(seed=seed, options=options)
 
     def step(
-        self, actions: _ActT_contra
-    ) -> tuple[_ObsT_co, _RewardArrT_co, _BoolArrT_co, _BoolArrT_co, dict[str, Any]]:
+        self, actions: VectorActType
+    ) -> tuple[
+        VectorObsType, RewardArrayType, BoolArrayType, BoolArrayType, dict[str, Any]
+    ]:
         """Step through all environments using the actions returning the batched data."""
         return self.env.step(actions)
 
@@ -426,7 +448,7 @@ class VectorWrapper(
     @property
     def unwrapped(
         self,
-    ) -> VectorEnv[_ObsT_co, _ActT_contra, _RewardArrT_co, _BoolArrT_co]:
+    ) -> VectorEnv[VectorObsType, VectorActType, RewardArrayType, BoolArrayType]:
         """Return the base non-wrapped environment."""
         return self.env.unwrapped
 
@@ -435,50 +457,50 @@ class VectorWrapper(
         return f"<{self.__class__.__name__}, {self.env}>"
 
     @property
-    def observation_space(self) -> gym.Space[_ObsT_co]:
+    def observation_space(self) -> gym.Space[VectorObsType]:
         """Gets the observation space of the vector environment."""
         if self._observation_space is None:
             return self.env.observation_space
         return self._observation_space
 
     @observation_space.setter
-    def observation_space(self, space: gym.Space[_ObsT_co]) -> None:
+    def observation_space(self, space: gym.Space[VectorObsType]) -> None:
         """Sets the observation space of the vector environment."""
         self._observation_space = space
 
     @property
-    def action_space(self) -> gym.Space[_ActT_contra]:
+    def action_space(self) -> gym.Space[VectorActType]:
         """Gets the action space of the vector environment."""
         if self._action_space is None:
             return self.env.action_space
         return self._action_space
 
     @action_space.setter
-    def action_space(self, space: gym.Space[_ActT_contra]) -> None:
+    def action_space(self, space: gym.Space[VectorActType]) -> None:
         """Sets the action space of the vector environment."""
         self._action_space = space
 
     @property
-    def single_observation_space(self) -> gym.Space[_ObsT_co]:
+    def single_observation_space(self) -> gym.Space[VectorObsType]:
         """Gets the single observation space of the vector environment."""
         if self._single_observation_space is None:
             return self.env.single_observation_space
         return self._single_observation_space
 
     @single_observation_space.setter
-    def single_observation_space(self, space: gym.Space[_ObsT_co]) -> None:
+    def single_observation_space(self, space: gym.Space[VectorObsType]) -> None:
         """Sets the single observation space of the vector environment."""
         self._single_observation_space = space
 
     @property
-    def single_action_space(self) -> gym.Space[_ActT_contra]:
+    def single_action_space(self) -> gym.Space[VectorActType]:
         """Gets the single action space of the vector environment."""
         if self._single_action_space is None:
             return self.env.single_action_space
         return self._single_action_space
 
     @single_action_space.setter
-    def single_action_space(self, space: gym.Space[_ActT_contra]) -> None:
+    def single_action_space(self, space: gym.Space[VectorActType]) -> None:
         """Sets the single action space of the vector environment."""
         self._single_action_space = space
 
@@ -537,16 +559,27 @@ class VectorWrapper(
 
 
 class VectorObservationWrapper(
-    VectorWrapper[_ObsT_co, _ActT_contra, _RewardArrT_co, _BoolArrT_co],
-    Generic[_ObsT_co, _ActT_contra, _RewardArrT_co, _BoolArrT_co, _ObsT_contra],
+    VectorWrapper[VectorObsType, VectorActType, RewardArrayType, BoolArrayType],
+    Generic[
+        VectorObsType,
+        VectorActType,
+        RewardArrayType,
+        BoolArrayType,
+        VectorWrappedObsType,
+    ],
 ):
     """Wraps the vectorized environment to allow a modular transformation of the observation.
 
     Equivalent to :class:`gymnasium.ObservationWrapper` for vectorized environments.
     """
 
+    env: VectorEnv[VectorWrappedObsType, VectorActType, RewardArrayType, BoolArrayType]  # ty:ignore[invalid-assignment]
+
     def __init__(
-        self, env: VectorEnv[_ObsT_co, _ActT_contra, _RewardArrT_co, _BoolArrT_co]
+        self,
+        env: VectorEnv[
+            VectorWrappedObsType, VectorActType, RewardArrayType, BoolArrayType
+        ],
     ) -> None:
         """Vector observation wrapper that batch transforms observations.
 
@@ -569,14 +602,16 @@ class VectorObservationWrapper(
 
     def reset(
         self, *, seed: int | None = None, options: dict[str, Any] | None = None
-    ) -> tuple[_ObsT_co, dict[str, Any]]:
+    ) -> tuple[VectorObsType, dict[str, Any]]:
         """Modifies the observation returned from the environment ``reset`` using the :meth:`observation`."""
         observations, infos = self.env.reset(seed=seed, options=options)
         return self.observations(observations), infos
 
     def step(
-        self, actions: _ActT_contra
-    ) -> tuple[_ObsT_co, _RewardArrT_co, _BoolArrT_co, _BoolArrT_co, dict[str, Any]]:
+        self, actions: VectorActType
+    ) -> tuple[
+        VectorObsType, RewardArrayType, BoolArrayType, BoolArrayType, dict[str, Any]
+    ]:
         """Modifies the observation returned from the environment ``step`` using the :meth:`observation`."""
         observations, rewards, terminations, truncations, infos = self.env.step(actions)
         return (
@@ -587,7 +622,7 @@ class VectorObservationWrapper(
             infos,
         )
 
-    def observations(self, observations: _ObsT_contra) -> _ObsT_co:
+    def observations(self, observations: VectorWrappedObsType) -> VectorObsType:
         """Defines the vector observation transformation.
 
         Args:
@@ -600,35 +635,51 @@ class VectorObservationWrapper(
 
 
 class VectorActionWrapper(
-    VectorWrapper[_ObsT_co, _ActT, _RewardArrT_co, _BoolArrT_co],
-    Generic[_ObsT_co, _ActT, _RewardArrT_co, _BoolArrT_co],
+    VectorWrapper[VectorObsType, VectorActType, RewardArrayType, BoolArrayType],
+    Generic[
+        VectorObsType,
+        VectorActType,
+        RewardArrayType,
+        BoolArrayType,
+        VectorWrappedActType,
+    ],
 ):
     """Wraps the vectorized environment to allow a modular transformation of the actions.
 
     Equivalent of :class:`gymnasium.ActionWrapper` for vectorized environments.
     """
 
+    env: VectorEnv[VectorObsType, VectorWrappedActType, RewardArrayType, BoolArrayType]  # ty:ignore[invalid-assignment]
+
     def step(
-        self, actions: _ActT
-    ) -> tuple[_ObsT_co, _RewardArrT_co, _BoolArrT_co, _BoolArrT_co, dict[str, Any]]:
+        self, actions: VectorActType
+    ) -> tuple[
+        VectorObsType, RewardArrayType, BoolArrayType, BoolArrayType, dict[str, Any]
+    ]:
         """Steps through the environment using a modified action by :meth:`action`."""
         return self.env.step(self.actions(actions))
 
-    def actions(self, actions: _ActT) -> _ActT:
+    def actions(self, actions: VectorActType) -> VectorWrappedActType:
         """Transform the actions before sending them to the environment.
 
         Args:
-            actions (_ActT): the actions to transform
+            actions (VectorActType): the actions to transform
 
         Returns:
-            _ActT: the transformed actions
+            VectorWrappedActType: the transformed actions
         """
         raise NotImplementedError
 
 
 class VectorRewardWrapper(
-    VectorWrapper[_ObsT_co, _ActT_contra, _RewardArrT_co, _BoolArrT_co],
-    Generic[_ObsT_co, _ActT_contra, _RewardArrT_co, _BoolArrT_co, _RewardArrT_contra],
+    VectorWrapper[VectorObsType, VectorActType, RewardArrayType, BoolArrayType],
+    Generic[
+        VectorObsType,
+        VectorActType,
+        RewardArrayType,
+        BoolArrayType,
+        WrappedRewardArrayType,
+    ],
 ):
     """Wraps the vectorized environment to allow a modular transformation of the reward.
 
@@ -636,13 +687,15 @@ class VectorRewardWrapper(
     """
 
     def step(
-        self, actions: _ActT_contra
-    ) -> tuple[_ObsT_co, _RewardArrT_co, _BoolArrT_co, _BoolArrT_co, dict[str, Any]]:
+        self, actions: VectorActType
+    ) -> tuple[
+        VectorObsType, RewardArrayType, BoolArrayType, BoolArrayType, dict[str, Any]
+    ]:
         """Steps through the environment returning a reward modified by :meth:`reward`."""
         observations, rewards, terminations, truncations, infos = self.env.step(actions)
         return observations, self.rewards(rewards), terminations, truncations, infos
 
-    def rewards(self, rewards: _RewardArrT_contra) -> _RewardArrT_co:
+    def rewards(self, rewards: WrappedRewardArrayType) -> RewardArrayType:
         """Transform the reward before returning it.
 
         Args:

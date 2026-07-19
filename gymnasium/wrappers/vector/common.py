@@ -11,21 +11,22 @@ import numpy.typing as npt
 from typing_extensions import TypeVar
 
 from gymnasium.logger import warn
+from gymnasium.typing import VectorActType, VectorObsType
 from gymnasium.vector.vector_env import AutoresetMode, VectorEnv, VectorWrapper
 
 __all__ = ["RecordEpisodeStatistics"]
 
 
-_ObsT = TypeVar("_ObsT", bound=np.ndarray, covariant=True, default=Any)
-_ActT_contra = TypeVar(
-    "_ActT_contra", bound=np.ndarray, contravariant=True, default=Any
-)
-_RewardsT_co = TypeVar("_RewardsT_co", bound=np.ndarray, covariant=True, default=Any)
+# A specialised, `np.ndarray`-bound reward array type. This is *not* the shared
+# `gymnasium.typing.RewardArrayType` (which is unbounded), so it keeps a distinct name.
+NDRewardArrayType = TypeVar("NDRewardArrayType", bound=np.ndarray, default=Any)
 
 
 class RecordEpisodeStatistics(
-    VectorWrapper[_ObsT, _ActT_contra, _RewardsT_co, npt.NDArray[np.bool_]],
-    Generic[_ObsT, _ActT_contra, _RewardsT_co],
+    VectorWrapper[
+        VectorObsType, VectorActType, NDRewardArrayType, npt.NDArray[np.bool_]
+    ],
+    Generic[VectorObsType, VectorActType, NDRewardArrayType],
 ):
     """This wrapper will keep track of cumulative rewards and episode lengths.
 
@@ -85,7 +86,9 @@ class RecordEpisodeStatistics(
 
     def __init__(
         self,
-        env: VectorEnv[_ObsT, _ActT_contra, _RewardsT_co, npt.NDArray[np.bool_]],
+        env: VectorEnv[
+            VectorObsType, VectorActType, NDRewardArrayType, npt.NDArray[np.bool_]
+        ],
         buffer_length: int = 100,
         stats_key: str = "episode",
     ) -> None:
@@ -125,7 +128,7 @@ class RecordEpisodeStatistics(
         self,
         seed: int | None = None,
         options: dict[str, Any] | None = None,
-    ) -> tuple[_ObsT, dict[str, Any]]:
+    ) -> tuple[VectorObsType, dict[str, Any]]:
         """Resets the environment using kwargs and resets the episode returns and lengths."""
         obs, info = super().reset(seed=seed, options=options)
 
@@ -161,10 +164,10 @@ class RecordEpisodeStatistics(
         return obs, info
 
     def step(
-        self, actions: _ActT_contra
+        self, actions: VectorActType
     ) -> tuple[
-        _ObsT,
-        _RewardsT_co,
+        VectorObsType,
+        NDRewardArrayType,
         npt.NDArray[np.bool_],
         npt.NDArray[np.bool_],
         dict[str, Any],

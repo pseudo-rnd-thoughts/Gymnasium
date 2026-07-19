@@ -10,29 +10,28 @@ from typing import TYPE_CHECKING, Any, Generic
 
 import numpy as np
 import numpy.typing as npt
-from typing_extensions import TypeVar
 
 import gymnasium as gym
 from gymnasium import error, logger
 from gymnasium.core import RenderFrame
 from gymnasium.error import DependencyNotInstalled
 from gymnasium.logger import warn
+from gymnasium.typing import (
+    BoolArrayType,
+    RewardArrayType,
+    VectorActType,
+    VectorObsType,
+)
 from gymnasium.vector import VectorEnv, VectorWrapper
 
 if TYPE_CHECKING:
     import pygame
 
 
-_ObsT_co = TypeVar("_ObsT_co", covariant=True, default=Any)
-_ActT_contra = TypeVar("_ActT_contra", contravariant=True, default=Any)
-_RewardArrT_co = TypeVar("_RewardArrT_co", covariant=True, default=Any)
-_BoolArrT_co = TypeVar("_BoolArrT_co", covariant=True, default=Any)
-
-
 class HumanRendering(
-    VectorWrapper[_ObsT_co, _ActT_contra, _RewardArrT_co, _BoolArrT_co],
+    VectorWrapper[VectorObsType, VectorActType, RewardArrayType, BoolArrayType],
     gym.utils.RecordConstructorArgs,
-    Generic[_ObsT_co, _ActT_contra, _RewardArrT_co, _BoolArrT_co],
+    Generic[VectorObsType, VectorActType, RewardArrayType, BoolArrayType],
 ):
     """Adds support for Human-based Rendering for Vector-based environments."""
 
@@ -53,7 +52,7 @@ class HumanRendering(
 
     def __init__(
         self,
-        env: VectorEnv[_ObsT_co, _ActT_contra, _RewardArrT_co, _BoolArrT_co],
+        env: VectorEnv[VectorObsType, VectorActType, RewardArrayType, BoolArrayType],
         screen_size: tuple[int, int] | None = None,
     ) -> None:
         """Constructor for Human Rendering of Vector-based environments.
@@ -89,8 +88,10 @@ class HumanRendering(
         return "human"
 
     def step(
-        self, actions: _ActT_contra
-    ) -> tuple[_ObsT_co, _RewardArrT_co, _BoolArrT_co, _BoolArrT_co, dict[str, Any]]:
+        self, actions: VectorActType
+    ) -> tuple[
+        VectorObsType, RewardArrayType, BoolArrayType, BoolArrayType, dict[str, Any]
+    ]:
         """Perform a step in the base environment and render a frame to the screen."""
         result = super().step(actions)
         self._render_frame()
@@ -101,7 +102,7 @@ class HumanRendering(
         *,
         seed: int | None = None,
         options: dict[str, Any] | None = None,
-    ) -> tuple[_ObsT_co, dict[str, Any]]:
+    ) -> tuple[VectorObsType, dict[str, Any]]:
         """Reset the base environment and render a frame to the screen."""
         result = super().reset(seed=seed, options=options)
         self._render_frame()
@@ -221,9 +222,9 @@ class HumanRendering(
 
 
 class RecordVideo(
-    VectorWrapper[_ObsT_co, _ActT_contra, _RewardArrT_co, npt.NDArray[np.bool_]],
+    VectorWrapper[VectorObsType, VectorActType, RewardArrayType, npt.NDArray[np.bool_]],
     gym.utils.RecordConstructorArgs,
-    Generic[_ObsT_co, _ActT_contra, _RewardArrT_co],
+    Generic[VectorObsType, VectorActType, RewardArrayType],
 ):
     """Adds support for video recording for Vector-based environments.
 
@@ -276,7 +277,9 @@ class RecordVideo(
 
     def __init__(
         self,
-        env: VectorEnv[_ObsT_co, _ActT_contra, _RewardArrT_co, _BoolArrT_co],
+        env: VectorEnv[
+            VectorObsType, VectorActType, RewardArrayType, npt.NDArray[np.bool_]
+        ],
         video_folder: str,
         video_aspect_ratio: tuple[int, int] = (1, 1),
         record_first_only: bool = False,
@@ -437,7 +440,7 @@ class RecordVideo(
 
     def reset(
         self, *, seed: int | None = None, options: dict[str, Any] | None = None
-    ) -> tuple[_ObsT_co, dict[str, Any]]:
+    ) -> tuple[VectorObsType, dict[str, Any]]:
         """Reset the environment and eventually starts a new recording."""
         if options is None or "reset_mask" not in options or options["reset_mask"][0]:
             self.episode_id += 1
@@ -460,10 +463,10 @@ class RecordVideo(
         return obs, info
 
     def step(
-        self, actions: _ActT_contra
+        self, actions: VectorActType
     ) -> tuple[
-        _ObsT_co,
-        _RewardArrT_co,
+        VectorObsType,
+        RewardArrayType,
         npt.NDArray[np.bool_],
         npt.NDArray[np.bool_],
         dict[str, Any],

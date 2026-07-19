@@ -15,7 +15,6 @@ from multiprocessing.sharedctypes import SynchronizedArray
 from typing import Any, Generic, TypeAlias
 
 import numpy as np
-from typing_extensions import TypeVar
 
 from gymnasium import Space, logger
 from gymnasium.core import Env, RenderFrame
@@ -26,6 +25,7 @@ from gymnasium.error import (
     NoAsyncCallError,
 )
 from gymnasium.spaces.utils import is_space_dtype_shape_equiv
+from gymnasium.typing import VectorActType, VectorObsType
 from gymnasium.vector.utils import (
     CloudpickleWrapper,
     batch_differing_spaces,
@@ -41,10 +41,6 @@ from gymnasium.vector.utils import (
 from gymnasium.vector.vector_env import AutoresetMode, VectorEnv
 
 __all__ = ["AsyncVectorEnv", "AsyncState"]
-
-
-_ObsT = TypeVar("_ObsT", default=Any)
-_ActT_contra = TypeVar("_ActT_contra", contravariant=True, default=Any)
 
 
 _VecBool: TypeAlias = np.ndarray[tuple[int], np.dtype[np.bool_]]
@@ -63,8 +59,8 @@ class AsyncState(Enum):
 
 
 class AsyncVectorEnv(
-    VectorEnv[_ObsT, _ActT_contra, _VecF64, _VecBool],
-    Generic[_ObsT, _ActT_contra],
+    VectorEnv[VectorObsType, VectorActType, _VecF64, _VecBool],
+    Generic[VectorObsType, VectorActType],
 ):
     """Vectorized environment that runs multiple environments in parallel.
 
@@ -121,10 +117,10 @@ class AsyncVectorEnv(
     render_mode: str | None
 
     single_action_space: Space
-    action_space: Space[_ActT_contra]
+    action_space: Space[VectorActType]
     single_observation_space: Space
-    observation_space: Space[_ObsT]
-    observations: _ObsT
+    observation_space: Space[VectorObsType]
+    observations: VectorObsType
 
     parent_pipes: list[
         Connection[
@@ -305,7 +301,7 @@ class AsyncVectorEnv(
         *,
         seed: int | list[int | None] | None = None,
         options: dict[str, Any] | None = None,
-    ) -> tuple[_ObsT, dict[str, Any]]:
+    ) -> tuple[VectorObsType, dict[str, Any]]:
         """Resets all sub-environments in parallel and return a batch of concatenated observations and info.
 
         Args:
@@ -391,7 +387,7 @@ class AsyncVectorEnv(
     def reset_wait(
         self,
         timeout: float | None = None,
-    ) -> tuple[_ObsT, dict[str, Any]]:
+    ) -> tuple[VectorObsType, dict[str, Any]]:
         """Waits for the calls triggered by :meth:`reset_async` to finish and returns the results.
 
         Args:
@@ -437,8 +433,8 @@ class AsyncVectorEnv(
         return (deepcopy(self.observations) if self.copy else self.observations), infos
 
     def step(
-        self, actions: _ActT_contra
-    ) -> tuple[_ObsT, _VecF64, _VecBool, _VecBool, dict[str, Any]]:
+        self, actions: VectorActType
+    ) -> tuple[VectorObsType, _VecF64, _VecBool, _VecBool, dict[str, Any]]:
         """Take an action for each parallel environment.
 
         Args:
@@ -477,7 +473,7 @@ class AsyncVectorEnv(
 
     def step_wait(
         self, timeout: float | None = None
-    ) -> tuple[_ObsT, _VecF64, _VecBool, _VecBool, dict[str, Any]]:
+    ) -> tuple[VectorObsType, _VecF64, _VecBool, _VecBool, dict[str, Any]]:
         """Wait for the calls to :obj:`step` in each sub-environment to finish.
 
         Args:

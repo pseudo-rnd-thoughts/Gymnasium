@@ -9,26 +9,23 @@ from typing import Any, Generic, TypeAlias
 
 import numpy as np
 import numpy.typing as npt
-from typing_extensions import TypeVar
 
 import gymnasium as gym
+from gymnasium.typing import VectorActType, VectorObsType
 from gymnasium.vector.vector_env import VectorEnv, VectorWrapper
 from gymnasium.wrappers.utils import RunningMeanStd
 
 __all__ = ["NormalizeReward"]
 
 
-_ObsT_co = TypeVar("_ObsT_co", covariant=True)
-_ActT_contra = TypeVar("_ActT_contra", contravariant=True)
-
 _VecBool: TypeAlias = np.ndarray[tuple[int], np.dtype[np.bool_]]
 _VecF64: TypeAlias = np.ndarray[tuple[int], np.dtype[np.float64]]
 
 
 class NormalizeReward(
-    VectorWrapper[_ObsT_co, _ActT_contra, _VecF64, _VecBool],
+    VectorWrapper[VectorObsType, VectorActType, _VecF64, _VecBool],
     gym.utils.RecordConstructorArgs,
-    Generic[_ObsT_co, _ActT_contra],
+    Generic[VectorObsType, VectorActType],
 ):
     r"""This wrapper will scale rewards s.t. their exponential moving average has an approximately fixed variance.
 
@@ -86,8 +83,8 @@ class NormalizeReward(
     def __init__(
         self,
         env: VectorEnv[
-            _ObsT_co,
-            _ActT_contra,
+            VectorObsType,
+            VectorActType,
             npt.NDArray[np.floating],
             npt.NDArray[np.bool_],
         ],
@@ -126,15 +123,15 @@ class NormalizeReward(
         *,
         seed: int | None = None,
         options: dict[str, Any] | None = None,
-    ) -> tuple[_ObsT_co, dict[str, Any]]:
+    ) -> tuple[VectorObsType, dict[str, Any]]:
         """Resets the environment and clears accumulated reward tracking state."""
         self.accumulated_reward[:] = 0
         self._prev_dones[:] = 0
         return super().reset(seed=seed, options=options)
 
     def step(
-        self, actions: _ActT_contra
-    ) -> tuple[_ObsT_co, _VecF64, _VecBool, _VecBool, dict[str, Any]]:
+        self, actions: VectorActType
+    ) -> tuple[VectorObsType, _VecF64, _VecBool, _VecBool, dict[str, Any]]:
         """Steps through the environment, normalizing the reward returned."""
         obs, reward, terminated, truncated, info = super().step(actions)
         active = ~self._prev_dones.astype(bool)

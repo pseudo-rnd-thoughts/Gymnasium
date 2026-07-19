@@ -8,11 +8,12 @@ from __future__ import annotations
 from typing import Any, Generic, TypeAlias
 
 import numpy as np
-from typing_extensions import TypeVar
+import numpy.typing as npt
 
 import gymnasium as gym
 from gymnasium.logger import warn
 from gymnasium.spaces import Box
+from gymnasium.typing import BoolArrayType, RewardArrayType, VectorActType
 from gymnasium.vector.utils import batch_space
 from gymnasium.vector.vector_env import (
     AutoresetMode,
@@ -24,24 +25,23 @@ from gymnasium.wrappers.utils import RunningMeanStd
 __all__ = ["NormalizeObservation"]
 
 
-_ActT_contra = TypeVar("_ActT_contra", contravariant=True, default=Any)
-_RewardArrT_co = TypeVar("_RewardArrT_co", covariant=True, default=Any)
-_BoolArrT_co = TypeVar("_BoolArrT_co", covariant=True, default=Any)
-
-_VecF32: TypeAlias = np.ndarray[tuple[int], np.dtype[np.float32]]
-_VecFloat: TypeAlias = np.ndarray[tuple[int], np.dtype[np.floating]]
+# Shape-generic: the batched vector observation is (num_envs, *obs_shape), so
+# the rank depends on the sub-environment's observation (2-D for CartPole,
+# higher for images).
+_ArrF32: TypeAlias = npt.NDArray[np.float32]
+_ArrFloat: TypeAlias = npt.NDArray[np.floating]
 
 
 class NormalizeObservation(
     VectorObservationWrapper[
-        _VecF32,
-        _ActT_contra,
-        _RewardArrT_co,
-        _BoolArrT_co,
-        _VecFloat,
+        _ArrF32,
+        VectorActType,
+        RewardArrayType,
+        BoolArrayType,
+        _ArrFloat,
     ],
     gym.utils.RecordConstructorArgs,
-    Generic[_ActT_contra, _RewardArrT_co, _BoolArrT_co],
+    Generic[VectorActType, RewardArrayType, BoolArrayType],
 ):
     """This wrapper will normalize observations s.t. each coordinate is centered with unit variance.
 
@@ -81,15 +81,15 @@ class NormalizeObservation(
         >>> envs.close()
     """
 
-    single_observation_space: Box[np.float32]
-    observation_space: Box[np.float32]
+    single_observation_space: Box  # f32
+    observation_space: Box  # f32
     obs_rms: RunningMeanStd  # f32
     epsilon: float
     _update_running_mean: bool
 
     def __init__(
         self,
-        env: VectorEnv[_VecF32, _ActT_contra, _RewardArrT_co, _BoolArrT_co],
+        env: VectorEnv[_ArrFloat, VectorActType, RewardArrayType, BoolArrayType],
         epsilon: float = 1e-8,
     ) -> None:
         """This wrapper will normalize observations s.t. each coordinate is centered with unit variance.
@@ -143,7 +143,7 @@ class NormalizeObservation(
         *,
         seed: int | None = None,
         options: dict[str, Any] | None = None,
-    ) -> tuple[_VecF32, dict[str, Any]]:
+    ) -> tuple[_ArrF32, dict[str, Any]]:
         """Reset function for `NormalizeObservationWrapper` which is disabled for partial resets."""
         if options is not None and "reset_mask" in options:
             if not np.all(options["reset_mask"]):
@@ -152,7 +152,7 @@ class NormalizeObservation(
                 )
         return super().reset(seed=seed, options=options)
 
-    def observations(self, observations: _VecFloat) -> _VecF32:
+    def observations(self, observations: _ArrFloat) -> _ArrF32:
         """Defines the vector observation normalization function.
 
         Args:

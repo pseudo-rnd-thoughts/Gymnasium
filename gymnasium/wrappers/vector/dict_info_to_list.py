@@ -5,22 +5,21 @@ from __future__ import annotations
 from typing import Any, Generic
 
 import numpy as np
-from typing_extensions import TypeVar
 
+from gymnasium.typing import (
+    BoolArrayType,
+    RewardArrayType,
+    VectorActType,
+    VectorObsType,
+)
 from gymnasium.vector.vector_env import VectorEnv, VectorWrapper
 
 __all__ = ["DictInfoToList"]
 
 
-_ObsT_co = TypeVar("_ObsT_co", covariant=True, default=Any)
-_ActT_contra = TypeVar("_ActT_contra", contravariant=True, default=Any)
-_RewardArrT_co = TypeVar("_RewardArrT_co", covariant=True, default=Any)
-_BoolArrT_co = TypeVar("_BoolArrT_co", covariant=True, default=Any)
-
-
 class DictInfoToList(
-    VectorWrapper[_ObsT_co, _ActT_contra, _RewardArrT_co, _BoolArrT_co],
-    Generic[_ObsT_co, _ActT_contra, _RewardArrT_co, _BoolArrT_co],
+    VectorWrapper[VectorObsType, VectorActType, RewardArrayType, BoolArrayType],
+    Generic[VectorObsType, VectorActType, RewardArrayType, BoolArrayType],
 ):
     """Converts infos of vectorized environments from ``dict`` to ``List[dict]``.
 
@@ -76,7 +75,8 @@ class DictInfoToList(
     """
 
     def __init__(
-        self, env: VectorEnv[_ObsT_co, _ActT_contra, _RewardArrT_co, _BoolArrT_co]
+        self,
+        env: VectorEnv[VectorObsType, VectorActType, RewardArrayType, BoolArrayType],
     ) -> None:
         """This wrapper will convert the info into the list format.
 
@@ -87,9 +87,13 @@ class DictInfoToList(
 
     # ty reports an error because the last return is a `dict` in super but a `list` here
     def step(
-        self, actions: _ActT_contra
+        self, actions: VectorActType
     ) -> tuple[
-        _ObsT_co, _RewardArrT_co, _BoolArrT_co, _BoolArrT_co, list[dict[str, Any]]
+        VectorObsType,
+        RewardArrayType,
+        BoolArrayType,
+        BoolArrayType,
+        list[dict[str, Any]],
     ]:  # ty:ignore[invalid-method-override]
         """Steps through the environment, convert dict info to list."""
         observation, reward, terminated, truncated, infos = self.env.step(actions)
@@ -101,7 +105,7 @@ class DictInfoToList(
     # ty reports an error because the last return is a `dict` in super but a `list` here
     def reset(
         self, *, seed: int | None = None, options: dict[str, Any] | None = None
-    ) -> tuple[_ObsT_co, list[dict[str, Any]]]:  # ty:ignore[invalid-method-override]
+    ) -> tuple[VectorObsType, list[dict[str, Any]]]:  # ty:ignore[invalid-method-override]
         """Resets the environment using kwargs."""
         obs, infos = self.env.reset(seed=seed, options=options)
         assert isinstance(infos, dict)

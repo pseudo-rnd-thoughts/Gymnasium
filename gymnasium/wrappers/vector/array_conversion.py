@@ -5,9 +5,13 @@ from __future__ import annotations
 from types import ModuleType
 from typing import Any, Generic
 
-from typing_extensions import TypeVar
-
 import gymnasium as gym
+from gymnasium.typing import (
+    BoolArrayType,
+    RewardArrayType,
+    VectorActType,
+    VectorObsType,
+)
 from gymnasium.vector import VectorEnv, VectorWrapper
 from gymnasium.wrappers.array_conversion import (
     Device,
@@ -18,16 +22,10 @@ from gymnasium.wrappers.array_conversion import (
 __all__ = ["ArrayConversion"]
 
 
-_ObsT_co = TypeVar("_ObsT_co", covariant=True, default=Any)
-_ActT_contra = TypeVar("_ActT_contra", contravariant=True, default=Any)
-_RewardArrT_co = TypeVar("_RewardArrT_co", covariant=True, default=Any)
-_BoolArrT_co = TypeVar("_BoolArrT_co", covariant=True, default=Any)
-
-
 class ArrayConversion(
-    VectorWrapper[_ObsT_co, _ActT_contra, _RewardArrT_co, _BoolArrT_co],
+    VectorWrapper[VectorObsType, VectorActType, RewardArrayType, BoolArrayType],
     gym.utils.RecordConstructorArgs,
-    Generic[_ObsT_co, _ActT_contra, _RewardArrT_co, _BoolArrT_co],
+    Generic[VectorObsType, VectorActType, RewardArrayType, BoolArrayType],
 ):
     """Wraps a vector environment returning Array API compatible arrays so that it can be interacted with through a specific framework.
 
@@ -46,7 +44,7 @@ class ArrayConversion(
 
     def __init__(
         self,
-        env: VectorEnv[_ObsT_co, _ActT_contra, _RewardArrT_co, _BoolArrT_co],
+        env: VectorEnv[VectorObsType, VectorActType, RewardArrayType, BoolArrayType],
         env_xp: ModuleType,
         target_xp: ModuleType,
         env_device: Device | None = None,
@@ -69,8 +67,10 @@ class ArrayConversion(
         self._target_device = target_device
 
     def step(
-        self, actions: _ActT_contra
-    ) -> tuple[_ObsT_co, _RewardArrT_co, _BoolArrT_co, _BoolArrT_co, dict[str, Any]]:
+        self, actions: VectorActType
+    ) -> tuple[
+        VectorObsType, RewardArrayType, BoolArrayType, BoolArrayType, dict[str, Any]
+    ]:
         """Transforms the action to the specified xp module array type.
 
         Args:
@@ -97,7 +97,7 @@ class ArrayConversion(
         *,
         seed: int | None = None,
         options: dict[str, Any] | None = None,
-    ) -> tuple[_ObsT_co, dict[str, Any]]:
+    ) -> tuple[VectorObsType, dict[str, Any]]:
         """Resets the environment returning xp-based observation and info.
 
         Args:
