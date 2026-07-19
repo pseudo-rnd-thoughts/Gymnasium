@@ -157,5 +157,30 @@ unresolved-attribute = "warn"             # TODO remove
 unresolved-import = "warn"                # TODO remove
 unsupported-operator = "warn"             # TODO remove
 
+# Ratchet: these folders are type-clean, so the warn-level rules above are
+# promoted to errors here to prevent regressions. Extend `include` as further
+# folders are cleaned up; once all of gymnasium is covered, delete this block
+# and remove the "warn" overrides above. `unresolved-import` stays at "warn"
+# because optional dependencies are not installed in every check environment.
+[[tool.ty.overrides]]
+include = [
+    "gymnasium/core.py",
+    "gymnasium/spaces/**",
+    "gymnasium/utils/**",
+    "gymnasium/experimental/**",
+    "gymnasium/wrappers/**",
+]
+exclude = ["gymnasium/wrappers/vector/**"]
+
+[tool.ty.overrides.rules]
+invalid-argument-type = "error"
+invalid-assignment = "error"
+invalid-method-override = "error"
+invalid-return-type = "error"
+missing-argument = "error"
+unresolved-attribute = "error"
+unsupported-operator = "error"
+unused-ignore-comment = "error"
+
 [tool.pytest.ini_options]
 filterwarnings = ["ignore::DeprecationWarning:gymnasium.*:"]
