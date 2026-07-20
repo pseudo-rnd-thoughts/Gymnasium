@@ -5,7 +5,7 @@ permalink: https://perma.cc/C9ZM-652R
 """
 
 import math
-from typing import Any, TypeAlias
+from typing import Any, TypeAlias, cast
 
 import numpy as np
 
@@ -116,7 +116,7 @@ class CartPoleEnv(gym.Env[np.ndarray, int | np.ndarray]):
     * v0: Initial versions release.
     """
 
-    metadata = {
+    metadata: dict[str, Any] = {
         "render_modes": ["human", "rgb_array"],
         "render_fps": 50,
     }
@@ -152,7 +152,7 @@ class CartPoleEnv(gym.Env[np.ndarray, int | np.ndarray]):
             dtype=np.float32,
         )
 
-        self.action_space = spaces.Discrete(2)
+        self.action_space = cast("spaces.Space[int | np.ndarray]", spaces.Discrete(2))
         self.observation_space = spaces.Box(-high, high, dtype=np.float32)
 
         self.render_mode = render_mode
@@ -426,7 +426,7 @@ class CartPoleVectorEnv(
         self.steps_beyond_terminated = None
 
     def step(
-        self, action: VectorIntArray
+        self, actions: VectorIntArray
     ) -> tuple[
         VectorFloat32Matrix,
         VectorFloat32Array,
@@ -434,13 +434,13 @@ class CartPoleVectorEnv(
         VectorBoolArray,
         dict[str, Any],
     ]:
-        assert self.action_space.contains(action), (
-            f"{action!r} ({type(action)}) invalid"
+        assert self.action_space.contains(actions), (
+            f"{actions!r} ({type(actions)}) invalid"
         )
         assert self.state is not None, "Call reset before using step method."
 
         x, x_dot, theta, theta_dot = self.state
-        force = np.sign(action - 0.5) * self.force_mag
+        force = np.sign(actions - 0.5) * self.force_mag
         costheta = np.cos(theta)
         sintheta = np.sin(theta)
 

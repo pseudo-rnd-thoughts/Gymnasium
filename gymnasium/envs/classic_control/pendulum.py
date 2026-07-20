@@ -1,6 +1,7 @@
 __credits__ = ["Carlos Luis"]
 
 from os import path
+from typing import Any
 
 import numpy as np
 
@@ -13,7 +14,7 @@ DEFAULT_X = np.pi
 DEFAULT_Y = 1.0
 
 
-class PendulumEnv(gym.Env):
+class PendulumEnv(gym.Env[np.ndarray, np.ndarray]):
     """
     ## Description
 
@@ -94,7 +95,7 @@ class PendulumEnv(gym.Env):
     * v0: Initial versions release
     """
 
-    metadata = {
+    metadata: dict[str, Any] = {
         "render_modes": ["human", "rgb_array"],
         "render_fps": 30,
     }
@@ -123,7 +124,7 @@ class PendulumEnv(gym.Env):
         )
         self.observation_space = spaces.Box(low=-high, high=high, dtype=np.float32)
 
-    def step(self, u):
+    def step(self, action):
         th, thdot = self.state  # th := theta
 
         g = self.g
@@ -131,7 +132,7 @@ class PendulumEnv(gym.Env):
         l = self.l
         dt = self.dt
 
-        u = np.clip(u, -self.max_torque, self.max_torque)[0]
+        u = np.clip(action, -self.max_torque, self.max_torque)[0]
         self.last_u = u  # for rendering
         costs = angle_normalize(th) ** 2 + 0.1 * thdot**2 + 0.001 * (u**2)
 
@@ -153,8 +154,8 @@ class PendulumEnv(gym.Env):
         else:
             # Note that if you use custom reset bounds, it may lead to out-of-bound
             # state/observations.
-            x = options.get("x_init") if "x_init" in options else DEFAULT_X
-            y = options.get("y_init") if "y_init" in options else DEFAULT_Y
+            x = options["x_init"] if "x_init" in options else DEFAULT_X
+            y = options["y_init"] if "y_init" in options else DEFAULT_Y
             x = utils.verify_number_and_cast(x)
             y = utils.verify_number_and_cast(y)
             high = np.array([x, y])

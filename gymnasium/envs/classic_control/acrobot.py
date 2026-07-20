@@ -1,5 +1,7 @@
 """classic Acrobot task"""
 
+from typing import Any
+
 import numpy as np
 from numpy import cos, pi, sin
 
@@ -139,7 +141,7 @@ class AcrobotEnv(Env):
     - Sutton, R. S., Barto, A. G. (2018 ). Reinforcement Learning: An Introduction. The MIT Press.
     """
 
-    metadata = {
+    metadata: dict[str, Any] = {
         "render_modes": ["human", "rgb_array"],
         "render_fps": 15,
     }
@@ -199,10 +201,10 @@ class AcrobotEnv(Env):
             self.render()
         return self._get_ob(), {}
 
-    def step(self, a):
+    def step(self, action):
         s = self.state
         assert s is not None, "Call reset before using AcrobotEnv object."
-        torque = self.AVAIL_TORQUE[a]
+        torque = self.AVAIL_TORQUE[action]
 
         # Add noise to the force action
         if self.torque_noise_max > 0:

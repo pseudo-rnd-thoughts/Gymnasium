@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from os import path
-from typing import TYPE_CHECKING, NamedTuple, TypeAlias
+from typing import TYPE_CHECKING, NamedTuple, TypeAlias, cast
 
 import jax
 import jax.numpy as jnp
@@ -29,13 +29,13 @@ class RenderStateType(NamedTuple):
     nS: int
     cell_size: tuple[int, int]
     cliff: np.ndarray
-    elf_images: tuple[pygame.Surface, pygame.Surface, pygame.Surface, pygame.Surface]
+    elf_images: tuple[pygame.Surface, ...]
     start_img: pygame.Surface
     goal_img: pygame.Surface
-    bg_imgs: tuple[str, str]
-    mountain_bg_img: tuple[pygame.Surface, pygame.Surface]
-    near_cliff_imgs: tuple[str, str]
-    near_cliff_img: tuple[pygame.Surface, pygame.Surface]
+    bg_imgs: tuple[str, ...]
+    mountain_bg_img: tuple[pygame.Surface, ...]
+    near_cliff_imgs: tuple[str, ...]
+    near_cliff_img: tuple[pygame.Surface, ...]
     cliff_img: pygame.Surface
 
 
@@ -141,7 +141,7 @@ class CliffWalkingFunctional(
         "autoreset_mode": AutoresetMode.NEXT_STEP,
     }
 
-    def transition(
+    def transition(  # ty: ignore[invalid-method-override]  # jax-specific signature over generic FuncEnv base
         self,
         state: EnvState,
         action: jax.Array,
@@ -177,30 +177,36 @@ class CliffWalkingFunctional(
         )
         new_state = EnvState(
             player_position=new_position.reshape((2,)),
-            last_action=action[0],
+            last_action=cast("int", action[0]),
             fallen=fallen,
         )
 
         return new_state
 
-    def initial(self, rng: PRNGKeyType, params: None = None) -> EnvState:
+    def initial(  # ty: ignore[invalid-method-override]  # jax-specific signature over generic FuncEnv base
+        self, rng: PRNGKeyType, params: None = None
+    ) -> EnvState:
         """Cliffwalking initial observation function."""
         player_position = jnp.array([3, 0])
 
         state = EnvState(player_position=player_position, last_action=-1, fallen=False)
         return state
 
-    def observation(self, state: EnvState, params: None = None) -> jax.Array:
+    def observation(  # ty: ignore[invalid-method-override]  # jax-specific signature over generic FuncEnv base
+        self, state: EnvState, params: None = None
+    ) -> jax.Array:
         """Cliffwalking observation."""
         return jnp.array(
             state.player_position[0] * 12 + state.player_position[1]
         ).reshape((1,))
 
-    def terminal(self, state: EnvState, params: None = None) -> jax.Array:
+    def terminal(  # ty: ignore[invalid-method-override]  # jax-specific signature over generic FuncEnv base
+        self, state: EnvState, params: None = None
+    ) -> jax.Array:
         """Determines if a particular Cliffwalking observation is terminal."""
         return jnp.array_equal(state.player_position, jnp.array([3, 11]))
 
-    def reward(
+    def reward(  # ty: ignore[invalid-method-override]  # jax-specific signature over generic FuncEnv base
         self,
         state: EnvState,
         action: ActType,
@@ -215,7 +221,7 @@ class CliffWalkingFunctional(
         reward = -1 + (-99 * state.fallen[0])
         return jax.lax.convert_element_type(reward, jnp.float32)
 
-    def render_init(
+    def render_init(  # ty: ignore[invalid-method-override]  # jax-specific signature over generic FuncEnv base
         self, screen_width: int = 600, screen_height: int = 500
     ) -> RenderStateType:
         """Returns an initial render state."""
@@ -328,7 +334,7 @@ class CliffWalkingFunctional(
         for s in range(nS):
             row, col = np.unravel_index(s, shape)
             pos = (col * cell_size[0], row * cell_size[1])
-            check_board_mask = row % 2 ^ col % 2
+            check_board_mask = cast("int", row % 2) ^ cast("int", col % 2)
             window_surface.blit(mountain_bg_img[check_board_mask], pos)
 
             if cliff[row, col]:
@@ -348,7 +354,9 @@ class CliffWalkingFunctional(
             np.array(pygame.surfarray.pixels3d(window_surface)), axes=(1, 0, 2)
         )
 
-    def render_close(self, render_state: RenderStateType) -> None:
+    def render_close(  # ty: ignore[invalid-method-override]  # jax-specific signature over generic FuncEnv base
+        self, render_state: RenderStateType
+    ) -> None:
         """Closes the render state."""
         try:
             import pygame

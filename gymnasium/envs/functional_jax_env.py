@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Any, Generic, TypeAlias
+from collections.abc import Callable
+from typing import Any, Generic, Protocol, TypeAlias, cast
 
 import jax
 import jax.numpy as jnp
@@ -16,6 +17,45 @@ from gymnasium.vector import AutoresetMode
 from gymnasium.vector.utils import batch_space
 
 PRNGKeyType: TypeAlias = jax.Array
+
+
+class _TransformedFuncEnv(Protocol, Generic[StateType, ObsType, ActType]):
+    """Static view of a :class:`FuncEnv` as used by the Jax env wrappers.
+
+    ``FuncEnv.transform`` rebinds the instance methods at runtime (documented with
+    ``ty: ignore`` comments there), so the bound-method signatures inferred from the
+    class no longer describe the call sites below. This Protocol restates the call
+    signatures actually used here so they can be checked statically.
+    """
+
+    observation_space: gym.Space
+    action_space: gym.Space
+
+    def initial(self, rng: Any) -> StateType: ...
+
+    def observation(self, state: StateType, rng: Any) -> ObsType: ...
+
+    def transition(self, state: StateType, action: ActType, rng: Any) -> StateType: ...
+
+    def reward(
+        self, state: StateType, action: ActType, next_state: StateType, rng: Any
+    ) -> Any: ...
+
+    def terminal(self, state: StateType, rng: Any) -> Any: ...
+
+    def state_info(self, state: StateType) -> dict: ...
+
+    def transition_info(
+        self, state: StateType, action: ActType, next_state: StateType
+    ) -> dict: ...
+
+    def transform(self, func: Callable[[Callable], Callable]) -> None: ...
+
+    def render_init(self) -> Any: ...
+
+    def render_image(self, state: StateType, render_state: Any) -> tuple[Any, Any]: ...
+
+    def render_close(self, render_state: Any) -> None: ...
 
 
 class FunctionalJaxEnv(gym.Env, Generic[StateType]):
@@ -36,7 +76,9 @@ class FunctionalJaxEnv(gym.Env, Generic[StateType]):
             # metadata.get("jax", False) can be used downstream to know that the environment returns jax arrays
             metadata = {"render_mode": [], "jax": True}
 
-        self.func_env = func_env
+        self.func_env: _TransformedFuncEnv[StateType, Any, Any] = cast(
+            "_TransformedFuncEnv[StateType, Any, Any]", func_env
+        )
 
         self.observation_space = func_env.observation_space
         self.action_space = func_env.action_space
@@ -122,7 +164,9 @@ class FunctionalJaxVectorEnv(
         super().__init__()
         if metadata is None:
             metadata = {"autoreset_mode": AutoresetMode.NEXT_STEP}
-        self.func_env = func_env
+        self.func_env: _TransformedFuncEnv[StateType, ObsType, ActType] = cast(
+            "_TransformedFuncEnv[StateType, ObsType, ActType]", func_env
+        )
         self.num_envs = num_envs
 
         self.single_observation_space = func_env.observation_space
@@ -171,7 +215,7 @@ class FunctionalJaxVectorEnv(
 
         return obs, info
 
-    def step(self, action: ActType):
+    def step(self, actions: ActType) -> tuple[ObsType, Any, Any, Any, dict[str, Any]]:
         """Steps through the environment using the action."""
         self.steps += 1
 
@@ -179,8 +223,8 @@ class FunctionalJaxVectorEnv(
 
         rng = jrng.split(rng, self.num_envs)
 
-        next_state = self.func_env.transition(self.state, action, rng)
-        reward = self.func_env.reward(self.state, action, next_state, rng)
+        next_state = self.func_env.transition(self.state, actions, rng)
+        reward = self.func_env.reward(self.state, actions, next_state, rng)
 
         terminated = self.func_env.terminal(next_state, rng)
         truncated = (
@@ -189,7 +233,7 @@ class FunctionalJaxVectorEnv(
             else jnp.zeros_like(terminated)
         )
 
-        info = self.func_env.transition_info(self.state, action, next_state)
+        info = self.func_env.transition_info(self.state, actions, next_state)
 
         if jnp.any(self.prev_done):
             to_reset = jnp.where(self.prev_done)[0]
@@ -200,7 +244,8 @@ class FunctionalJaxVectorEnv(
 
             new_initials = self.func_env.initial(rng)
 
-            next_state = self.state.at[to_reset].set(new_initials)
+            # ``StateType`` is a jax array at runtime, exposing the functional ``.at`` API
+            next_state = self.state.at[to_reset].set(new_initials)  # ty: ignore[unresolved-attribute]
             self.steps = self.steps.at[to_reset].set(0)
             terminated = terminated.at[to_reset].set(False)
             truncated = truncated.at[to_reset].set(False)

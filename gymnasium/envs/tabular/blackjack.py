@@ -2,7 +2,7 @@
 
 import math
 import os
-from typing import TYPE_CHECKING, NamedTuple, TypeAlias
+from typing import TYPE_CHECKING, NamedTuple, TypeAlias, cast
 
 import jax
 import jax.numpy as jnp
@@ -13,7 +13,7 @@ from jax import random
 from gymnasium import spaces
 from gymnasium.envs.functional_jax_env import FunctionalJaxEnv
 from gymnasium.error import DependencyNotInstalled
-from gymnasium.experimental.functional import ActType, FuncEnv, StateType
+from gymnasium.experimental.functional import FuncEnv
 from gymnasium.utils import EzPickle, seeding
 from gymnasium.vector import AutoresetMode
 from gymnasium.wrappers import HumanRendering
@@ -246,7 +246,7 @@ class BlackjackFunctional(
         "autoreseet-mode": AutoresetMode.NEXT_STEP,
     }
 
-    def transition(
+    def transition(  # ty: ignore[invalid-method-override]  # jax-specific signature over generic FuncEnv base
         self,
         state: EnvState,
         action: int | jax.Array,
@@ -276,7 +276,7 @@ class BlackjackFunctional(
 
         return new_state
 
-    def initial(
+    def initial(  # ty: ignore[invalid-method-override]  # jax-specific signature over generic FuncEnv base
         self,
         rng: PRNGKeyType,
         params: BlackJackParams | type[BlackJackParams] = BlackJackParams,
@@ -299,10 +299,10 @@ class BlackjackFunctional(
 
         return state
 
-    def observation(
+    def observation(  # ty: ignore[invalid-method-override]  # jax-specific signature over generic FuncEnv base
         self,
         state: EnvState,
-        rng: PRNGKeyType,
+        rng: PRNGKeyType | None,
         params: BlackJackParams | type[BlackJackParams] = BlackJackParams,
     ) -> jax.Array:
         """Blackjack observation."""
@@ -315,19 +315,19 @@ class BlackjackFunctional(
             dtype=np.int32,
         )
 
-    def terminal(
+    def terminal(  # ty: ignore[invalid-method-override]  # jax-specific signature over generic FuncEnv base
         self,
         state: EnvState,
         rng: PRNGKeyType,
         params: BlackJackParams | type[BlackJackParams] = BlackJackParams,
     ) -> jax.Array:
         """Determines if a particular Blackjack observation is terminal."""
-        return (state.done) > 0
+        return cast("jax.Array", state.done > 0)
 
-    def reward(
+    def reward(  # ty: ignore[invalid-method-override]  # jax-specific signature over generic FuncEnv base
         self,
         state: EnvState,
-        action: ActType,
+        action: int | jax.Array,
         next_state: EnvState,
         rng: PRNGKeyType,
         params: BlackJackParams | type[BlackJackParams] = BlackJackParams,
@@ -360,7 +360,7 @@ class BlackjackFunctional(
             reward = reward * jnp.logical_not(condition) + 1 * condition
         return reward
 
-    def render_init(
+    def render_init(  # ty: ignore[invalid-method-override]  # jax-specific signature over generic FuncEnv base
         self, screen_width: int = 600, screen_height: int = 500
     ) -> RenderStateType:
         """Returns an initial render state."""
@@ -382,9 +382,9 @@ class BlackjackFunctional(
 
         return screen, dealer_top_card_value_str, dealer_top_card_suit
 
-    def render_image(
+    def render_image(  # ty: ignore[invalid-method-override]  # jax-specific signature over generic FuncEnv base
         self,
-        state: StateType,
+        state: EnvState,
         render_state: RenderStateType,
         params: BlackJackParams | type[BlackJackParams] = BlackJackParams,
     ) -> tuple[RenderStateType, np.ndarray]:
@@ -397,7 +397,7 @@ class BlackjackFunctional(
             ) from e
         screen, dealer_top_card_value_str, dealer_top_card_suit = render_state
 
-        player_sum, dealer_card_value, usable_ace = self.observation(state, None)
+        player_sum, dealer_card_value, usable_ace = self.observation(state, None)  # ty: ignore[missing-argument, invalid-argument-type]  # `observation` resolves to unbound FuncEnv base via transform() reassignment
         screen_width, screen_height = 600, 500
         card_img_height = screen_height // 3
         card_img_width = int(card_img_height * 142 / 197)
@@ -493,7 +493,7 @@ class BlackjackFunctional(
             np.array(pygame.surfarray.pixels3d(screen)), axes=(1, 0, 2)
         )
 
-    def render_close(
+    def render_close(  # ty: ignore[invalid-method-override]  # jax-specific signature over generic FuncEnv base
         self,
         render_state: RenderStateType,
         params: BlackJackParams | type[BlackJackParams] = BlackJackParams,

@@ -95,7 +95,7 @@ class CliffWalkingEnv(Env):
 
     """
 
-    metadata = {
+    metadata: dict[str, Any] = {
         "render_modes": ["human", "rgb_array", "ansi"],
         "render_fps": 4,
     }
@@ -158,7 +158,7 @@ class CliffWalkingEnv(Env):
         return coord
 
     def _calculate_transition_prob(
-        self, current: list[int] | np.ndarray, move: int
+        self, current: list[int] | tuple[Any, ...] | np.ndarray, move: int
     ) -> list[tuple[float, Any, int, bool]]:
         """Determine the outcome for an action. Transition Prob is always 1.0.
 
@@ -190,12 +190,12 @@ class CliffWalkingEnv(Env):
                 outcomes.append((1 / len(deltas), new_state, -1, is_terminated))
         return outcomes
 
-    def step(self, a):
-        transitions = self.P[self.s][a]
+    def step(self, action):
+        transitions = self.P[self.s][action]
         i = categorical_sample([t[0] for t in transitions], self.np_random)
         p, s, r, t = transitions[i]
         self.s = s
-        self.lastaction = a
+        self.lastaction = action
 
         if self.render_mode == "human":
             self.render()
@@ -291,7 +291,7 @@ class CliffWalkingEnv(Env):
         for s in range(self.nS):
             row, col = np.unravel_index(s, self.shape)
             pos = (col * self.cell_size[0], row * self.cell_size[1])
-            check_board_mask = row % 2 ^ col % 2
+            check_board_mask = int(row % 2) ^ int(col % 2)
             self.window_surface.blit(self.mountain_bg_img[check_board_mask], pos)
 
             if self._cliff[row, col]:

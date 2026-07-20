@@ -1,5 +1,6 @@
 import os
 import time
+from typing import cast
 
 import glfw
 import imageio
@@ -797,8 +798,8 @@ class MujocoRenderer:
                 self.viewer = OffScreenViewer(
                     self.model,
                     self.data,
-                    self.width,
-                    self.height,
+                    cast(int, self.width),
+                    cast(int, self.height),
                     self.max_geom,
                     self._vopt,
                 )

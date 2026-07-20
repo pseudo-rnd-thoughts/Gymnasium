@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from os import path
-from typing import TYPE_CHECKING, Any, TypeAlias
+from typing import TYPE_CHECKING, Any, TypeAlias, cast
 
 import jax
 import jax.numpy as jnp
@@ -50,7 +50,7 @@ class PendulumFunctional(
     observation_space = gym.spaces.Box(-np.inf, np.inf, shape=(3,), dtype=np.float32)
     action_space = gym.spaces.Box(-max_torque, max_torque, shape=(1,), dtype=np.float32)
 
-    def initial(
+    def initial(  # ty: ignore[invalid-method-override]
         self,
         rng: PRNGKeyType,
         params: PendulumParams | type[PendulumParams] = PendulumParams,
@@ -59,7 +59,7 @@ class PendulumFunctional(
         high = jnp.array([params.high_x, params.high_y])
         return jax.random.uniform(key=rng, minval=-high, maxval=high, shape=high.shape)
 
-    def transition(
+    def transition(  # ty: ignore[invalid-method-override]
         self,
         state: StateType,
         action: int | jax.Array,
@@ -84,7 +84,7 @@ class PendulumFunctional(
         new_state = jnp.array([newth, newthdot])
         return new_state
 
-    def observation(
+    def observation(  # ty: ignore[invalid-method-override]
         self,
         state: StateType,
         rng: Any,
@@ -94,7 +94,7 @@ class PendulumFunctional(
         theta, thetadot = state
         return jnp.array([jnp.cos(theta), jnp.sin(theta), thetadot])
 
-    def reward(
+    def reward(  # ty: ignore[invalid-method-override]
         self,
         state: StateType,
         action: ActType,
@@ -106,14 +106,14 @@ class PendulumFunctional(
         th, thdot = state  # th := theta
         u = action
 
-        u = jnp.clip(u, -self.max_torque, self.max_torque)[0]
+        u = jnp.clip(cast("jax.Array", u), -self.max_torque, self.max_torque)[0]
 
         th_normalized = ((th + jnp.pi) % (2 * jnp.pi)) - jnp.pi
         costs = th_normalized**2 + 0.1 * thdot**2 + 0.001 * (u**2)
 
         return -costs
 
-    def terminal(
+    def terminal(  # ty: ignore[invalid-method-override]
         self,
         state: StateType,
         rng: Any,
@@ -122,7 +122,7 @@ class PendulumFunctional(
         """Determines if the state is a terminal state."""
         return False
 
-    def render_image(
+    def render_image(  # ty: ignore[invalid-method-override]
         self,
         state: StateType,
         render_state: RenderStateType,
@@ -151,7 +151,7 @@ class PendulumFunctional(
         coords = [(l, b), (l, t), (r, t), (r, b)]
         transformed_coords = []
         for c in coords:
-            c = pygame.math.Vector2(c).rotate_rad(state[0] + np.pi / 2)
+            c = pygame.math.Vector2(c).rotate_rad(cast("float", state[0] + np.pi / 2))
             c = (c[0] + offset, c[1] + offset)
             transformed_coords.append(c)
         gfxdraw.aapolygon(surf, transformed_coords, (204, 77, 77))
@@ -161,7 +161,9 @@ class PendulumFunctional(
         gfxdraw.filled_circle(surf, offset, offset, int(rod_width / 2), (204, 77, 77))
 
         rod_end = (rod_length, 0)
-        rod_end = pygame.math.Vector2(rod_end).rotate_rad(state[0] + np.pi / 2)
+        rod_end = pygame.math.Vector2(rod_end).rotate_rad(
+            cast("float", state[0] + np.pi / 2)
+        )
         rod_end = (int(rod_end[0] + offset), int(rod_end[1] + offset))
         gfxdraw.aacircle(
             surf, rod_end[0], rod_end[1], int(rod_width / 2), (204, 77, 77)
@@ -197,7 +199,7 @@ class PendulumFunctional(
             np.array(pygame.surfarray.pixels3d(screen)), axes=(1, 0, 2)
         )
 
-    def render_init(
+    def render_init(  # ty: ignore[invalid-method-override]
         self,
         screen_width: int = 600,
         screen_height: int = 400,
@@ -217,7 +219,7 @@ class PendulumFunctional(
 
         return screen, clock, None
 
-    def render_close(
+    def render_close(  # ty: ignore[invalid-method-override]
         self,
         render_state: RenderStateType,
         params: PendulumParams | type[PendulumParams] = PendulumParams,
