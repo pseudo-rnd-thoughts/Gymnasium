@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
-from typing import Any, Literal, NamedTuple
+from typing import Any, Literal, NamedTuple, cast
 
 import numpy as np
 from numpy.typing import NDArray
 
 import gymnasium as gym
-from gymnasium.spaces import Box, Discrete
 from gymnasium.spaces.space import Space
 
 
@@ -46,8 +45,8 @@ class Graph(Space[GraphInstance]):
                [1, 1]], dtype=int32))
     """
 
-    node_space: Box | Discrete
-    edge_space: Box | Discrete | None
+    node_space: Space[Any]
+    edge_space: Space[Any] | None
 
     def __init__(
         self,
@@ -145,7 +144,7 @@ class Graph(Space[GraphInstance]):
                 return (
                     super().seed(seed[0]),
                     self.node_space.seed(seed[1]),
-                    self.edge_space.seed(seed[2]),  # ty:ignore[index-out-of-bounds]
+                    self.edge_space.seed(seed[2]),
                 )
         else:
             raise TypeError(
@@ -311,7 +310,11 @@ class Graph(Space[GraphInstance]):
         for sample in sample_n:
             ret = {"nodes": self.batch_node_space.to_jsonable([sample.nodes])}
             if sample.edges is not None and sample.edge_links is not None:
-                ret["edges"] = self.batch_edge_space.to_jsonable([sample.edges])
+                # `batch_edge_space` is non-None whenever a sample has edges (both are set
+                # together with `edge_space` in `__init__`).
+                ret["edges"] = cast("Space[Any]", self.batch_edge_space).to_jsonable(
+                    [sample.edges]
+                )
                 ret["edge_links"] = sample.edge_links.tolist()
             ret_n.append(ret)
         return ret_n
@@ -326,7 +329,9 @@ class Graph(Space[GraphInstance]):
                 assert self.edge_space is not None
                 ret_n = GraphInstance(
                     self.batch_node_space.from_jsonable(sample["nodes"])[0],
-                    self.batch_edge_space.from_jsonable(sample["edges"])[0],
+                    cast("Space[Any]", self.batch_edge_space).from_jsonable(
+                        sample["edges"]
+                    )[0],
                     np.asarray(sample["edge_links"], dtype=np.int32),
                 )
             else:

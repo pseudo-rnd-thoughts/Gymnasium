@@ -1,7 +1,7 @@
 __credits__ = ["Andrea PIERRÉ"]
 
 import math
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
@@ -9,7 +9,10 @@ import gymnasium as gym
 from gymnasium import error, spaces
 from gymnasium.error import DependencyNotInstalled
 from gymnasium.utils import EzPickle
-from gymnasium.utils.step_api_compatibility import step_api_compatibility
+from gymnasium.utils.step_api_compatibility import (
+    TerminatedTruncatedStepType,
+    step_api_compatibility,
+)
 
 try:
     import Box2D
@@ -204,7 +207,7 @@ class LunarLander(gym.Env, EzPickle):
     Created by Oleg Klimov
     """
 
-    metadata = {
+    metadata: dict[str, Any] = {
         "render_modes": ["human", "rgb_array"],
         "render_fps": FPS,
     }
@@ -247,7 +250,7 @@ class LunarLander(gym.Env, EzPickle):
 
         self.enable_wind = enable_wind
 
-        self.screen: pygame.Surface = None
+        self.screen: pygame.Surface | None = None
         self.clock = None
         self.isopen = True
         self.world = Box2D.b2World(gravity=(0, gravity))
@@ -848,8 +851,10 @@ def demo_heuristic_lander(env, seed=None, render=False):
     s, info = env.reset(seed=seed)
     while True:
         a = heuristic(env, s)
-        s, r, terminated, truncated, info = step_api_compatibility(env.step(a), True)
-        total_reward += r
+        s, r, terminated, truncated, info = cast(
+            TerminatedTruncatedStepType, step_api_compatibility(env.step(a), True)
+        )
+        total_reward += float(r)
 
         if render:
             still_open = env.render()

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import typing
 from collections.abc import Iterable
-from typing import Any, TypeVar, overload
+from typing import Any, TypeVar, cast, overload
 
 import numpy as np
 
@@ -13,7 +13,7 @@ from gymnasium.spaces.space import Space
 _T_co = TypeVar("_T_co", covariant=True)
 
 
-class Tuple(Space[tuple[_T_co, ...]], typing.Sequence[_T_co]):
+class Tuple(Space[tuple[_T_co, ...]], typing.Sequence[Space[_T_co]]):
     """A tuple (more precisely: the cartesian product) of :class:`Space` instances.
 
     Elements of this space are tuples of elements of the constituent spaces.
@@ -86,7 +86,7 @@ class Tuple(Space[tuple[_T_co, ...]], typing.Sequence[_T_co]):
                 )
 
             return tuple(
-                space.seed(subseed)
+                space.seed(cast("int", subseed))
                 for subseed, space in zip(seed, self.spaces, strict=True)
             )
         else:

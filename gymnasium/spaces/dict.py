@@ -121,8 +121,10 @@ class Dict(
                     f"Dict space element is not an instance of Space: key='{key}', space={space}"
                 )
 
-        # None for shape and dtype, since it'll require special handling
-        super().__init__(None, None, seed)  # type: ignore
+        # None for shape and dtype, since it'll require special handling.
+        # `seed` may be a dict for composite spaces; `Space.__init__` forwards it to the
+        # overridden `Dict.seed`, which accepts a dict, so the narrower base signature is safe.
+        super().__init__(None, None, seed)  # ty: ignore[invalid-argument-type]
 
     @property
     def is_np_flattenable(self) -> bool:

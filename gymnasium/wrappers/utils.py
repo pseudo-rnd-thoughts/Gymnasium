@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from functools import singledispatch
-from typing import TypeVar
+from typing import TypeVar, cast
 
 import numpy as np
 
@@ -187,6 +187,7 @@ def rescale_box(
                 f"Expected new_min to be an integer, float, or numpy array, got {type(new_min)}"
             )
         new_min = np.full(box.shape, new_min)
+    new_min = cast(np.ndarray, new_min)
     if new_min.shape != box.shape:
         raise ValueError(
             f"Expected new_min.shape to be {box.shape}, got {new_min.shape}"
@@ -201,6 +202,7 @@ def rescale_box(
                 f"Expected new_max to be an integer, float, or numpy array, got {type(new_max)}"
             )
         new_max = np.full(box.shape, new_max)
+    new_max = cast(np.ndarray, new_max)
     if new_max.shape != box.shape:
         raise ValueError(
             f"Expected new_max.shape to be {box.shape}, got {new_max.shape}"

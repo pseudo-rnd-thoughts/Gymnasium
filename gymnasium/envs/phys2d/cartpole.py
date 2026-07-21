@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, TypeAlias
+from typing import TYPE_CHECKING, Any, TypeAlias, cast
 
 import jax
 import jax.numpy as jnp
@@ -54,7 +54,7 @@ class CartPoleFunctional(
     observation_space = gym.spaces.Box(-np.inf, np.inf, shape=(4,), dtype=np.float32)
     action_space = gym.spaces.Discrete(2)
 
-    def initial(
+    def initial(  # ty: ignore[invalid-method-override]
         self,
         rng: PRNGKeyType,
         params: CartPoleParams | type[CartPoleParams] = CartPoleParams,
@@ -64,7 +64,7 @@ class CartPoleFunctional(
             key=rng, minval=-params.x_init, maxval=params.x_init, shape=(4,)
         )
 
-    def transition(
+    def transition(  # ty: ignore[invalid-method-override]
         self,
         state: StateType,
         action: int | jax.Array,
@@ -97,7 +97,7 @@ class CartPoleFunctional(
 
         return state
 
-    def observation(
+    def observation(  # ty: ignore[invalid-method-override]
         self,
         state: StateType,
         rng: Any,
@@ -106,7 +106,7 @@ class CartPoleFunctional(
         """Cartpole observation."""
         return state
 
-    def terminal(
+    def terminal(  # ty: ignore[invalid-method-override]
         self,
         state: StateType,
         rng: Any,
@@ -124,7 +124,7 @@ class CartPoleFunctional(
 
         return terminated
 
-    def reward(
+    def reward(  # ty: ignore[invalid-method-override]
         self,
         state: StateType,
         action: ActType,
@@ -150,7 +150,7 @@ class CartPoleFunctional(
 
         return reward
 
-    def render_image(
+    def render_image(  # ty: ignore[invalid-method-override]
         self,
         state: StateType,
         render_state: RenderStateType,
@@ -180,7 +180,9 @@ class CartPoleFunctional(
 
         l, r, t, b = -cartwidth / 2, cartwidth / 2, cartheight / 2, -cartheight / 2
         axleoffset = cartheight / 4.0
-        cartx = x[0] * scale + params.screen_width / 2.0  # MIDDLE OF CART
+        cartx = cast(
+            "float", x[0] * scale + params.screen_width / 2.0
+        )  # MIDDLE OF CART
         carty = 100  # TOP OF CART
         cart_coords = [(l, b), (l, t), (r, t), (r, b)]
         cart_coords = [(c[0] + cartx, c[1] + carty) for c in cart_coords]
@@ -196,7 +198,7 @@ class CartPoleFunctional(
 
         pole_coords = []
         for coord in [(l, b), (l, t), (r, t), (r, b)]:
-            coord = pygame.math.Vector2(coord).rotate_rad(-x[2])
+            coord = pygame.math.Vector2(coord).rotate_rad(cast("float", -x[2]))
             coord = (coord[0] + cartx, coord[1] + carty + axleoffset)
             pole_coords.append(coord)
         gfxdraw.aapolygon(surf, pole_coords, (202, 152, 101))
@@ -226,7 +228,7 @@ class CartPoleFunctional(
             np.array(pygame.surfarray.pixels3d(screen)), axes=(1, 0, 2)
         )
 
-    def render_init(
+    def render_init(  # ty: ignore[invalid-method-override]
         self,
         params: CartPoleParams | type[CartPoleParams] = CartPoleParams,
         screen_width: int = 600,
@@ -246,7 +248,7 @@ class CartPoleFunctional(
 
         return screen, clock
 
-    def render_close(
+    def render_close(  # ty: ignore[invalid-method-override]
         self,
         render_state: RenderStateType,
         params: CartPoleParams | type[CartPoleParams] = CartPoleParams,

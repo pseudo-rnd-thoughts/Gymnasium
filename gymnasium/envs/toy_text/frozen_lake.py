@@ -3,6 +3,7 @@ from __future__ import annotations
 from contextlib import closing
 from io import StringIO
 from os import path
+from typing import Any
 
 import numpy as np
 
@@ -224,7 +225,7 @@ class FrozenLakeEnv(Env):
 
     """
 
-    metadata = {
+    metadata: dict[str, Any] = {
         "render_modes": ["human", "ansi", "rgb_array"],
         "render_fps": 4,
     }
@@ -321,12 +322,12 @@ class FrozenLakeEnv(Env):
         self.goal_img = None
         self.start_img = None
 
-    def step(self, a):
-        transitions = self.P[self.s][a]
+    def step(self, action):
+        transitions = self.P[self.s][action]
         i = categorical_sample([t[0] for t in transitions], self.np_random)
         p, s, r, t = transitions[i]
         self.s = s
-        self.lastaction = a
+        self.lastaction = action
 
         if self.render_mode == "human":
             self.render()

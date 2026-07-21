@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from typing import cast
 
 import numpy as np
 
@@ -110,12 +111,15 @@ class ClipAction(
                 f"ClipAction requires a Box action space, got {type(env.action_space)}"
             )
 
+        # Bind the narrowed ``Box`` action space so ``low``/``high`` resolve for typing.
+        box_action_space = env.action_space
+
         gym.utils.RecordConstructorArgs.__init__(self)
         TransformAction.__init__(
             self,
             env=env,
             func=lambda action: np.clip(
-                action, env.action_space.low, env.action_space.high
+                action, box_action_space.low, box_action_space.high
             ),
             action_space=Box(
                 -np.inf,
@@ -296,21 +300,23 @@ class DiscretizeAction(
         ]
 
         if self.multidiscrete:
-            self.action_space = MultiDiscrete(self.bins)
+            self.action_space = cast("Space[WrapperActType]", MultiDiscrete(self.bins))
         else:
-            self.action_space = Discrete(np.prod(self.bins))
+            self.action_space = cast(
+                "Space[WrapperActType]", Discrete(np.prod(self.bins))
+            )
 
-    def action(self, act):
+    def action(self, action: WrapperActType) -> ActType:
         """Discretizes the action."""
         if self.multidiscrete:
-            indices = np.asarray(act, dtype=int)
+            indices = np.asarray(action, dtype=int)
         else:
-            indices = self._unflatten_index(act)
+            indices = self._unflatten_index(action)
         centers = [
             self.bin_centers[i][min(max(idx, 0), self.bins[i] - 1)]
             for i, idx in enumerate(indices)
         ]
-        return np.array(centers, dtype=self.env.action_space.dtype)
+        return cast(ActType, np.array(centers, dtype=self.env.action_space.dtype))
 
     def revert_action(self, action):
         """Converts a discretized action to a possible continuous action (the center of the closest bin)."""

@@ -5,7 +5,7 @@ permalink: https://perma.cc/C9ZM-652R
 """
 
 import math
-from typing import Any
+from typing import Any, TypeAlias, cast
 
 import numpy as np
 
@@ -15,6 +15,11 @@ from gymnasium.envs.classic_control import utils
 from gymnasium.error import DependencyNotInstalled
 from gymnasium.vector import AutoresetMode, VectorEnv
 from gymnasium.vector.utils import batch_space
+
+VectorBoolArray: TypeAlias = np.ndarray[tuple[int], np.dtype[np.bool_]]
+VectorIntArray: TypeAlias = np.ndarray[tuple[int], np.dtype[np.integer]]
+VectorFloat32Array: TypeAlias = np.ndarray[tuple[int], np.dtype[np.float32]]
+VectorFloat32Matrix: TypeAlias = np.ndarray[tuple[int, int], np.dtype[np.float32]]
 
 
 class CartPoleEnv(gym.Env[np.ndarray, int | np.ndarray]):
@@ -111,7 +116,7 @@ class CartPoleEnv(gym.Env[np.ndarray, int | np.ndarray]):
     * v0: Initial versions release.
     """
 
-    metadata = {
+    metadata: dict[str, Any] = {
         "render_modes": ["human", "rgb_array"],
         "render_fps": 50,
     }
@@ -147,7 +152,7 @@ class CartPoleEnv(gym.Env[np.ndarray, int | np.ndarray]):
             dtype=np.float32,
         )
 
-        self.action_space = spaces.Discrete(2)
+        self.action_space = cast("spaces.Space[int | np.ndarray]", spaces.Discrete(2))
         self.observation_space = spaces.Box(-high, high, dtype=np.float32)
 
         self.render_mode = render_mode
@@ -229,8 +234,8 @@ class CartPoleEnv(gym.Env[np.ndarray, int | np.ndarray]):
         self,
         *,
         seed: int | None = None,
-        options: dict | None = None,
-    ):
+        options: dict[str, Any] | None = None,
+    ) -> tuple[VectorFloat32Array, dict[str, Any]]:
         super().reset(seed=seed)
         # Note that if you use custom reset bounds, it may lead to out-of-bound
         # state/observations.
@@ -352,7 +357,9 @@ class CartPoleEnv(gym.Env[np.ndarray, int | np.ndarray]):
             self.isopen = False
 
 
-class CartPoleVectorEnv(VectorEnv):
+class CartPoleVectorEnv(
+    VectorEnv[VectorFloat32Matrix, VectorIntArray, VectorFloat32Array, VectorBoolArray]
+):
     metadata = {
         "render_modes": ["rgb_array"],
         "render_fps": 50,
@@ -419,15 +426,21 @@ class CartPoleVectorEnv(VectorEnv):
         self.steps_beyond_terminated = None
 
     def step(
-        self, action: np.ndarray
-    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict]:
-        assert self.action_space.contains(action), (
-            f"{action!r} ({type(action)}) invalid"
+        self, actions: VectorIntArray
+    ) -> tuple[
+        VectorFloat32Matrix,
+        VectorFloat32Array,
+        VectorBoolArray,
+        VectorBoolArray,
+        dict[str, Any],
+    ]:
+        assert self.action_space.contains(actions), (
+            f"{actions!r} ({type(actions)}) invalid"
         )
         assert self.state is not None, "Call reset before using step method."
 
         x, x_dot, theta, theta_dot = self.state
-        force = np.sign(action - 0.5) * self.force_mag
+        force = np.sign(actions - 0.5) * self.force_mag
         costheta = np.cos(theta)
         sintheta = np.sin(theta)
 
@@ -488,8 +501,8 @@ class CartPoleVectorEnv(VectorEnv):
         self,
         *,
         seed: int | None = None,
-        options: dict | None = None,
-    ):
+        options: dict[str, Any] | None = None,
+    ) -> tuple[VectorFloat32Matrix, dict[str, Any]]:
         super().reset(seed=seed)
         # Note that if you use custom reset bounds, it may lead to out-of-bound
         # state/observations.

@@ -11,13 +11,13 @@ from __future__ import annotations
 
 from collections import deque
 from copy import deepcopy
-from typing import Any, Final, SupportsFloat
+from typing import Any, Final, SupportsFloat, cast
 
 import numpy as np
 
 import gymnasium as gym
 import gymnasium.spaces as spaces
-from gymnasium.core import ActType, ObsType, WrapperActType, WrapperObsType
+from gymnasium.core import ActType, ObsType, WrapperObsType
 from gymnasium.spaces import Box, Dict, Tuple
 from gymnasium.vector.utils import batch_space, concatenate, create_empty_array
 from gymnasium.wrappers.utils import RunningMeanStd, create_zero_array
@@ -243,14 +243,16 @@ class TimeAwareObservation(
 
         # If to flatten the observation space
         if self.flatten:
-            self.observation_space: gym.Space[WrapperObsType] = spaces.flatten_space(
-                observation_space
+            self.observation_space: gym.Space[WrapperObsType] = cast(
+                "gym.Space[WrapperObsType]", spaces.flatten_space(observation_space)
             )
             self._obs_postprocess_func = lambda obs: spaces.flatten(
                 observation_space, obs
             )
         else:
-            self.observation_space: gym.Space[WrapperObsType] = observation_space
+            self.observation_space: gym.Space[WrapperObsType] = cast(
+                "gym.Space[WrapperObsType]", observation_space
+            )
             self._obs_postprocess_func = lambda obs: obs
 
     def observation(self, observation: ObsType) -> WrapperObsType:
@@ -262,10 +264,13 @@ class TimeAwareObservation(
         Returns:
             The observation with the time information appended to it
         """
-        return self._obs_postprocess_func(
-            self._append_data_func(
-                observation, self._time_preprocess_func(self.timesteps)
-            )
+        return cast(
+            WrapperObsType,
+            self._obs_postprocess_func(
+                self._append_data_func(
+                    observation, self._time_preprocess_func(self.timesteps)
+                )
+            ),
         )
 
     def step(
@@ -394,7 +399,7 @@ class FrameStackObservation(
         ):
             self.padding_value: ObsType = create_zero_array(env.observation_space)
         elif padding_type in env.observation_space:
-            self.padding_value = padding_type
+            self.padding_value = cast(ObsType, padding_type)
             padding_type = "_custom"
         else:
             if isinstance(padding_type, str):
@@ -416,7 +421,7 @@ class FrameStackObservation(
         self.stacked_obs = create_empty_array(env.observation_space, n=self.stack_size)
 
     def step(
-        self, action: WrapperActType
+        self, action: ActType
     ) -> tuple[WrapperObsType, SupportsFloat, bool, bool, dict[str, Any]]:
         """Steps through the environment, appending the observation to the frame buffer.
 
@@ -429,8 +434,13 @@ class FrameStackObservation(
         obs, reward, terminated, truncated, info = self.env.step(action)
         self.obs_queue.append(obs)
 
-        updated_obs = deepcopy(
-            concatenate(self.env.observation_space, self.obs_queue, self.stacked_obs)
+        updated_obs = cast(
+            WrapperObsType,
+            deepcopy(
+                concatenate(
+                    self.env.observation_space, self.obs_queue, self.stacked_obs
+                )
+            ),
         )
         return updated_obs, reward, terminated, truncated, info
 
@@ -454,8 +464,13 @@ class FrameStackObservation(
             self.obs_queue.append(self.padding_value)
         self.obs_queue.append(obs)
 
-        updated_obs = deepcopy(
-            concatenate(self.env.observation_space, self.obs_queue, self.stacked_obs)
+        updated_obs = cast(
+            WrapperObsType,
+            deepcopy(
+                concatenate(
+                    self.env.observation_space, self.obs_queue, self.stacked_obs
+                )
+            ),
         )
         return updated_obs, info
 
@@ -517,11 +532,14 @@ class NormalizeObservation(
                 "NormalizeObservation wrapper requires the observation space to have a shape."
             )
 
-        self.observation_space = gym.spaces.Box(
-            low=-np.inf,
-            high=np.inf,
-            shape=env.observation_space.shape,
-            dtype=np.float32,
+        self.observation_space = cast(
+            "gym.Space[WrapperObsType]",
+            gym.spaces.Box(
+                low=-np.inf,
+                high=np.inf,
+                shape=env.observation_space.shape,
+                dtype=np.float32,
+            ),
         )
 
         self.obs_rms = RunningMeanStd(
@@ -544,8 +562,12 @@ class NormalizeObservation(
         """Normalises the observation using the running mean and variance of the observations."""
         if self._update_running_mean:
             self.obs_rms.update(np.array([observation]))
-        return np.float32(
-            (observation - self.obs_rms.mean) / np.sqrt(self.obs_rms.var + self.epsilon)
+        return cast(
+            WrapperObsType,
+            np.float32(
+                (observation - self.obs_rms.mean)
+                / np.sqrt(self.obs_rms.var + self.epsilon)
+            ),
         )
 
 
@@ -609,7 +631,7 @@ class MaxAndSkipObservation(
         )
 
     def step(
-        self, action: WrapperActType
+        self, action: ActType
     ) -> tuple[WrapperObsType, SupportsFloat, bool, bool, dict[str, Any]]:
         """Step the environment with the given action for ``skip`` steps.
 
@@ -632,6 +654,6 @@ class MaxAndSkipObservation(
             total_reward += float(reward)
             if terminated or truncated:
                 break
-        max_frame = np.max(self._obs_buffer, axis=0)
+        max_frame = cast(WrapperObsType, np.max(self._obs_buffer, axis=0))
 
         return max_frame, total_reward, terminated, truncated, info

@@ -13,7 +13,7 @@ from collections.abc import Callable, Iterable, Iterator, Mapping
 from collections.abc import Sequence as _PySequence
 from copy import deepcopy
 from functools import singledispatch
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 import numpy as np
 
@@ -527,7 +527,7 @@ def _create_empty_array_graph(
 ) -> tuple[GraphInstance, ...]:
     return tuple(
         GraphInstance(
-            nodes=create_empty_array(space.node_space, n=1, fn=fn),
+            nodes=cast("np.ndarray", create_empty_array(space.node_space, n=1, fn=fn)),
             edges=(
                 create_empty_array(space.edge_space, n=1, fn=fn)
                 if space.edge_space is not None

@@ -1,4 +1,5 @@
 from os import path
+from typing import Any, SupportsFloat
 
 import numpy as np
 from numpy.typing import NDArray
@@ -45,7 +46,7 @@ class MujocoEnv(gym.Env):
         height: int = DEFAULT_SIZE,
         camera_id: int | None = None,
         camera_name: str | None = None,
-        default_camera_config: dict[str, float] | None = None,
+        default_camera_config: dict[str, Any] | None = None,
         max_geom: int = 1000,
         visual_options: dict[int, bool] | None = None,
     ):
@@ -208,7 +209,7 @@ class MujocoEnv(gym.Env):
     # ----------------------------
     def step(
         self, action: NDArray[np.float32]
-    ) -> tuple[NDArray[np.float64], np.float64, bool, bool, dict[str, np.float64]]:
+    ) -> tuple[NDArray[np.float64], SupportsFloat, bool, bool, dict[str, Any]]:
         raise NotImplementedError
 
     def reset_model(self) -> NDArray[np.float64]:

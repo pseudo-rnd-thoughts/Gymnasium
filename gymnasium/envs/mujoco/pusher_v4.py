@@ -39,16 +39,16 @@ class PusherEnv(MujocoEnv, utils.EzPickle):
             **kwargs,
         )
 
-    def step(self, a):
+    def step(self, action):
         vec_1 = self.get_body_com("object") - self.get_body_com("tips_arm")
         vec_2 = self.get_body_com("object") - self.get_body_com("goal")
 
         reward_near = -np.linalg.norm(vec_1)
         reward_dist = -np.linalg.norm(vec_2)
-        reward_ctrl = -np.square(a).sum()
+        reward_ctrl = -np.square(action).sum()
         reward = reward_dist + 0.1 * reward_ctrl + 0.5 * reward_near
 
-        self.do_simulation(a, self.frame_skip)
+        self.do_simulation(action, self.frame_skip)
         if self.render_mode == "human":
             self.render()
 

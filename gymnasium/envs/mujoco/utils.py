@@ -3,6 +3,8 @@
 Author: @Kallinteris-Andreas
 """
 
+from typing import cast
+
 import mujoco
 import numpy as np
 
@@ -21,8 +23,9 @@ def get_state(
     """
     assert mujoco.__version__ >= "2.3.6", "Feature requires `mujoco>=2.3.6`"
 
-    state = np.empty(mujoco.mj_stateSize(env.unwrapped.model, state_type))
-    mujoco.mj_getState(env.unwrapped.model, env.unwrapped.data, state, state_type)
+    unwrapped = cast(MujocoEnv, env.unwrapped)
+    state = np.empty(mujoco.mj_stateSize(unwrapped.model, state_type))
+    mujoco.mj_getState(unwrapped.model, unwrapped.data, state, state_type)
     return state
 
 
@@ -40,9 +43,10 @@ def set_state(
     """
     assert mujoco.__version__ >= "2.3.6", "Feature requires `mujoco>=2.3.6`"
 
+    unwrapped = cast(MujocoEnv, env.unwrapped)
     mujoco.mj_setState(
-        env.unwrapped.model,
-        env.unwrapped.data,
+        unwrapped.model,
+        unwrapped.data,
         state,
         spec=state_type,
     )

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping, Sequence
-from typing import TYPE_CHECKING, Any, Generic, Literal, overload
+from typing import TYPE_CHECKING, Any, Generic, Literal, cast, overload
 
 import numpy as np
 from numpy.typing import NDArray
@@ -107,7 +107,7 @@ class MultiDiscrete(Space[NDArray[_IntegerT_co]], Generic[_IntegerT_co]):
             raise ValueError(
                 "MultiDiscrete dtype must be explicitly provided, cannot be None."
             )
-        self.dtype = np.dtype(dtype)
+        self.dtype = cast("np.dtype[_IntegerT_co]", np.dtype(dtype))
 
         #  * check that dtype is an accepted dtype
         if not (np.issubdtype(self.dtype, np.integer)):
@@ -119,7 +119,7 @@ class MultiDiscrete(Space[NDArray[_IntegerT_co]], Generic[_IntegerT_co]):
         if start is not None:
             self.start = np.array(start, dtype=dtype, copy=True)
         else:
-            self.start = np.zeros(self.nvec.shape, dtype=dtype)
+            self.start = np.zeros(self.nvec.shape, dtype=self.dtype)
 
         if self.start.shape != self.nvec.shape:
             raise ValueError(
@@ -133,7 +133,8 @@ class MultiDiscrete(Space[NDArray[_IntegerT_co]], Generic[_IntegerT_co]):
     @property
     def shape(self) -> tuple[int, ...]:
         """Has stricter type than :class:`gym.Space` - never None."""
-        return self._shape  # type: ignore
+        # `MultiDiscrete` always sets a concrete shape in `__init__`, so `_shape` is never None.
+        return cast("tuple[int, ...]", self._shape)
 
     @property
     def is_np_flattenable(self) -> Literal[True]:
@@ -194,7 +195,9 @@ class MultiDiscrete(Space[NDArray[_IntegerT_co]], Generic[_IntegerT_co]):
             )
             assert isinstance(sub_start, np.ndarray)
             return [
-                self._apply_mask(new_mask, new_nvec, new_start, mask_type)
+                self._apply_mask(
+                    cast("MaskNDArray", new_mask), new_nvec, new_start, mask_type
+                )
                 for new_mask, new_nvec, new_start in zip(
                     sub_mask, sub_nvec, sub_start, strict=True
                 )
@@ -206,6 +209,8 @@ class MultiDiscrete(Space[NDArray[_IntegerT_co]], Generic[_IntegerT_co]):
         assert isinstance(sub_mask, np.ndarray), (
             f"Expects the sub mask to be np.ndarray, actual type: {type(sub_mask)}"
         )
+        # Rebind to the narrowed array type; the tuple branch is excluded by the assert above.
+        sub_mask = cast("MaskNDArray", sub_mask)
         assert len(sub_mask) == sub_nvec, (
             f"Expects the mask length to be equal to the number of actions, mask length: {len(sub_mask)}, action: {sub_nvec}"
         )
@@ -223,7 +228,8 @@ class MultiDiscrete(Space[NDArray[_IntegerT_co]], Generic[_IntegerT_co]):
             if np.any(valid_action_mask):
                 return self.np_random.choice(np.where(valid_action_mask)[0]) + sub_start
             else:
-                return sub_start
+                # In the scalar branch `sub_start` is a numpy integer scalar.
+                return cast("int", sub_start)
         elif mask_type == "probability":
             assert sub_mask.dtype == np.float64, (
                 f"Expects the mask dtype to be np.float64, actual dtype: {sub_mask.dtype}"
@@ -295,7 +301,7 @@ class MultiDiscrete(Space[NDArray[_IntegerT_co]], Generic[_IntegerT_co]):
         # you don't need to deepcopy as np random generator call replaces the state not the data
         subspace.np_random.bit_generator.state = self.np_random.bit_generator.state
 
-        return subspace
+        return cast("Discrete[_IntegerT_co] | MultiDiscrete[_IntegerT_co]", subspace)
 
     def __len__(self) -> int:
         """Gives the ``len`` of samples from this space."""
