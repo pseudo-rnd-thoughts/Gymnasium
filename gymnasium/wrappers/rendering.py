@@ -13,13 +13,13 @@ import gc
 import os
 from collections.abc import Callable
 from copy import deepcopy
-from typing import Any, Generic, SupportsFloat, cast
+from typing import Any, SupportsFloat, cast
 
 import numpy as np
 
 import gymnasium as gym
 from gymnasium import error, logger
-from gymnasium.core import ActType, ObsType, RenderFrame
+from gymnasium.core import RenderFrame
 from gymnasium.error import DependencyNotInstalled, InvalidProbability
 
 __all__ = [
@@ -31,9 +31,8 @@ __all__ = [
 ]
 
 
-class RenderCollection(
+class RenderCollection[ObsType, ActType](
     gym.Wrapper[ObsType, ActType, ObsType, ActType],
-    Generic[ObsType, ActType],
     gym.utils.RecordConstructorArgs,
 ):
     """Collect rendered frames of an environment such ``render`` returns a ``list[RenderedFrame]``.
@@ -163,9 +162,8 @@ class RenderCollection(
         return frames
 
 
-class RecordVideo(
+class RecordVideo[ObsType, ActType](
     gym.Wrapper[ObsType, ActType, ObsType, ActType],
-    Generic[ObsType, ActType],
     gym.utils.RecordConstructorArgs,
 ):
     """Records videos of environment episodes using the environment's render function.
@@ -437,7 +435,7 @@ class RecordVideo(
             logger.warn("Unable to save last video! Did you call close()?")
 
 
-class HumanRendering(
+class HumanRendering[ObsType, ActType](
     gym.Wrapper[ObsType, ActType, ObsType, ActType], gym.utils.RecordConstructorArgs
 ):
     """Allows human like rendering for environments that support "rgb_array" rendering.
@@ -586,7 +584,7 @@ class HumanRendering(
         super().close()
 
 
-class AddWhiteNoise(
+class AddWhiteNoise[ObsType, ActType](
     gym.Wrapper[ObsType, ActType, ObsType, ActType], gym.utils.RecordConstructorArgs
 ):
     """Randomly replaces pixels with white noise.
@@ -662,7 +660,7 @@ class AddWhiteNoise(
         return np.where(mask[..., None], noise, render_out)
 
 
-class ObstructView(
+class ObstructView[ObsType, ActType](
     gym.Wrapper[ObsType, ActType, ObsType, ActType], gym.utils.RecordConstructorArgs
 ):
     """Randomly obstructs rendering with white noise patches.

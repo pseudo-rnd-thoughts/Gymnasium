@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from os import path
-from typing import TYPE_CHECKING, NamedTuple, TypeAlias
+from typing import TYPE_CHECKING, NamedTuple
 
 import jax
 import jax.numpy as jnp
@@ -12,7 +12,7 @@ import numpy as np
 from gymnasium import spaces
 from gymnasium.envs.functional_jax_env import FunctionalJaxEnv
 from gymnasium.error import DependencyNotInstalled
-from gymnasium.experimental.functional import ActType, FuncEnv
+from gymnasium.experimental.functional import FuncEnv
 from gymnasium.utils import EzPickle
 from gymnasium.vector import AutoresetMode
 from gymnasium.wrappers import HumanRendering
@@ -50,7 +50,7 @@ class EnvState(NamedTuple):
     fallen: bool | jax.Array
 
 
-PRNGKeyType: TypeAlias = jax.Array
+type PRNGKeyType = jax.Array
 
 
 def fell_off(player_position):
@@ -203,7 +203,7 @@ class CliffWalkingFunctional(
     def reward(
         self,
         state: EnvState,
-        action: ActType,
+        action: int,
         next_state: EnvState,
         params: None = None,
     ) -> jax.Array:

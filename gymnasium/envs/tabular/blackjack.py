@@ -2,7 +2,7 @@
 
 import math
 import os
-from typing import TYPE_CHECKING, NamedTuple, TypeAlias
+from typing import TYPE_CHECKING, NamedTuple
 
 import jax
 import jax.numpy as jnp
@@ -13,7 +13,7 @@ from jax import random
 from gymnasium import spaces
 from gymnasium.envs.functional_jax_env import FunctionalJaxEnv
 from gymnasium.error import DependencyNotInstalled
-from gymnasium.experimental.functional import ActType, FuncEnv, StateType
+from gymnasium.experimental.functional import FuncEnv
 from gymnasium.utils import EzPickle, seeding
 from gymnasium.vector import AutoresetMode
 from gymnasium.wrappers import HumanRendering
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     import pygame
 
 
-PRNGKeyType: TypeAlias = jax.Array
+type PRNGKeyType = jax.Array
 RenderStateType = tuple["pygame.Surface", str, int]  # type: ignore  # noqa: F821
 
 
@@ -327,7 +327,7 @@ class BlackjackFunctional(
     def reward(
         self,
         state: EnvState,
-        action: ActType,
+        action: int,
         next_state: EnvState,
         rng: PRNGKeyType,
         params: BlackJackParams | type[BlackJackParams] = BlackJackParams,
@@ -384,7 +384,7 @@ class BlackjackFunctional(
 
     def render_image(
         self,
-        state: StateType,
+        state: EnvState,
         render_state: RenderStateType,
         params: BlackJackParams | type[BlackJackParams] = BlackJackParams,
     ) -> tuple[RenderStateType, np.ndarray]:

@@ -3,26 +3,22 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Any, Generic, TypeVar
+from typing import Any
 
 import numpy as np
 
 from gymnasium import Space
 
-StateType = TypeVar("StateType")
-ActType = TypeVar("ActType")
-ObsType = TypeVar("ObsType")
-RewardType = TypeVar("RewardType")
-TerminalType = TypeVar("TerminalType")
-RenderStateType = TypeVar("RenderStateType")
-Params = TypeVar("Params")
 
-
-class FuncEnv(
-    Generic[
-        StateType, ObsType, ActType, RewardType, TerminalType, RenderStateType, Params
-    ]
-):
+class FuncEnv[
+    StateType,
+    ObsType,
+    ActType,
+    RewardType,
+    TerminalType,
+    RenderStateType,
+    Params,
+]:
     """Base class (template) for functional envs.
 
     This API is meant to be used in a stateless manner, with the environment state being passed around explicitly.

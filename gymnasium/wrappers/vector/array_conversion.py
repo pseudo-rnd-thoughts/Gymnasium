@@ -3,15 +3,9 @@
 from __future__ import annotations
 
 from types import ModuleType
-from typing import Any, Generic
+from typing import Any
 
 import gymnasium as gym
-from gymnasium.typing import (
-    VectorActType,
-    VectorBoolType,
-    VectorObsType,
-    VectorRewardType,
-)
 from gymnasium.vector import VectorEnv, VectorWrapper
 from gymnasium.wrappers.array_conversion import (
     Device,
@@ -22,10 +16,14 @@ from gymnasium.wrappers.array_conversion import (
 __all__ = ["ArrayConversion"]
 
 
-class ArrayConversion(
+class ArrayConversion[
+    VectorObsType = Any,
+    VectorActType = Any,
+    VectorRewardType = Any,
+    VectorBoolType = Any,
+](
     VectorWrapper[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
     gym.utils.RecordConstructorArgs,
-    Generic[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
 ):
     """Wraps a vector environment returning Array API compatible arrays so that it can be interacted with through a specific framework.
 

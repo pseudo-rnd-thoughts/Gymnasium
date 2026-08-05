@@ -552,7 +552,7 @@ def register_envs(env_module: ModuleType) -> None:
 
 
 @contextlib.contextmanager
-def namespace(ns: str) -> Generator[None, None, None]:
+def namespace(ns: str) -> Generator[None]:
     """Context manager for modifying the current namespace."""
     global current_namespace
     old_namespace = current_namespace

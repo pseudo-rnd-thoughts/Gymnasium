@@ -3,18 +3,11 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, Generic
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
-from typing_extensions import TypeVar
 
 from gymnasium import Env
-from gymnasium.typing import (
-    VectorActType,
-    VectorBoolType,
-    VectorObsType,
-    VectorRewardType,
-)
 from gymnasium.vector import VectorEnv, VectorRewardWrapper
 from gymnasium.wrappers import transform_reward
 
@@ -27,23 +20,16 @@ if TYPE_CHECKING:
         def __setitem__(self, key: int, value: Any) -> None: ...
 
 
-MutableRewardArrayType = TypeVar(
-    "MutableRewardArrayType", bound="_CanIterAndSetItem", default=Any
-)
-# The wrapped (inner) environment's reward array type; defaults to this wrapper's own
-# invariant `RewardArrayType`.
-WrappedRewardArrayType = TypeVar("WrappedRewardArrayType", default=VectorRewardType)
-
-
-class TransformReward(
+class TransformReward[
+    VectorObsType = Any,
+    VectorActType = Any,
+    VectorRewardType = Any,
+    VectorBoolType = Any,
+    # The wrapped (inner) environment's reward array type; defaults to this
+    # wrapper's own invariant `VectorRewardType`.
+    WrappedRewardArrayType = VectorRewardType,
+](
     VectorRewardWrapper[
-        VectorObsType,
-        VectorActType,
-        VectorRewardType,
-        VectorBoolType,
-        WrappedRewardArrayType,
-    ],
-    Generic[
         VectorObsType,
         VectorActType,
         VectorRewardType,
@@ -95,7 +81,12 @@ class TransformReward(
         return self.func(rewards)
 
 
-class VectorizeTransformReward(
+class VectorizeTransformReward[
+    VectorObsType = Any,
+    VectorActType = Any,
+    MutableRewardArrayType: _CanIterAndSetItem = Any,
+    VectorBoolType = Any,
+](
     VectorRewardWrapper[
         VectorObsType,
         VectorActType,
@@ -103,7 +94,6 @@ class VectorizeTransformReward(
         VectorBoolType,
         MutableRewardArrayType,
     ],
-    Generic[VectorObsType, VectorActType, MutableRewardArrayType, VectorBoolType],
 ):
     """Vectorizes a single-agent transform reward wrapper for vector environments.
 
@@ -148,11 +138,15 @@ class VectorizeTransformReward(
         return rewards
 
 
-class ClipReward(
+class ClipReward[
+    VectorObsType = Any,
+    VectorActType = Any,
+    MutableRewardArrayType: _CanIterAndSetItem = Any,
+    VectorBoolType = Any,
+](
     VectorizeTransformReward[
         VectorObsType, VectorActType, MutableRewardArrayType, VectorBoolType
     ],
-    Generic[VectorObsType, VectorActType, MutableRewardArrayType, VectorBoolType],
 ):
     """A wrapper that clips the rewards for an environment between an upper and lower bound.
 

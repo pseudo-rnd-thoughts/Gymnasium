@@ -17,7 +17,7 @@ import numpy as np
 
 import gymnasium as gym
 import gymnasium.spaces as spaces
-from gymnasium.core import ActType, ObsType, WrapperActType, WrapperObsType
+from gymnasium.core import WrapperActType
 from gymnasium.spaces import Box, Dict, Tuple
 from gymnasium.vector.utils import batch_space, concatenate, create_empty_array
 from gymnasium.wrappers.utils import RunningMeanStd, create_zero_array
@@ -31,7 +31,7 @@ __all__ = [
 ]
 
 
-class DelayObservation(
+class DelayObservation[ObsType = Any, ActType = Any](
     gym.ObservationWrapper[ObsType, ActType, ObsType], gym.utils.RecordConstructorArgs
 ):
     """Adds a delay to the returned observation from the environment.
@@ -102,7 +102,7 @@ class DelayObservation(
             return create_zero_array(self.observation_space)
 
 
-class TimeAwareObservation(
+class TimeAwareObservation[WrapperObsType = Any, ActType = Any, ObsType = Any](
     gym.ObservationWrapper[WrapperObsType, ActType, ObsType],
     gym.utils.RecordConstructorArgs,
 ):
@@ -300,7 +300,7 @@ class TimeAwareObservation(
         return super().reset(seed=seed, options=options)
 
 
-class FrameStackObservation(
+class FrameStackObservation[WrapperObsType = Any, ActType = Any, ObsType = Any](
     gym.Wrapper[WrapperObsType, ActType, ObsType, ActType],
     gym.utils.RecordConstructorArgs,
 ):
@@ -460,7 +460,7 @@ class FrameStackObservation(
         return updated_obs, info
 
 
-class NormalizeObservation(
+class NormalizeObservation[WrapperObsType = Any, ActType = Any, ObsType = Any](
     gym.ObservationWrapper[WrapperObsType, ActType, ObsType],
     gym.utils.RecordConstructorArgs,
 ):
@@ -549,7 +549,7 @@ class NormalizeObservation(
         )
 
 
-class MaxAndSkipObservation(
+class MaxAndSkipObservation[WrapperObsType = Any, ActType = Any, ObsType = Any](
     gym.Wrapper[WrapperObsType, ActType, ObsType, ActType],
     gym.utils.RecordConstructorArgs,
 ):

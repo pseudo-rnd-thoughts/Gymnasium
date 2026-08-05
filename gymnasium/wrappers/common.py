@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, Any, SupportsFloat
 
 import gymnasium as gym
 from gymnasium import logger
-from gymnasium.core import ActType, ObsType, RenderFrame, WrapperObsType
+from gymnasium.core import RenderFrame, WrapperObsType
 from gymnasium.error import ResetNeeded
 from gymnasium.utils.passive_env_checker import (
     check_action_space,
@@ -39,7 +39,7 @@ __all__ = [
 ]
 
 
-class TimeLimit(
+class TimeLimit[ObsType = Any, ActType = Any](
     gym.Wrapper[ObsType, ActType, ObsType, ActType], gym.utils.RecordConstructorArgs
 ):
     """Limits the number of steps for an environment through truncating the environment if a maximum number of timesteps is exceeded.
@@ -170,7 +170,7 @@ class TimeLimit(
         return env_spec
 
 
-class Autoreset(
+class Autoreset[ObsType = Any, ActType = Any](
     gym.Wrapper[ObsType, ActType, ObsType, ActType], gym.utils.RecordConstructorArgs
 ):
     """The wrapped environment is automatically reset when a terminated or truncated state is reached.
@@ -221,7 +221,7 @@ class Autoreset(
         return obs, reward, terminated, truncated, info
 
 
-class PassiveEnvChecker(
+class PassiveEnvChecker[ObsType = Any, ActType = Any](
     gym.Wrapper[ObsType, ActType, ObsType, ActType], gym.utils.RecordConstructorArgs
 ):
     """A passive wrapper that surrounds the ``step``, ``reset`` and ``render`` functions to check they follow Gymnasium's API.
@@ -341,7 +341,7 @@ class PassiveEnvChecker(
                 raise e
 
 
-class OrderEnforcing(
+class OrderEnforcing[ObsType = Any, ActType = Any](
     gym.Wrapper[ObsType, ActType, ObsType, ActType], gym.utils.RecordConstructorArgs
 ):
     """Will produce an error if ``step`` or ``render`` is called before ``reset``.
@@ -438,7 +438,7 @@ class OrderEnforcing(
         return env_spec
 
 
-class RecordEpisodeStatistics(
+class RecordEpisodeStatistics[ObsType = Any, ActType = Any](
     gym.Wrapper[ObsType, ActType, ObsType, ActType], gym.utils.RecordConstructorArgs
 ):
     """This wrapper will keep track of cumulative rewards and episode lengths.

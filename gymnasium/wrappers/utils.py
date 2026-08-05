@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from functools import singledispatch
-from typing import TypeVar
 
 import numpy as np
 
@@ -26,8 +25,6 @@ from gymnasium.spaces import (
 )
 
 __all__ = ["RunningMeanStd", "update_mean_var_count_from_moments", "create_zero_array"]
-
-_T = TypeVar("_T")
 
 
 class RunningMeanStd:
@@ -72,7 +69,7 @@ def update_mean_var_count_from_moments(
 
 
 @singledispatch
-def create_zero_array(space: Space[_T]) -> _T:
+def create_zero_array[T](space: Space[T]) -> T:
     """Creates a zero-based array of a space, this is similar to ``create_empty_array`` except all arrays are valid samples from the space.
 
     As some ``Box`` cases have ``high`` or ``low`` that don't contain zero then the ``create_empty_array`` would in case

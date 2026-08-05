@@ -4,29 +4,27 @@ from __future__ import annotations
 
 import time
 from collections import deque
-from typing import Any, Generic
+from typing import Any
 
 import numpy as np
 import numpy.typing as npt
-from typing_extensions import TypeVar
 
 from gymnasium.logger import warn
-from gymnasium.typing import VectorActType, VectorObsType
 from gymnasium.vector.vector_env import AutoresetMode, VectorEnv, VectorWrapper
 
 __all__ = ["RecordEpisodeStatistics"]
 
 
-# A specialised, `np.ndarray`-bound reward array type. This is *not* the shared
-# `gymnasium.typing.RewardArrayType` (which is unbounded), so it keeps a distinct name.
-NDRewardArrayType = TypeVar("NDRewardArrayType", bound=np.ndarray, default=Any)
-
-
-class RecordEpisodeStatistics(
+class RecordEpisodeStatistics[
+    VectorObsType = Any,
+    VectorActType = Any,
+    # A specialised, `np.ndarray`-bound reward array type. This is *not* the shared
+    # `gymnasium.typing.RewardArrayType` (which is unbounded), so it keeps a distinct name.
+    NDRewardArrayType: np.ndarray = Any,
+](
     VectorWrapper[
         VectorObsType, VectorActType, NDRewardArrayType, npt.NDArray[np.bool_]
     ],
-    Generic[VectorObsType, VectorActType, NDRewardArrayType],
 ):
     """This wrapper will keep track of cumulative rewards and episode lengths.
 

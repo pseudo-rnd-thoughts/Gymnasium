@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Generic, TypeAlias
+from typing import Any
 
 import numpy as np
 import numpy.typing as npt
@@ -13,7 +13,6 @@ import numpy.typing as npt
 import gymnasium as gym
 from gymnasium.logger import warn
 from gymnasium.spaces import Box
-from gymnasium.typing import VectorActType, VectorBoolType, VectorRewardType
 from gymnasium.vector.utils import batch_space
 from gymnasium.vector.vector_env import (
     AutoresetMode,
@@ -28,11 +27,15 @@ __all__ = ["NormalizeObservation"]
 # Shape-generic: the batched vector observation is (num_envs, *obs_shape), so
 # the rank depends on the sub-environment's observation (2-D for CartPole,
 # higher for images).
-VectorFloat32Array: TypeAlias = npt.NDArray[np.float32]
-VectorFloatingArray: TypeAlias = npt.NDArray[np.floating]
+type VectorFloat32Array = npt.NDArray[np.float32]
+type VectorFloatingArray = npt.NDArray[np.floating]
 
 
-class NormalizeObservation(
+class NormalizeObservation[
+    VectorActType = Any,
+    VectorRewardType = Any,
+    VectorBoolType = Any,
+](
     VectorObservationWrapper[
         VectorFloat32Array,
         VectorActType,
@@ -41,7 +44,6 @@ class NormalizeObservation(
         VectorFloatingArray,
     ],
     gym.utils.RecordConstructorArgs,
-    Generic[VectorActType, VectorRewardType, VectorBoolType],
 ):
     """This wrapper will normalize observations s.t. each coordinate is centered with unit variance.
 
@@ -113,7 +115,12 @@ class NormalizeObservation(
                     f"Expected env.metadata['autoreset_mode'] to be AutoresetMode.NEXT_STEP, got {self.env.metadata['autoreset_mode']}"
                 )
 
-        new_single_space = Box(
+        # Annotated as a bare `Box` rather than letting the `dtype=np.float32`
+        # argument specialise it: under PEP 695 variance is inferred, and `Box`
+        # comes out invariant (it extends `Space[NDArray[ScalarT_co]]`, and
+        # numpy's `dtype` is invariant), so `Box[np.float32]` is not assignable
+        # to the `Box` this attribute is declared as.
+        new_single_space: Box = Box(
             low=-np.inf,
             high=np.inf,
             shape=self.single_observation_space.shape,

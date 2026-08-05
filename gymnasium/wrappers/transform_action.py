@@ -9,11 +9,11 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from typing import Any
 
 import numpy as np
 
 import gymnasium as gym
-from gymnasium.core import ActType, ObsType, WrapperActType
 from gymnasium.spaces import Box, Discrete, MultiDiscrete, Space
 
 __all__ = ["TransformAction", "ClipAction", "RescaleAction"]
@@ -21,7 +21,7 @@ __all__ = ["TransformAction", "ClipAction", "RescaleAction"]
 from gymnasium.wrappers.utils import rescale_box
 
 
-class TransformAction(
+class TransformAction[ObsType = Any, WrapperActType = Any, ActType = Any](
     gym.ActionWrapper[ObsType, WrapperActType, ActType], gym.utils.RecordConstructorArgs
 ):
     """Applies a function to the ``action`` before passing the modified value to the environment ``step`` function.
@@ -75,7 +75,7 @@ class TransformAction(
         return self.func(action)
 
 
-class ClipAction(
+class ClipAction[ObsType = Any, WrapperActType = Any, ActType = Any](
     TransformAction[ObsType, WrapperActType, ActType], gym.utils.RecordConstructorArgs
 ):
     """Clips the ``action`` pass to ``step`` to be within the environment's `action_space`.
@@ -126,7 +126,7 @@ class ClipAction(
         )
 
 
-class RescaleAction(
+class RescaleAction[ObsType = Any, WrapperActType = Any, ActType = Any](
     TransformAction[ObsType, WrapperActType, ActType], gym.utils.RecordConstructorArgs
 ):
     """Affinely (linearly) rescales a ``Box`` action space of the environment to within the range of ``[min_action, max_action]``.
@@ -186,7 +186,7 @@ class RescaleAction(
         )
 
 
-class DiscretizeAction(
+class DiscretizeAction[ObsType = Any, WrapperActType = Any, ActType = Any](
     TransformAction[ObsType, WrapperActType, ActType],
     gym.utils.RecordConstructorArgs,
 ):

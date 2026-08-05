@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from os import path
-from typing import TYPE_CHECKING, Any, TypeAlias
+from typing import TYPE_CHECKING, Any
 
 import jax
 import jax.numpy as jnp
@@ -13,7 +13,7 @@ from flax import struct
 import gymnasium as gym
 from gymnasium.envs.functional_jax_env import FunctionalJaxEnv, FunctionalJaxVectorEnv
 from gymnasium.error import DependencyNotInstalled
-from gymnasium.experimental.functional import ActType, FuncEnv
+from gymnasium.experimental.functional import FuncEnv
 from gymnasium.utils import EzPickle
 from gymnasium.vector import AutoresetMode
 
@@ -21,8 +21,11 @@ if TYPE_CHECKING:
     import pygame
 
 
-PRNGKeyType: TypeAlias = jax.Array
-StateType: TypeAlias = jax.Array
+type PRNGKeyType = jax.Array
+# Kept as a plain assignment (not `type StateType = ...`): StateType is used to
+# parameterise `FuncEnv[StateType, ...]` in a class base list below, which is
+# evaluated eagerly at class-definition time and needs a real runtime type.
+StateType = jax.Array
 RenderStateType = tuple["pygame.Surface", "pygame.time.Clock", float | None]
 
 
@@ -97,7 +100,7 @@ class PendulumFunctional(
     def reward(
         self,
         state: StateType,
-        action: ActType,
+        action: int,
         next_state: StateType,
         rng: Any,
         params: PendulumParams | type[PendulumParams] = PendulumParams,

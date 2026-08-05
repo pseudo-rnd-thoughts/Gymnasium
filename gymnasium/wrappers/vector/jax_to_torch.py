@@ -2,17 +2,11 @@
 
 from __future__ import annotations
 
-from typing import Generic
+from typing import Any
 
 import jax.numpy as jnp
 import torch
 
-from gymnasium.typing import (
-    VectorActType,
-    VectorBoolType,
-    VectorObsType,
-    VectorRewardType,
-)
 from gymnasium.vector import VectorEnv
 from gymnasium.wrappers.jax_to_torch import Device
 from gymnasium.wrappers.vector.array_conversion import ArrayConversion
@@ -20,10 +14,12 @@ from gymnasium.wrappers.vector.array_conversion import ArrayConversion
 __all__ = ["JaxToTorch"]
 
 
-class JaxToTorch(
-    ArrayConversion[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
-    Generic[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
-):
+class JaxToTorch[
+    VectorObsType = Any,
+    VectorActType = Any,
+    VectorRewardType = Any,
+    VectorBoolType = Any,
+](ArrayConversion[VectorObsType, VectorActType, VectorRewardType, VectorBoolType]):
     """Wraps a Jax-based vector environment so that it can be interacted with through PyTorch Tensors.
 
     Actions must be provided as PyTorch Tensors and observations, rewards, terminations and truncations will be returned as PyTorch Tensors.

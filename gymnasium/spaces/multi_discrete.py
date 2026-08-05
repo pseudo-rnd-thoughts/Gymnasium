@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping, Sequence
-from typing import TYPE_CHECKING, Any, Generic, Literal, overload
+from typing import Any, Literal, overload
 
 import numpy as np
 from numpy.typing import NDArray
@@ -12,22 +12,10 @@ import gymnasium as gym
 from gymnasium.spaces.discrete import Discrete
 from gymnasium.spaces.space import MaskNDArray, Space
 
-if TYPE_CHECKING:
-    from typing_extensions import TypeVar
 
-    _IntegerT_co = TypeVar(
-        "_IntegerT_co",
-        bound=np.integer[Any],
-        covariant=True,
-        default=np.int64,
-    )
-else:
-    from typing import TypeVar
-
-    _IntegerT_co = TypeVar("_IntegerT_co", bound=np.integer[Any], covariant=True)
-
-
-class MultiDiscrete(Space[NDArray[_IntegerT_co]], Generic[_IntegerT_co]):
+class MultiDiscrete[IntegerT_co: np.integer[Any] = np.int64](
+    Space[NDArray[IntegerT_co]]
+):
     """This represents the cartesian product of arbitrary :class:`Discrete` spaces.
 
     It is useful to represent game controllers or keyboards where each key can be represented as a discrete action space.
@@ -55,9 +43,9 @@ class MultiDiscrete(Space[NDArray[_IntegerT_co]], Generic[_IntegerT_co]):
                [2, 2]])
     """
 
-    dtype: np.dtype[_IntegerT_co]
-    nvec: NDArray[_IntegerT_co]
-    start: NDArray[_IntegerT_co]
+    dtype: np.dtype[IntegerT_co]
+    nvec: NDArray[IntegerT_co]
+    start: NDArray[IntegerT_co]
 
     @overload
     def __init__(
@@ -71,7 +59,7 @@ class MultiDiscrete(Space[NDArray[_IntegerT_co]], Generic[_IntegerT_co]):
     def __init__(
         self,
         nvec: NDArray[np.integer[Any]] | list[int],
-        dtype: type[_IntegerT_co] | np.dtype[_IntegerT_co],
+        dtype: type[IntegerT_co] | np.dtype[IntegerT_co],
         seed: int | np.random.Generator | None = None,
         start: NDArray[np.integer[Any]] | list[int] | None = None,
     ) -> None: ...
@@ -144,7 +132,7 @@ class MultiDiscrete(Space[NDArray[_IntegerT_co]], Generic[_IntegerT_co]):
         self,
         mask: tuple[MaskNDArray, ...] | None = None,
         probability: tuple[MaskNDArray, ...] | None = None,
-    ) -> NDArray[_IntegerT_co]:
+    ) -> NDArray[IntegerT_co]:
         """Generates a single random sample from this space.
 
         Args:
@@ -270,7 +258,7 @@ class MultiDiscrete(Space[NDArray[_IntegerT_co]], Generic[_IntegerT_co]):
 
     def from_jsonable(
         self, sample_n: list[Sequence[int]]
-    ) -> list[NDArray[_IntegerT_co]]:
+    ) -> list[NDArray[IntegerT_co]]:
         """Convert a JSONable data type to a batch of samples from this space."""
         return [np.array(sample, dtype=self.dtype) for sample in sample_n]
 
@@ -282,7 +270,7 @@ class MultiDiscrete(Space[NDArray[_IntegerT_co]], Generic[_IntegerT_co]):
 
     def __getitem__(
         self, index: int | tuple[int, ...]
-    ) -> Discrete[_IntegerT_co] | MultiDiscrete[_IntegerT_co]:
+    ) -> Discrete[IntegerT_co] | MultiDiscrete[IntegerT_co]:
         """Extract a subspace from this ``MultiDiscrete`` space."""
         nvec = self.nvec[index]
         start = self.start[index]

@@ -6,26 +6,16 @@ import collections.abc
 import typing
 from collections import OrderedDict
 from collections.abc import Iterable, Iterator, KeysView, Sequence
-from typing import TYPE_CHECKING, Any, Generic, cast
+from typing import Any, cast
 
 import numpy as np
 
 from gymnasium.spaces.space import Space
 
-if TYPE_CHECKING:
-    from typing_extensions import TypeVar
 
-    _T_co = TypeVar("_T_co", covariant=True, default=Any)
-else:
-    from typing import TypeVar
-
-    _T_co = TypeVar("_T_co", covariant=True)
-
-
-class Dict(
+class Dict[T_co = Any](
     Space[dict[str, Space]],
-    typing.Mapping[str, Space[_T_co]],
-    Generic[_T_co],
+    typing.Mapping[str, Space[T_co]],
 ):
     """A dictionary of :class:`Space` instances.
 
@@ -64,12 +54,12 @@ class Dict(
     Similar wrappers can be implemented to deal with :class:`Dict` actions.
     """
 
-    spaces: dict[str, Space[_T_co]]
+    spaces: dict[str, Space[T_co]]
 
     def __init__(
         self,
         spaces: (
-            dict[str, Space[_T_co]] | Sequence[tuple[str, Space[_T_co]]] | None
+            dict[str, Space[T_co]] | Sequence[tuple[str, Space[T_co]]] | None
         ) = None,
         seed: dict | int | np.random.Generator | None = None,
         **spaces_kwargs: Space,
@@ -114,7 +104,7 @@ class Dict(
                     f"Dict space keyword '{key}' already exists in the spaces dictionary."
                 )
 
-        self.spaces = cast("dict[str, Space[_T_co]]", spaces_dict)
+        self.spaces = cast("dict[str, Space[T_co]]", spaces_dict)
         for key, space in self.spaces.items():
             if not isinstance(space, Space):
                 raise TypeError(

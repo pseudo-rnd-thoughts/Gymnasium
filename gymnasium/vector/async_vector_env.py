@@ -12,7 +12,7 @@ from enum import Enum
 from multiprocessing import Queue
 from multiprocessing.connection import Connection
 from multiprocessing.sharedctypes import SynchronizedArray
-from typing import Any, Generic, TypeAlias
+from typing import Any
 
 import numpy as np
 
@@ -25,7 +25,6 @@ from gymnasium.error import (
     NoAsyncCallError,
 )
 from gymnasium.spaces.utils import is_space_dtype_shape_equiv
-from gymnasium.typing import VectorActType, VectorObsType
 from gymnasium.vector.utils import (
     CloudpickleWrapper,
     batch_differing_spaces,
@@ -43,10 +42,10 @@ from gymnasium.vector.vector_env import AutoresetMode, VectorEnv
 __all__ = ["AsyncVectorEnv", "AsyncState"]
 
 
-VectorBoolArray: TypeAlias = np.ndarray[tuple[int], np.dtype[np.bool_]]
-VectorFloat32Array: TypeAlias = np.ndarray[tuple[int], np.dtype[np.float64]]
+type VectorBoolArray = np.ndarray[tuple[int], np.dtype[np.bool_]]
+type VectorFloat32Array = np.ndarray[tuple[int], np.dtype[np.float64]]
 
-ErrorInfo: TypeAlias = tuple[int, type[BaseException], BaseException, str]
+type ErrorInfo = tuple[int, type[BaseException], BaseException, str]
 
 
 class AsyncState(Enum):
@@ -58,9 +57,8 @@ class AsyncState(Enum):
     WAITING_CALL = "call"
 
 
-class AsyncVectorEnv(
-    VectorEnv[VectorObsType, VectorActType, VectorFloat32Array, VectorBoolArray],
-    Generic[VectorObsType, VectorActType],
+class AsyncVectorEnv[VectorObsType = Any, VectorActType = Any](
+    VectorEnv[VectorObsType, VectorActType, VectorFloat32Array, VectorBoolArray]
 ):
     """Vectorized environment that runs multiple environments in parallel.
 

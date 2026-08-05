@@ -7,13 +7,13 @@ from typing import Any, SupportsFloat
 import numpy as np
 
 import gymnasium as gym
-from gymnasium.core import ActType, ObsType, WrapperActType, WrapperObsType
+from gymnasium.core import WrapperActType, WrapperObsType
 from gymnasium.error import InvalidBound, InvalidProbability
 
 __all__ = ["StickyAction", "RepeatAction"]
 
 
-class StickyAction(
+class StickyAction[ObsType = Any, ActType = Any](
     gym.ActionWrapper[ObsType, ActType, ActType], gym.utils.RecordConstructorArgs
 ):
     """Adds a probability that the action is repeated for the same ``step`` function.
@@ -135,7 +135,7 @@ class StickyAction(
         return action
 
 
-class RepeatAction(
+class RepeatAction[ObsType = Any, ActType = Any](
     gym.Wrapper[ObsType, ActType, ObsType, ActType], gym.utils.RecordConstructorArgs
 ):
     """Repeats the given action for ``num_repeats`` steps, accumulating the reward.

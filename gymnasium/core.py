@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Generic, SupportsFloat
+from typing import TYPE_CHECKING, Any, Self, SupportsFloat
 
 import numpy as np
 
@@ -19,8 +19,6 @@ from gymnasium.typing import (
 from gymnasium.utils import RecordConstructorArgs, seeding
 
 if TYPE_CHECKING:
-    from typing_extensions import Self
-
     from gymnasium.envs.registration import EnvSpec, WrapperSpec
 
 # single-environment TypeVars are re-exported from `gymnasium.typing`
@@ -38,7 +36,7 @@ __all__ = [
 ]
 
 
-class Env(Generic[ObsType, ActType]):
+class Env[ObsType = Any, ActType = Any]:
     r"""The main Gymnasium class for implementing Reinforcement Learning Agents environments.
 
     The class encapsulates an environment with arbitrary behind-the-scenes dynamics through the :meth:`step` and :meth:`reset` functions.
@@ -299,10 +297,12 @@ class Env(Generic[ObsType, ActType]):
         return False
 
 
-class Wrapper(
-    Env[WrapperObsType, WrapperActType],
-    Generic[WrapperObsType, WrapperActType, ObsType, ActType],
-):
+class Wrapper[
+    WrapperObsType = Any,
+    WrapperActType = Any,
+    ObsType = Any,
+    ActType = Any,
+](Env[WrapperObsType, WrapperActType]):
     """Wraps a :class:`gymnasium.Env` to allow a modular transformation of the :meth:`step` and :meth:`reset` methods.
 
     This class is the base class of all wrappers to change the behavior of the underlying environment.
@@ -543,7 +543,9 @@ class Wrapper(
         )
 
 
-class ObservationWrapper(Wrapper[WrapperObsType, ActType, ObsType, ActType]):
+class ObservationWrapper[WrapperObsType = Any, ActType = Any, ObsType = Any](
+    Wrapper[WrapperObsType, ActType, ObsType, ActType]
+):
     """Modify observations from :meth:`Env.reset` and :meth:`Env.step` using :meth:`observation` function.
 
     If you would like to apply a function to only the observation before
@@ -587,7 +589,9 @@ class ObservationWrapper(Wrapper[WrapperObsType, ActType, ObsType, ActType]):
         raise NotImplementedError
 
 
-class RewardWrapper(Wrapper[ObsType, ActType, ObsType, ActType]):
+class RewardWrapper[ObsType = Any, ActType = Any](
+    Wrapper[ObsType, ActType, ObsType, ActType]
+):
     """Superclass of wrappers that can modify the returning reward from a step.
 
     If you would like to apply a function to the reward that is returned by the base environment before
@@ -622,7 +626,9 @@ class RewardWrapper(Wrapper[ObsType, ActType, ObsType, ActType]):
         raise NotImplementedError
 
 
-class ActionWrapper(Wrapper[ObsType, WrapperActType, ObsType, ActType]):
+class ActionWrapper[ObsType = Any, WrapperActType = Any, ActType = Any](
+    Wrapper[ObsType, WrapperActType, ObsType, ActType]
+):
     """Superclass of wrappers that can modify the action before :meth:`step`.
 
     If you would like to apply a function to the action before passing it to the base environment,

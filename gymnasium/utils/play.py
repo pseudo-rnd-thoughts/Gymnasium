@@ -4,14 +4,13 @@ from __future__ import annotations
 
 from collections import deque
 from collections.abc import Callable, Iterable
-from typing import TYPE_CHECKING, Any, Generic
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 import gymnasium as gym
 from gymnasium import Env, logger
 from gymnasium.error import DependencyNotInstalled
-from gymnasium.typing import ActType, ObsType
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -174,7 +173,7 @@ def display_arr(
     screen.blit(pyg_img, (width_offset, height_offset))
 
 
-def play(
+def play[ActType](
     env: Env[Any, ActType],
     transpose: bool | None = True,
     fps: int | None = None,
@@ -365,7 +364,7 @@ def play(
     pygame.quit()
 
 
-class PlayPlot(Generic[ObsType, ActType]):
+class PlayPlot[ObsType, ActType]:
     """Provides a callback to create live plots of arbitrary metrics when using :func:`play`.
 
     This class is instantiated with a function that accepts information about a single environment transition:

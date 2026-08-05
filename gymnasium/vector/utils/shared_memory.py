@@ -9,7 +9,7 @@ from ctypes import c_bool, c_int32, c_int64, c_uint8
 from functools import singledispatch
 from multiprocessing.sharedctypes import SynchronizedArray
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, TypeAlias
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -30,15 +30,15 @@ from gymnasium.spaces import (
 )
 
 if TYPE_CHECKING:
-    from typing_extensions import Never, Unpack
+    from typing import Never
 
 __all__ = ["create_shared_memory", "read_from_shared_memory", "write_to_shared_memory"]
 
 
-_SharedMemory: TypeAlias = dict[str, Any] | tuple[Any, ...] | SynchronizedArray
-_SharedMemoryOneOf: TypeAlias = tuple[
-    "SynchronizedArray[c_int64]",
-    "Unpack[tuple[SynchronizedArray[Any], ...]]",
+type _SharedMemory = dict[str, Any] | tuple[Any, ...] | SynchronizedArray
+type _SharedMemoryOneOf = tuple[
+    SynchronizedArray[c_int64],
+    *tuple[SynchronizedArray[Any], ...],
 ]
 
 

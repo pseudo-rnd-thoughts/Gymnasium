@@ -2,25 +2,21 @@
 
 from __future__ import annotations
 
-from typing import Any, Generic
+from typing import Any
 
 import numpy as np
 
-from gymnasium.typing import (
-    VectorActType,
-    VectorBoolType,
-    VectorObsType,
-    VectorRewardType,
-)
 from gymnasium.vector.vector_env import VectorEnv, VectorWrapper
 
 __all__ = ["DictInfoToList"]
 
 
-class DictInfoToList(
-    VectorWrapper[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
-    Generic[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
-):
+class DictInfoToList[
+    VectorObsType = Any,
+    VectorActType = Any,
+    VectorRewardType = Any,
+    VectorBoolType = Any,
+](VectorWrapper[VectorObsType, VectorActType, VectorRewardType, VectorBoolType]):
     """Converts infos of vectorized environments from ``dict`` to ``List[dict]``.
 
     This wrapper converts the info format of a

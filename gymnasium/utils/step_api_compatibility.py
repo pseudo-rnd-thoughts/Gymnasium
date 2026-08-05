@@ -2,20 +2,18 @@
 
 from __future__ import annotations
 
-from typing import SupportsFloat
+from typing import Any, SupportsFloat
 
 import numpy as np
 
-from gymnasium.core import ObsType
-
-DoneStepType = tuple[
+type DoneStepType[ObsType = Any] = tuple[
     ObsType | np.ndarray,
     SupportsFloat | np.ndarray,
     bool | np.ndarray,
     dict | list,
 ]
 
-TerminatedTruncatedStepType = tuple[
+type TerminatedTruncatedStepType[ObsType = Any] = tuple[
     ObsType | np.ndarray,
     SupportsFloat | np.ndarray,
     bool | np.ndarray,
@@ -24,7 +22,7 @@ TerminatedTruncatedStepType = tuple[
 ]
 
 
-def convert_to_terminated_truncated_step_api(
+def convert_to_terminated_truncated_step_api[ObsType = Any](
     step_returns: DoneStepType[ObsType] | TerminatedTruncatedStepType[ObsType],
     is_vector_env: bool = False,
 ) -> TerminatedTruncatedStepType[ObsType]:

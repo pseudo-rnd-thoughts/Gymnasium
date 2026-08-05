@@ -14,21 +14,24 @@ For example, a custom environment producing image observations and accepting dis
 import numpy as np
 
 import gymnasium as gym
-from gymnasium.typing import ActType, ObsType, WrapperObsType
 
 
 class MyEnv(gym.Env[np.ndarray, int]):
     """An environment with `np.ndarray` observations and `int` actions."""
 
 
-class GrayscaleWrapper(gym.ObservationWrapper[np.ndarray, ActType, np.ndarray]):
+class GrayscaleWrapper[ActType](
+    gym.ObservationWrapper[np.ndarray, ActType, np.ndarray]
+):
     """Transforms `(H, W, 3)` uint8 observations into `(H, W)` grayscale ones."""
 
     def observation(self, observation: np.ndarray) -> np.ndarray:
         return np.mean(observation, axis=-1).astype(np.uint8)
 ```
 
-Every TypeVar defaults to ``Any``, so ``gym.Env``, ``gym.Wrapper[np.ndarray, int]`` and other partial subscriptions remain valid.
+Note the [PEP 695](https://peps.python.org/pep-0695/) syntax: `GrayscaleWrapper` stays generic in its action type by declaring `[ActType]` as its own type parameter, rather than importing a shared `TypeVar`. Type parameters are lexically scoped to the class that declares them, so a name imported from `gymnasium.typing` cannot parameterise your class — it would be treated as a fixed type instead, silently making the class non-generic.
+
+Every type parameter defaults to `Any` ([PEP 696](https://peps.python.org/pep-0696/)), so `gym.Env`, `gym.Wrapper[np.ndarray, int]` and other partial subscriptions remain valid.
 
 ## Single-environment vocabulary
 
@@ -52,8 +55,14 @@ Every TypeVar defaults to ``Any``, so ``gym.Env``, ``gym.Wrapper[np.ndarray, int
    :no-value:
 .. autodata:: gymnasium.typing.VectorActType
    :no-value:
-.. autodata:: gymnasium.typing.RewardArrayType
+.. autodata:: gymnasium.typing.VectorRewardType
    :no-value:
-.. autodata:: gymnasium.typing.BoolArrayType
+.. autodata:: gymnasium.typing.VectorBoolType
+   :no-value:
+.. autodata:: gymnasium.typing.VectorWrappedObsType
+   :no-value:
+.. autodata:: gymnasium.typing.VectorWrappedActType
+   :no-value:
+.. autodata:: gymnasium.typing.VectorWrappedRewardType
    :no-value:
 ```

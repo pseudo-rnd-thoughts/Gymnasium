@@ -4,14 +4,13 @@ from __future__ import annotations
 
 from collections.abc import Callable, Sequence
 from copy import deepcopy
-from typing import Any, Generic, TypeAlias, cast
+from typing import Any, cast
 
 import numpy as np
 
 from gymnasium import Env, Space
 from gymnasium.core import RenderFrame
 from gymnasium.spaces.utils import is_space_dtype_shape_equiv
-from gymnasium.typing import VectorActType, VectorObsType
 from gymnasium.vector.utils import (
     batch_differing_spaces,
     batch_space,
@@ -24,13 +23,12 @@ from gymnasium.vector.vector_env import AutoresetMode, VectorEnv
 __all__ = ["SyncVectorEnv"]
 
 
-VectorBoolArray: TypeAlias = np.ndarray[tuple[int], np.dtype[np.bool_]]
-VectorFloat32Array: TypeAlias = np.ndarray[tuple[int], np.dtype[np.float64]]
+type VectorBoolArray = np.ndarray[tuple[int], np.dtype[np.bool_]]
+type VectorFloat32Array = np.ndarray[tuple[int], np.dtype[np.float64]]
 
 
-class SyncVectorEnv(
-    VectorEnv[VectorObsType, VectorActType, VectorFloat32Array, VectorBoolArray],
-    Generic[VectorObsType, VectorActType],
+class SyncVectorEnv[VectorObsType = Any, VectorActType = Any](
+    VectorEnv[VectorObsType, VectorActType, VectorFloat32Array, VectorBoolArray]
 ):
     """Vectorized environment that serially runs multiple environments.
 

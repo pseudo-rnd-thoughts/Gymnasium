@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Generic
+from typing import TYPE_CHECKING, Any, Self
 
 import numpy as np
-from typing_extensions import Self
 
 import gymnasium as gym
 from gymnasium.core import RenderFrame
@@ -53,9 +52,12 @@ class AutoresetMode(Enum):
     DISABLED = "Disabled"
 
 
-class VectorEnv(
-    Generic[VectorObsType, VectorActType, VectorRewardType, VectorBoolType]
-):
+class VectorEnv[
+    VectorObsType = Any,
+    VectorActType = Any,
+    VectorRewardType = Any,
+    VectorBoolType = Any,
+]:
     """Base class for vectorized environments to run multiple independent copies of the same environment in parallel.
 
     Vector environments can provide a linear speed-up in the steps taken per second through sampling multiple
@@ -369,10 +371,12 @@ class VectorEnv(
             )
 
 
-class VectorWrapper(
-    VectorEnv[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
-    Generic[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
-):
+class VectorWrapper[
+    VectorObsType = Any,
+    VectorActType = Any,
+    VectorRewardType = Any,
+    VectorBoolType = Any,
+](VectorEnv[VectorObsType, VectorActType, VectorRewardType, VectorBoolType]):
     """Wraps the vectorized environment to allow a modular transformation.
 
     This class is the base class for all wrappers for vectorized environments. The subclass
@@ -551,16 +555,13 @@ class VectorWrapper(
         self.env.closed = value
 
 
-class VectorObservationWrapper(
-    VectorWrapper[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
-    Generic[
-        VectorObsType,
-        VectorActType,
-        VectorRewardType,
-        VectorBoolType,
-        VectorWrappedObsType,
-    ],
-):
+class VectorObservationWrapper[
+    VectorObsType = Any,
+    VectorActType = Any,
+    VectorRewardType = Any,
+    VectorBoolType = Any,
+    VectorWrappedObsType = VectorObsType,
+](VectorWrapper[VectorObsType, VectorActType, VectorRewardType, VectorBoolType]):
     """Wraps the vectorized environment to allow a modular transformation of the observation.
 
     Equivalent to :class:`gymnasium.ObservationWrapper` for vectorized environments.
@@ -629,16 +630,13 @@ class VectorObservationWrapper(
         raise NotImplementedError
 
 
-class VectorActionWrapper(
-    VectorWrapper[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
-    Generic[
-        VectorObsType,
-        VectorActType,
-        VectorRewardType,
-        VectorBoolType,
-        VectorWrappedActType,
-    ],
-):
+class VectorActionWrapper[
+    VectorObsType = Any,
+    VectorActType = Any,
+    VectorRewardType = Any,
+    VectorBoolType = Any,
+    VectorWrappedActType = VectorActType,
+](VectorWrapper[VectorObsType, VectorActType, VectorRewardType, VectorBoolType]):
     """Wraps the vectorized environment to allow a modular transformation of the actions.
 
     Equivalent of :class:`gymnasium.ActionWrapper` for vectorized environments.
@@ -668,16 +666,13 @@ class VectorActionWrapper(
         raise NotImplementedError
 
 
-class VectorRewardWrapper(
-    VectorWrapper[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
-    Generic[
-        VectorObsType,
-        VectorActType,
-        VectorRewardType,
-        VectorBoolType,
-        VectorWrappedRewardType,
-    ],
-):
+class VectorRewardWrapper[
+    VectorObsType = Any,
+    VectorActType = Any,
+    VectorRewardType = Any,
+    VectorBoolType = Any,
+    VectorWrappedRewardType = VectorRewardType,
+](VectorWrapper[VectorObsType, VectorActType, VectorRewardType, VectorBoolType]):
     """Wraps the vectorized environment to allow a modular transformation of the reward.
 
     Equivalent of :class:`gymnasium.RewardWrapper` for vectorized environments.

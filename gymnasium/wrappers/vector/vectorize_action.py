@@ -4,38 +4,28 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from copy import deepcopy
-from typing import Any, Generic
+from typing import Any
 
 import numpy as np
-from typing_extensions import TypeVar
 
 from gymnasium import Space
 from gymnasium.core import Env
 from gymnasium.logger import warn
-from gymnasium.typing import (
-    VectorActType,
-    VectorBoolType,
-    VectorObsType,
-    VectorRewardType,
-)
 from gymnasium.vector import VectorActionWrapper, VectorEnv
 from gymnasium.vector.utils import batch_space, concatenate, create_empty_array, iterate
 from gymnasium.wrappers import transform_action
 
-# The wrapped (inner) environment's action type; defaults to this wrapper's own
-# invariant `VectorActType`.
-VectorWrappedActType = TypeVar("VectorWrappedActType", default=VectorActType)
 
-
-class TransformAction(
+class TransformAction[
+    VectorObsType = Any,
+    VectorActType = Any,
+    VectorRewardType = Any,
+    VectorBoolType = Any,
+    # The wrapped (inner) environment's action type; defaults to this wrapper's own
+    # invariant `VectorActType`.
+    VectorWrappedActType = VectorActType,
+](
     VectorActionWrapper[
-        VectorObsType,
-        VectorActType,
-        VectorRewardType,
-        VectorBoolType,
-        VectorWrappedActType,
-    ],
-    Generic[
         VectorObsType,
         VectorActType,
         VectorRewardType,
@@ -128,11 +118,15 @@ class TransformAction(
         return self.func(actions)
 
 
-class VectorizeTransformAction(
+class VectorizeTransformAction[
+    VectorObsType = Any,
+    VectorActType = Any,
+    VectorRewardType = Any,
+    VectorBoolType = Any,
+](
     VectorActionWrapper[
         VectorObsType, VectorActType, VectorRewardType, VectorBoolType, VectorActType
     ],
-    Generic[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
 ):
     """Vectorizes a single-agent transform action wrapper for vector environments.
 
@@ -235,11 +229,15 @@ class VectorizeTransformAction(
         return actions_out  # ty:ignore[invalid-return-type]
 
 
-class ClipAction(
+class ClipAction[
+    VectorObsType = Any,
+    VectorActType = Any,
+    VectorRewardType = Any,
+    VectorBoolType = Any,
+](
     VectorizeTransformAction[
         VectorObsType, VectorActType, VectorRewardType, VectorBoolType
     ],
-    Generic[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
 ):
     """Clip the continuous action within the valid :class:`Box` observation space bound.
 
@@ -270,11 +268,15 @@ class ClipAction(
         super().__init__(env, transform_action.ClipAction)
 
 
-class RescaleAction(
+class RescaleAction[
+    VectorObsType = Any,
+    VectorActType = Any,
+    VectorRewardType = Any,
+    VectorBoolType = Any,
+](
     VectorizeTransformAction[
         VectorObsType, VectorActType, VectorRewardType, VectorBoolType
     ],
-    Generic[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
 ):
     """Affinely rescales the continuous action space of the environment to the range [min_action, max_action].
 

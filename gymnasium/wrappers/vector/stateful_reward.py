@@ -5,27 +5,25 @@
 
 from __future__ import annotations
 
-from typing import Any, Generic, TypeAlias
+from typing import Any
 
 import numpy as np
 import numpy.typing as npt
 
 import gymnasium as gym
-from gymnasium.typing import VectorActType, VectorObsType
 from gymnasium.vector.vector_env import VectorEnv, VectorWrapper
 from gymnasium.wrappers.utils import RunningMeanStd
 
 __all__ = ["NormalizeReward"]
 
 
-VectorBoolArray: TypeAlias = np.ndarray[tuple[int], np.dtype[np.bool_]]
-VectorFloat32Array: TypeAlias = np.ndarray[tuple[int], np.dtype[np.float64]]
+type VectorBoolArray = np.ndarray[tuple[int], np.dtype[np.bool_]]
+type VectorFloat32Array = np.ndarray[tuple[int], np.dtype[np.float64]]
 
 
-class NormalizeReward(
+class NormalizeReward[VectorObsType = Any, VectorActType = Any](
     VectorWrapper[VectorObsType, VectorActType, VectorFloat32Array, VectorBoolArray],
     gym.utils.RecordConstructorArgs,
-    Generic[VectorObsType, VectorActType],
 ):
     r"""This wrapper will scale rewards s.t. their exponential moving average has an approximately fixed variance.
 

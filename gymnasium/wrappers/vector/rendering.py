@@ -6,7 +6,7 @@ import gc
 import os
 from collections.abc import Callable, Sequence
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Generic
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import numpy.typing as npt
@@ -16,22 +16,20 @@ from gymnasium import error, logger
 from gymnasium.core import RenderFrame
 from gymnasium.error import DependencyNotInstalled
 from gymnasium.logger import warn
-from gymnasium.typing import (
-    VectorActType,
-    VectorBoolType,
-    VectorObsType,
-    VectorRewardType,
-)
 from gymnasium.vector import VectorEnv, VectorWrapper
 
 if TYPE_CHECKING:
     import pygame
 
 
-class HumanRendering(
+class HumanRendering[
+    VectorObsType = Any,
+    VectorActType = Any,
+    VectorRewardType = Any,
+    VectorBoolType = Any,
+](
     VectorWrapper[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
     gym.utils.RecordConstructorArgs,
-    Generic[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
 ):
     """Adds support for Human-based Rendering for Vector-based environments."""
 
@@ -221,12 +219,11 @@ class HumanRendering(
         super().close(**kwargs)
 
 
-class RecordVideo(
+class RecordVideo[VectorObsType = Any, VectorActType = Any, VectorRewardType = Any](
     VectorWrapper[
         VectorObsType, VectorActType, VectorRewardType, npt.NDArray[np.bool_]
     ],
     gym.utils.RecordConstructorArgs,
-    Generic[VectorObsType, VectorActType, VectorRewardType],
 ):
     """Adds support for video recording for Vector-based environments.
 

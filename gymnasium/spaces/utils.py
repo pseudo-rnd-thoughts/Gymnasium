@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import operator as op
 from functools import reduce, singledispatch
-from typing import Any, TypeAlias, TypeVar
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -28,8 +28,6 @@ from gymnasium.spaces import (
     Text,
     Tuple,
 )
-
-_IntegerT = TypeVar("_IntegerT", bound=np.integer)
 
 
 @singledispatch
@@ -109,12 +107,11 @@ def _flatdim_oneof(space: OneOf) -> int:
     return 1 + max(flatdim(s) for s in space.spaces)
 
 
-T = TypeVar("T")
-FlatType: TypeAlias = NDArray[Any] | dict[str, Any] | tuple[Any, ...] | GraphInstance
+type FlatType = NDArray[Any] | dict[str, Any] | tuple[Any, ...] | GraphInstance
 
 
 @singledispatch
-def flatten(space: Space[T], x: T) -> FlatType:
+def flatten[T](space: Space[T], x: T) -> FlatType:
     """Flatten a data point from a space.
 
     This is useful when e.g. points from spaces must be passed to a neural
@@ -165,7 +162,9 @@ def _flatten_box_multibinary(space: Box | MultiBinary, x: NDArray[Any]) -> NDArr
 
 
 @flatten.register(Discrete)
-def _flatten_discrete(space: Discrete, x: _IntegerT) -> NDArray[_IntegerT]:
+def _flatten_discrete[IntegerT: np.integer](
+    space: Discrete, x: IntegerT
+) -> NDArray[IntegerT]:
     onehot = np.zeros(space.n, dtype=space.dtype)
     onehot[x - space.start] = 1
     return onehot
@@ -283,7 +282,7 @@ def _flatten_oneof(space: OneOf, x: tuple[int, Any]) -> NDArray[Any]:
 
 
 @singledispatch
-def unflatten(space: Space[T], x: FlatType) -> T:
+def unflatten[T](space: Space[T], x: FlatType) -> T:
     """Unflatten a data point from a space.
 
     This reverses the transformation applied by :func:`flatten`. You must ensure
@@ -311,9 +310,9 @@ def _unflatten_box_multibinary(
 
 
 @unflatten.register(Discrete)
-def _unflatten_discrete(
-    space: Discrete, x: NDArray[_IntegerT | np.float64]
-) -> _IntegerT:
+def _unflatten_discrete[IntegerT: np.integer](
+    space: Discrete, x: NDArray[IntegerT | np.float64]
+) -> IntegerT:
     nonzero = np.nonzero(x)
     if len(nonzero[0]) == 0:
         raise ValueError(

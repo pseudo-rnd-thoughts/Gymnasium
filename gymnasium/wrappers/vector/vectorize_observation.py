@@ -4,38 +4,29 @@ from __future__ import annotations
 
 from collections.abc import Callable, Sequence
 from copy import deepcopy
-from typing import Any, Generic
+from typing import Any
 
 import numpy as np
-from typing_extensions import TypeVar
 
 from gymnasium import Space
 from gymnasium.core import Env
 from gymnasium.logger import warn
-from gymnasium.typing import (
-    VectorActType,
-    VectorBoolType,
-    VectorObsType,
-    VectorRewardType,
-)
 from gymnasium.vector import VectorEnv, VectorObservationWrapper
 from gymnasium.vector.utils import batch_space, concatenate, create_empty_array, iterate
 from gymnasium.vector.vector_env import AutoresetMode
 from gymnasium.wrappers import transform_observation
 
-# The wrapped (inner) environment's observation type; defaults to this wrapper's own invariant `VectorObsType`.
-VectorWrappedObsType = TypeVar("VectorWrappedObsType", default=VectorObsType)
 
-
-class TransformObservation(
+class TransformObservation[
+    VectorObsType = Any,
+    VectorActType = Any,
+    VectorRewardType = Any,
+    VectorBoolType = Any,
+    # The wrapped (inner) environment's observation type; defaults to this
+    # wrapper's own invariant `VectorObsType`.
+    VectorWrappedObsType = VectorObsType,
+](
     VectorObservationWrapper[
-        VectorObsType,
-        VectorActType,
-        VectorRewardType,
-        VectorBoolType,
-        VectorWrappedObsType,
-    ],
-    Generic[
         VectorObsType,
         VectorActType,
         VectorRewardType,
@@ -126,11 +117,15 @@ class TransformObservation(
         return self.func(observations)
 
 
-class VectorizeTransformObservation(
+class VectorizeTransformObservation[
+    VectorObsType = Any,
+    VectorActType = Any,
+    VectorRewardType = Any,
+    VectorBoolType = Any,
+](
     VectorObservationWrapper[
         VectorObsType, VectorActType, VectorRewardType, VectorBoolType, VectorObsType
     ],
-    Generic[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
 ):
     """Vectorizes a single-agent transform observation wrapper for vector environments.
 
@@ -273,11 +268,15 @@ class VectorizeTransformObservation(
         return observations_out  # ty:ignore[invalid-return-type]
 
 
-class FilterObservation(
+class FilterObservation[
+    VectorObsType = Any,
+    VectorActType = Any,
+    VectorRewardType = Any,
+    VectorBoolType = Any,
+](
     VectorizeTransformObservation[
         VectorObsType, VectorActType, VectorRewardType, VectorBoolType
     ],
-    Generic[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
 ):
     """Vector wrapper for filtering dict or tuple observation spaces.
 
@@ -317,11 +316,15 @@ class FilterObservation(
         )
 
 
-class FlattenObservation(
+class FlattenObservation[
+    VectorObsType = Any,
+    VectorActType = Any,
+    VectorRewardType = Any,
+    VectorBoolType = Any,
+](
     VectorizeTransformObservation[
         VectorObsType, VectorActType, VectorRewardType, VectorBoolType
     ],
-    Generic[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
 ):
     """Observation wrapper that flattens the observation.
 
@@ -350,11 +353,15 @@ class FlattenObservation(
         super().__init__(env, transform_observation.FlattenObservation)
 
 
-class GrayscaleObservation(
+class GrayscaleObservation[
+    VectorObsType = Any,
+    VectorActType = Any,
+    VectorRewardType = Any,
+    VectorBoolType = Any,
+](
     VectorizeTransformObservation[
         VectorObsType, VectorActType, VectorRewardType, VectorBoolType
     ],
-    Generic[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
 ):
     """Observation wrapper that converts an RGB image to grayscale.
 
@@ -387,11 +394,15 @@ class GrayscaleObservation(
         )
 
 
-class ResizeObservation(
+class ResizeObservation[
+    VectorObsType = Any,
+    VectorActType = Any,
+    VectorRewardType = Any,
+    VectorBoolType = Any,
+](
     VectorizeTransformObservation[
         VectorObsType, VectorActType, VectorRewardType, VectorBoolType
     ],
-    Generic[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
 ):
     """Resizes image observations using OpenCV to shape.
 
@@ -422,11 +433,15 @@ class ResizeObservation(
         super().__init__(env, transform_observation.ResizeObservation, shape=shape)
 
 
-class ReshapeObservation(
+class ReshapeObservation[
+    VectorObsType = Any,
+    VectorActType = Any,
+    VectorRewardType = Any,
+    VectorBoolType = Any,
+](
     VectorizeTransformObservation[
         VectorObsType, VectorActType, VectorRewardType, VectorBoolType
     ],
-    Generic[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
 ):
     """Reshapes array based observations to shapes.
 
@@ -457,11 +472,15 @@ class ReshapeObservation(
         super().__init__(env, transform_observation.ReshapeObservation, shape=shape)
 
 
-class RescaleObservation(
+class RescaleObservation[
+    VectorObsType = Any,
+    VectorActType = Any,
+    VectorRewardType = Any,
+    VectorBoolType = Any,
+](
     VectorizeTransformObservation[
         VectorObsType, VectorActType, VectorRewardType, VectorBoolType
     ],
-    Generic[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
 ):
     """Linearly rescales observation to between a minimum and maximum value.
 
@@ -503,11 +522,15 @@ class RescaleObservation(
         )
 
 
-class DtypeObservation(
+class DtypeObservation[
+    VectorObsType = Any,
+    VectorActType = Any,
+    VectorRewardType = Any,
+    VectorBoolType = Any,
+](
     VectorizeTransformObservation[
         VectorObsType, VectorActType, VectorRewardType, VectorBoolType
     ],
-    Generic[VectorObsType, VectorActType, VectorRewardType, VectorBoolType],
 ):
     """Observation wrapper for transforming the dtype of an observation.
 

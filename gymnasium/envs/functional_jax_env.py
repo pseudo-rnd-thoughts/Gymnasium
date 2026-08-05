@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Generic, TypeAlias
+from typing import Any
 
 import jax
 import jax.numpy as jnp
@@ -10,15 +10,15 @@ import jax.random as jrng
 
 import gymnasium as gym
 from gymnasium.envs.registration import EnvSpec
-from gymnasium.experimental.functional import ActType, FuncEnv, ObsType, StateType
+from gymnasium.experimental.functional import FuncEnv
 from gymnasium.utils import seeding
 from gymnasium.vector import AutoresetMode
 from gymnasium.vector.utils import batch_space
 
-PRNGKeyType: TypeAlias = jax.Array
+type PRNGKeyType = jax.Array
 
 
-class FunctionalJaxEnv(gym.Env, Generic[StateType]):
+class FunctionalJaxEnv[StateType, ActType](gym.Env):
     """A conversion layer for jax-based environments."""
 
     state: StateType
@@ -100,9 +100,8 @@ class FunctionalJaxEnv(gym.Env, Generic[StateType]):
             self.render_state = None
 
 
-class FunctionalJaxVectorEnv(
-    gym.vector.VectorEnv[ObsType, ActType, Any, Any],
-    Generic[ObsType, ActType, StateType],
+class FunctionalJaxVectorEnv[ObsType, ActType, StateType](
+    gym.vector.VectorEnv[ObsType, ActType, Any, Any]
 ):
     """A vector env implementation for functional Jax envs."""
 

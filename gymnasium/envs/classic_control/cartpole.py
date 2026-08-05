@@ -5,7 +5,7 @@ permalink: https://perma.cc/C9ZM-652R
 """
 
 import math
-from typing import Any, TypeAlias
+from typing import Any
 
 import numpy as np
 
@@ -16,10 +16,14 @@ from gymnasium.error import DependencyNotInstalled
 from gymnasium.vector import AutoresetMode, VectorEnv
 from gymnasium.vector.utils import batch_space
 
-VectorBoolArray: TypeAlias = np.ndarray[tuple[int], np.dtype[np.bool_]]
-VectorIntArray: TypeAlias = np.ndarray[tuple[int], np.dtype[np.integer]]
-VectorFloat32Array: TypeAlias = np.ndarray[tuple[int], np.dtype[np.float32]]
-VectorFloat32Matrix: TypeAlias = np.ndarray[tuple[int, int], np.dtype[np.float32]]
+# Kept as plain assignments (not `type X = ...`): these are used to parameterise
+# `VectorEnv[...]` in a class base list below (`CartPoleVectorEnv`), which is
+# evaluated eagerly at class-definition time via runtime subscripting and needs
+# real runtime types.
+VectorBoolArray = np.ndarray[tuple[int], np.dtype[np.bool_]]
+VectorIntArray = np.ndarray[tuple[int], np.dtype[np.integer]]
+VectorFloat32Array = np.ndarray[tuple[int], np.dtype[np.float32]]
+VectorFloat32Matrix = np.ndarray[tuple[int, int], np.dtype[np.float32]]
 
 
 class CartPoleEnv(gym.Env[np.ndarray, int | np.ndarray]):

@@ -21,7 +21,6 @@ import numpy as np
 
 import gymnasium as gym
 from gymnasium import spaces
-from gymnasium.core import ActType, ObsType, WrapperObsType
 from gymnasium.error import DependencyNotInstalled
 
 __all__ = [
@@ -40,7 +39,7 @@ __all__ = [
 from gymnasium.wrappers.utils import rescale_box
 
 
-class TransformObservation(
+class TransformObservation[WrapperObsType = Any, ActType = Any, ObsType = Any](
     gym.ObservationWrapper[WrapperObsType, ActType, ObsType],
     gym.utils.RecordConstructorArgs,
 ):
@@ -97,7 +96,7 @@ class TransformObservation(
         return self.func(observation)
 
 
-class FilterObservation(
+class FilterObservation[WrapperObsType = Any, ActType = Any, ObsType = Any](
     TransformObservation[WrapperObsType, ActType, ObsType],
     gym.utils.RecordConstructorArgs,
 ):
@@ -221,7 +220,7 @@ class FilterObservation(
         self.filter_keys: Final[Sequence[str | int]] = filter_keys
 
 
-class FlattenObservation(
+class FlattenObservation[WrapperObsType = Any, ActType = Any, ObsType = Any](
     TransformObservation[WrapperObsType, ActType, ObsType],
     gym.utils.RecordConstructorArgs,
 ):
@@ -261,7 +260,7 @@ class FlattenObservation(
         )
 
 
-class GrayscaleObservation(
+class GrayscaleObservation[WrapperObsType = Any, ActType = Any, ObsType = Any](
     TransformObservation[WrapperObsType, ActType, ObsType],
     gym.utils.RecordConstructorArgs,
 ):
@@ -350,7 +349,7 @@ class GrayscaleObservation(
             )
 
 
-class ResizeObservation(
+class ResizeObservation[WrapperObsType = Any, ActType = Any, ObsType = Any](
     TransformObservation[WrapperObsType, ActType, ObsType],
     gym.utils.RecordConstructorArgs,
 ):
@@ -444,7 +443,7 @@ class ResizeObservation(
         )
 
 
-class ReshapeObservation(
+class ReshapeObservation[WrapperObsType = Any, ActType = Any, ObsType = Any](
     TransformObservation[WrapperObsType, ActType, ObsType],
     gym.utils.RecordConstructorArgs,
 ):
@@ -512,7 +511,7 @@ class ReshapeObservation(
         )
 
 
-class RescaleObservation(
+class RescaleObservation[WrapperObsType = Any, ActType = Any, ObsType = Any](
     TransformObservation[WrapperObsType, ActType, ObsType],
     gym.utils.RecordConstructorArgs,
 ):
@@ -565,7 +564,7 @@ class RescaleObservation(
         )
 
 
-class DtypeObservation(
+class DtypeObservation[WrapperObsType = Any, ActType = Any, ObsType = Any](
     TransformObservation[WrapperObsType, ActType, ObsType],
     gym.utils.RecordConstructorArgs,
 ):
@@ -635,7 +634,7 @@ class DtypeObservation(
         )
 
 
-class AddRenderObservation(
+class AddRenderObservation[WrapperObsType = Any, ActType = Any, ObsType = Any](
     TransformObservation[WrapperObsType, ActType, ObsType],
     gym.utils.RecordConstructorArgs,
 ):
@@ -752,7 +751,7 @@ class AddRenderObservation(
             )
 
 
-class DiscretizeObservation(
+class DiscretizeObservation[WrapperObsType = Any, ActType = Any, ObsType = Any](
     TransformObservation[WrapperObsType, ActType, ObsType],
     gym.utils.RecordConstructorArgs,
 ):
