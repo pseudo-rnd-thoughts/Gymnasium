@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 import numpy as np
 
 from gymnasium import error
@@ -37,7 +39,9 @@ def np_random(seed: int | None = None) -> tuple[np.random.Generator, int]:
             )
 
     seed_seq = np.random.SeedSequence(seed)
-    np_seed = seed_seq.entropy
+    # ``entropy`` is typed as ``int | Sequence[int] | None`` but is always an ``int``
+    # here since ``SeedSequence`` is constructed from an ``int`` or ``None`` seed.
+    np_seed = cast(int, seed_seq.entropy)
     rng = RandomNumberGenerator(np.random.PCG64(seed_seq))
     return rng, np_seed
 

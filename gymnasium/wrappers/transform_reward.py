@@ -112,5 +112,5 @@ class ClipReward[ObsType = Any, ActType = Any](
         TransformReward.__init__(
             self,
             env=env,
-            func=lambda x: np.clip(x, a_min=min_reward, a_max=max_reward),  # ty:ignore[no-matching-overload]
+            func=lambda x: np.clip(x, a_min=min_reward, a_max=max_reward),
         )

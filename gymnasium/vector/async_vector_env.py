@@ -108,7 +108,7 @@ class AsyncVectorEnv[VectorObsType = Any, VectorActType = Any](
         ]
         | None
     )
-    observation_mode: str | Space
+    observation_mode: str | Space | tuple[Space, Space]
     autoreset_mode: AutoresetMode
     num_envs: int
     metadata: dict[str, Any]
@@ -143,7 +143,7 @@ class AsyncVectorEnv[VectorObsType = Any, VectorActType = Any](
             ]
             | None
         ) = None,
-        observation_mode: str | Space = "same",
+        observation_mode: str | Space | tuple[Space, Space] = "same",
         autoreset_mode: str | AutoresetMode = AutoresetMode.NEXT_STEP,
     ) -> None:
         """Vectorized environment that runs multiple environments in parallel.
@@ -212,7 +212,9 @@ class AsyncVectorEnv[VectorObsType = Any, VectorActType = Any](
                 raise TypeError(
                     f"Expected both elements of observation_mode to be Spaces, got {type(observation_mode[0])} and {type(observation_mode[1])}"
                 )
-            self.observation_space, self.single_observation_space = observation_mode
+            self.observation_space, self.single_observation_space = cast(
+                "tuple[Space, Space]", observation_mode
+            )
         else:
             if observation_mode == "same":
                 self.single_observation_space = dummy_env.observation_space
@@ -778,7 +780,8 @@ class AsyncVectorEnv[VectorObsType = Any, VectorActType = Any](
             logger.error(f"{trace}")
 
             self.parent_pipes[index].close()
-            self.parent_pipes[index] = None
+            # a `None` sentinel marks a pipe whose worker errored; guarded by `is not None` checks elsewhere
+            self.parent_pipes[index] = None  # ty: ignore[invalid-assignment]
 
             if i == num_errors - 1:
                 logger.error("Raising the last exception back to the main process.")

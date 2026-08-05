@@ -11,7 +11,7 @@ import numpy as np
 from gymnasium.spaces.space import Space
 
 
-class Tuple[T_co](Space[tuple[T_co, ...]], typing.Sequence[T_co]):
+class Tuple[T_co](Space[tuple[T_co, ...]], typing.Sequence[Space[T_co]]):
     """A tuple (more precisely: the cartesian product) of :class:`Space` instances.
 
     Elements of this space are tuples of elements of the constituent spaces.
@@ -84,7 +84,7 @@ class Tuple[T_co](Space[tuple[T_co, ...]], typing.Sequence[T_co]):
                 )
 
             return tuple(
-                space.seed(subseed)
+                space.seed(cast("int", subseed))
                 for subseed, space in zip(seed, self.spaces, strict=True)
             )
         else:

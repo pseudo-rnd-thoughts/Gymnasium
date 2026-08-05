@@ -138,7 +138,7 @@ class RenderCollection[ObsType, ActType](
     ) -> tuple[ObsType, SupportsFloat, bool, bool, dict[str, Any]]:
         """Perform a step in the base environment and collect a frame."""
         output = super().step(action)
-        self.frame_list.append(super().render())
+        self.frame_list.append(cast(RenderFrame, super().render()))
         return output
 
     def reset(
@@ -149,7 +149,7 @@ class RenderCollection[ObsType, ActType](
 
         if self.reset_clean:
             self.frame_list = []
-        self.frame_list.append(super().render())
+        self.frame_list.append(cast(RenderFrame, super().render()))
 
         return output
 
@@ -302,7 +302,9 @@ class RecordVideo[ObsType, ActType](
         self.frames_per_sec: int = fps
         self.name_prefix: str = name_prefix
         self._video_name: str | None = None
-        self.video_length: int = video_length if video_length != 0 else float("inf")
+        self.video_length: int | float = (
+            video_length if video_length != 0 else float("inf")
+        )
         self.recording: bool = False
         self.recorded_frames: list[RenderFrame] = []
         self.render_history: list[RenderFrame] = []
@@ -376,14 +378,14 @@ class RecordVideo[ObsType, ActType](
 
     def render(self) -> RenderFrame | list[RenderFrame]:
         """Compute the render frames as specified by render_mode attribute during initialization of the environment."""
-        render_out = super().render()
+        render_out = cast("RenderFrame | list[RenderFrame]", super().render())
         if self.recording and isinstance(render_out, list):
             self.recorded_frames += render_out
 
         if len(self.render_history) > 0:
             tmp_history = self.render_history
             self.render_history = []
-            return tmp_history + render_out
+            return tmp_history + cast("list[RenderFrame]", render_out)
         else:
             return render_out
 

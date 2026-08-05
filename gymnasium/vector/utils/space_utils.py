@@ -527,7 +527,7 @@ def _create_empty_array_graph(
 ) -> tuple[GraphInstance, ...]:
     return tuple(
         GraphInstance(
-            nodes=create_empty_array(space.node_space, n=1, fn=fn),
+            nodes=cast("np.ndarray", create_empty_array(space.node_space, n=1, fn=fn)),
             edges=(
                 create_empty_array(space.edge_space, n=1, fn=fn)
                 if space.edge_space is not None

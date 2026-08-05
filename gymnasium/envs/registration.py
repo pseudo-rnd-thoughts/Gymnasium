@@ -15,7 +15,7 @@ from collections.abc import Callable, Generator, Iterable, Sequence
 from dataclasses import dataclass, field
 from enum import Enum
 from types import ModuleType
-from typing import Any, Protocol
+from typing import Any, Protocol, cast
 
 import gymnasium as gym
 from gymnasium import Env, Wrapper, error, logger
@@ -416,13 +416,21 @@ def _check_version_exists(ns: str | None, name: str, version: int | None) -> Non
     latest_spec = max(
         versioned_specs, key=lambda env_spec: env_spec.version, default=None
     )
-    if latest_spec is not None and version > latest_spec.version:
+    if (
+        latest_spec is not None
+        and latest_spec.version is not None
+        and version > latest_spec.version
+    ):
         version_list_msg = ", ".join(f"`v{env_spec.version}`" for env_spec in env_specs)
         message += f" It provides versioned environments: [ {version_list_msg} ]."
 
         raise error.VersionNotFound(message)
 
-    if latest_spec is not None and version < latest_spec.version:
+    if (
+        latest_spec is not None
+        and latest_spec.version is not None
+        and version < latest_spec.version
+    ):
         raise error.DeprecatedEnv(
             f"Environment version v{version} for `{get_env_id(ns, name, None)}` is deprecated. "
             f"Please use `{latest_spec.id}` instead."
@@ -439,7 +447,7 @@ def _check_spec_register(testing_spec: EnvSpec) -> None:
             and env_spec.name == testing_spec.name
             and env_spec.version is not None
         ),
-        key=lambda spec_: int(spec_.version),
+        key=lambda spec_: int(spec_.version or -1),
         default=None,
     )
 
@@ -700,8 +708,9 @@ def make(
     # Determine if to use the rendering
     render_modes: list[str] | None = None
     if hasattr(env_creator, "metadata"):
-        _check_metadata(env_creator.metadata)
-        render_modes = env_creator.metadata.get("render_modes")
+        env_creator_metadata = cast("dict[str, Any]", env_creator.metadata)
+        _check_metadata(env_creator_metadata)
+        render_modes = env_creator_metadata.get("render_modes")
     render_mode = env_spec_kwargs.get("render_mode")
     apply_human_rendering = False
     apply_render_collection = False
@@ -733,7 +742,7 @@ def make(
             )
 
     try:
-        env = env_creator(**env_spec_kwargs)  # ty:ignore[call-top-callable]
+        env = cast("gym.Env", env_creator(**env_spec_kwargs))  # ty:ignore[call-top-callable]
     except TypeError as e:
         if (
             str(e).find("got an unexpected keyword argument 'render_mode'") >= 0
@@ -819,7 +828,10 @@ def make(
                 f"{wrapper_spec.name} wrapper does not inherit from `gymnasium.utils.RecordConstructorArgs`, therefore, the wrapper cannot be recreated."
             )
 
-        env = load_env_creator(wrapper_spec.entry_point)(env=env, **wrapper_spec.kwargs)
+        env = cast(
+            "gym.Env",
+            load_env_creator(wrapper_spec.entry_point)(env=env, **wrapper_spec.kwargs),
+        )
 
     # Add human rendering wrapper
     if apply_human_rendering:
@@ -960,7 +972,10 @@ def make_vec(
         ):
             env_spec_kwargs["max_episode_steps"] = env_spec.max_episode_steps
 
-        env = env_creator(num_envs=num_envs, **env_spec_kwargs)  # ty:ignore[call-top-callable]
+        env = cast(
+            "gym.vector.VectorEnv",
+            env_creator(num_envs=num_envs, **env_spec_kwargs),  # ty:ignore[call-top-callable]
+        )
     else:
         raise error.Error(f"Unknown vectorization mode: {vectorization_mode}")
 
@@ -1056,7 +1071,7 @@ def pprint_registry(
                 # If namespace cannot be found, default to env name
                 ns = env_spec.name
 
-        namespace_envs[ns].append(env_spec.id)
+        namespace_envs[cast("str", ns)].append(env_spec.id)
         max_justify = max(max_justify, len(env_spec.name))
 
     # Iterate through each namespace and print environment alphabetically

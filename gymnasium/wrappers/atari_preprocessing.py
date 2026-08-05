@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, SupportsFloat
+from typing import Any, Protocol, SupportsFloat, cast
 
 import numpy as np
 
@@ -11,6 +11,25 @@ from gymnasium.core import WrapperActType, WrapperObsType
 from gymnasium.spaces import Box
 
 __all__ = ["AtariPreprocessing"]
+
+
+class _ALEInterface(Protocol):
+    """Protocol describing the subset of the ALE interface used by this wrapper."""
+
+    def lives(self) -> int: ...
+
+    def getScreenGrayscale(self, buffer: np.ndarray) -> None: ...
+
+    def getScreenRGB(self, buffer: np.ndarray) -> None: ...
+
+
+class _ALEEnv(Protocol):
+    """Protocol describing the subset of an ALE environment used by this wrapper."""
+
+    def get_action_meanings(self) -> list[str]: ...
+
+    @property
+    def ale(self) -> _ALEInterface: ...
 
 
 class AtariPreprocessing(gym.Wrapper, gym.utils.RecordConstructorArgs):
@@ -128,7 +147,7 @@ class AtariPreprocessing(gym.Wrapper, gym.utils.RecordConstructorArgs):
 
         self.noop_max = noop_max
         if noop_max > 0:
-            if env.unwrapped.get_action_meanings()[0] != "NOOP":
+            if cast(_ALEEnv, env.unwrapped).get_action_meanings()[0] != "NOOP":
                 raise ValueError(
                     "When noop_max > 0, the first action meaning must be 'NOOP'"
                 )
@@ -170,9 +189,9 @@ class AtariPreprocessing(gym.Wrapper, gym.utils.RecordConstructorArgs):
         self.observation_space = Box(low=_low, high=_high, shape=_shape, dtype=_dtype)
 
     @property
-    def ale(self):
+    def ale(self) -> _ALEInterface:
         """Make ale as a class property to avoid serialization error."""
-        return self.env.unwrapped.ale
+        return cast(_ALEEnv, self.env.unwrapped).ale
 
     def step(
         self, action: WrapperActType
@@ -182,7 +201,7 @@ class AtariPreprocessing(gym.Wrapper, gym.utils.RecordConstructorArgs):
 
         for t in range(self.frame_skip):
             _, reward, terminated, truncated, info = self.env.step(action)
-            total_reward += reward
+            total_reward += cast(float, reward)
             self.game_over = terminated
 
             if self.terminal_on_life_loss:

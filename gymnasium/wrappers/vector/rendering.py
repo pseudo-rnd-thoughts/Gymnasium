@@ -431,7 +431,7 @@ class RecordVideo[VectorObsType = Any, VectorActType = Any, VectorRewardType = A
 
         if self.frame_cols == -1 or self.frame_rows == -1:
             n_frames = len(envs_frame)
-            h, w, c = envs_frame[0].shape
+            h, w, c = cast("np.ndarray", envs_frame[0]).shape
             self._get_concat_frame_shape(n_frames, h, w)
 
         concatenated_envs_frame = self._concat_frames(envs_frame)
@@ -506,7 +506,7 @@ class RecordVideo[VectorObsType = Any, VectorActType = Any, VectorRewardType = A
 
         return obs, rewards, terminations, truncations, info
 
-    def render(self) -> RenderFrame | list[RenderFrame]:
+    def render(self) -> tuple[RenderFrame, ...] | None:
         """Compute the render frames as specified by render_mode attribute during initialization of the environment."""
         render_out = super().render()
         if self.recording and isinstance(render_out, list):
@@ -515,7 +515,10 @@ class RecordVideo[VectorObsType = Any, VectorActType = Any, VectorRewardType = A
         if len(self.render_history) > 0:
             tmp_history = self.render_history
             self.render_history = []
-            return tmp_history + render_out
+            return cast(
+                "tuple[RenderFrame, ...]",
+                tmp_history + cast("list[RenderFrame]", render_out),
+            )
         else:
             return render_out
 

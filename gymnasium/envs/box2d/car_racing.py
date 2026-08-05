@@ -1,6 +1,7 @@
 __credits__ = ["Andrea PIERRÉ"]
 
 import math
+from typing import Any, cast
 
 import numpy as np
 
@@ -199,7 +200,7 @@ class CarRacing(gym.Env, EzPickle):
     Created by Oleg Klimov
     """
 
-    metadata = {
+    metadata: dict[str, Any] = {
         "render_modes": [
             "human",
             "rgb_array",
@@ -232,7 +233,7 @@ class CarRacing(gym.Env, EzPickle):
         self.contactListener_keepref = FrictionDetector(self, self.lap_complete_percent)
         self.world = Box2D.b2World((0, 0), contactListener=self.contactListener_keepref)
         self.screen: pygame.Surface | None = None
-        self.surf = None
+        self.surf: pygame.Surface | None = None
         self.clock = None
         self.isopen = True
         self.invisible_state_window = None
@@ -536,11 +537,11 @@ class CarRacing(gym.Env, EzPickle):
             self.render()
         return self.step(None)[0], {}
 
-    def step(self, action: np.ndarray | int):
+    def step(self, action: np.ndarray | int | None = None):
         assert self.car is not None
         if action is not None:
             if self.continuous:
-                action = action.astype(np.float64)
+                action = cast(np.ndarray, action).astype(np.float64)
                 self.car.steer(-action[0])
                 self.car.gas(action[1])
                 self.car.brake(action[2])
@@ -699,7 +700,9 @@ class CarRacing(gym.Env, EzPickle):
         h = H / 40.0
         color = (0, 0, 0)
         polygon = [(W, H), (W, H - 5 * h), (0, H - 5 * h), (0, H)]
-        pygame.draw.polygon(self.surf, color=color, points=polygon)
+        assert self.surf is not None
+        surf = self.surf
+        pygame.draw.polygon(surf, color=color, points=polygon)
 
         def vertical_ind(place, val):
             return [
@@ -726,7 +729,7 @@ class CarRacing(gym.Env, EzPickle):
         # simple wrapper to render if the indicator value is above a threshold
         def render_if_min(value, points, color):
             if abs(value) > 1e-4:
-                pygame.draw.polygon(self.surf, points=points, color=color)
+                pygame.draw.polygon(surf, points=points, color=color)
 
         render_if_min(true_speed, vertical_ind(5, 0.02 * true_speed), (255, 255, 255))
         # ABS sensors
@@ -779,6 +782,7 @@ class CarRacing(gym.Env, EzPickle):
             and (-MAX_SHAPE_DIM <= coord[1] <= WINDOW_H + MAX_SHAPE_DIM)
             for coord in poly
         ):
+            assert self.surf is not None
             gfxdraw.aapolygon(self.surf, poly, color)
             gfxdraw.filled_polygon(self.surf, poly, color)
 

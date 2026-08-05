@@ -1,4 +1,5 @@
 import os
+from typing import Any
 
 import numpy as np
 
@@ -155,7 +156,7 @@ class BlackjackEnv(gym.Env):
     * v0: Initial version release
     """
 
-    metadata = {
+    metadata: dict[str, Any] = {
         "render_modes": ["human", "rgb_array"],
         "render_fps": 4,
     }

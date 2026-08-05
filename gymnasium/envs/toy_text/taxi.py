@@ -167,7 +167,7 @@ class TaxiEnv(Env):
     * v0: Initial version release
     """
 
-    metadata = {
+    metadata: dict[str, Any] = {
         "render_modes": ["human", "ansi", "rgb_array"],
         "render_fps": 4,
     }
@@ -428,11 +428,11 @@ class TaxiEnv(Env):
             mask[5] = 1
         return mask
 
-    def step(self, a):
-        transitions = self.P[self.s][a]
+    def step(self, action):
+        transitions = self.P[self.s][action]
         i = categorical_sample([t[0] for t in transitions], self.np_random)
         p, s, r, t = transitions[i]
-        self.lastaction = a
+        self.lastaction = action
 
         shadow_row, shadow_col, shadow_pass_loc, shadow_dest_idx = self.decode(self.s)
         taxi_row, taxi_col, pass_loc, _ = self.decode(s)

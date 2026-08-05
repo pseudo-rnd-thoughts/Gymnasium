@@ -367,7 +367,7 @@ class SyncVectorEnv[VectorObsType = Any, VectorActType = Any](
 
     def render(self) -> tuple[RenderFrame, ...]:
         """Returns the rendered frames from the environments."""
-        return tuple(env.render() for env in self.envs)
+        return cast("tuple[RenderFrame, ...]", tuple(env.render() for env in self.envs))
 
     def call(self, name: str, *args: Any, **kwargs: Any) -> tuple[Any, ...]:
         """Calls a sub-environment method with name and applies args and kwargs.
