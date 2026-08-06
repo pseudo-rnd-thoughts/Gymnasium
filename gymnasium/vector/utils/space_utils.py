@@ -13,7 +13,7 @@ from collections.abc import Callable, Iterable, Iterator, Mapping
 from collections.abc import Sequence as _PySequence
 from copy import deepcopy
 from functools import singledispatch
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 

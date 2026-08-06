@@ -12,7 +12,7 @@ from enum import Enum
 from multiprocessing import Queue
 from multiprocessing.connection import Connection
 from multiprocessing.sharedctypes import SynchronizedArray
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 

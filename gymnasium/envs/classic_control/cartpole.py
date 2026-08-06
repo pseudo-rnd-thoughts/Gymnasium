@@ -5,7 +5,7 @@ permalink: https://perma.cc/C9ZM-652R
 """
 
 import math
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 

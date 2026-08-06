@@ -4,7 +4,7 @@
 # Gymnasium uses PEP 695 type-parameter syntax, which only parses on Python >= 3.13.
 # Hooks that parse source (check-ast, debug-statements) must run on such an interpreter.
 default_language_version:
-  python: python3
+  python: python3.13
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks

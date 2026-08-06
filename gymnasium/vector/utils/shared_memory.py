@@ -9,7 +9,7 @@ from ctypes import c_bool, c_int32, c_int64, c_uint8
 from functools import singledispatch
 from multiprocessing.sharedctypes import SynchronizedArray
 from types import ModuleType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
@@ -322,7 +322,9 @@ def _write_text_to_shared_memory(
     destination = np.frombuffer(shared_memory.get_obj(), dtype=np.int32)
     np.copyto(
         destination[index * size : (index + 1) * size],
-        flatten(space, values),
+        # `flatten` is a singledispatch whose declared return type is the union of
+        # every space's flat representation; the `Text` implementation returns an array.
+        cast("np.ndarray[Any, np.dtype[Any]]", flatten(space, values)),
     )
 
 

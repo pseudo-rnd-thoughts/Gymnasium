@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import operator as op
 from functools import reduce, singledispatch
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -163,7 +163,7 @@ def _flatten_box_multibinary(space: Box | MultiBinary, x: NDArray[Any]) -> NDArr
 
 @flatten.register(Discrete)
 def _flatten_discrete[IntegerT: np.integer](
-    space: Discrete, x: IntegerT
+    space: Discrete[IntegerT], x: np.integer
 ) -> NDArray[IntegerT]:
     onehot = np.zeros(space.n, dtype=space.dtype)
     onehot[x - space.start] = 1

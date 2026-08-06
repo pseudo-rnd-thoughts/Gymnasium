@@ -7,7 +7,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Any, SupportsFloat
+from typing import Any, SupportsFloat, cast
 
 import numpy as np
 
@@ -112,5 +112,9 @@ class ClipReward[ObsType = Any, ActType = Any](
         TransformReward.__init__(
             self,
             env=env,
-            func=lambda x: np.clip(x, a_min=min_reward, a_max=max_reward),
+            # `np.clip` is typed only for numpy scalars/arrays, but accepts any
+            # `SupportsFloat` at runtime and preserves its type.
+            func=lambda x: np.clip(
+                cast("np.floating[Any]", x), a_min=min_reward, a_max=max_reward
+            ),
         )

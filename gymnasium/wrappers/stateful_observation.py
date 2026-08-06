@@ -17,7 +17,6 @@ import numpy as np
 
 import gymnasium as gym
 import gymnasium.spaces as spaces
-from gymnasium.core import WrapperActType
 from gymnasium.spaces import Box, Dict, Tuple
 from gymnasium.vector.utils import batch_space, concatenate, create_empty_array
 from gymnasium.wrappers.utils import RunningMeanStd, create_zero_array

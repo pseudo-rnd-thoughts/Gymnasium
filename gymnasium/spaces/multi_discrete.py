@@ -95,7 +95,7 @@ class MultiDiscrete[IntegerT_co: np.integer[Any] = np.int64](
             raise ValueError(
                 "MultiDiscrete dtype must be explicitly provided, cannot be None."
             )
-        self.dtype = cast("np.dtype[_IntegerT_co]", np.dtype(dtype))
+        self.dtype = cast("np.dtype[IntegerT_co]", np.dtype(dtype))
 
         #  * check that dtype is an accepted dtype
         if not (np.issubdtype(self.dtype, np.integer)):
@@ -289,7 +289,7 @@ class MultiDiscrete[IntegerT_co: np.integer[Any] = np.int64](
         # you don't need to deepcopy as np random generator call replaces the state not the data
         subspace.np_random.bit_generator.state = self.np_random.bit_generator.state
 
-        return cast("Discrete[_IntegerT_co] | MultiDiscrete[_IntegerT_co]", subspace)
+        return cast("Discrete[IntegerT_co] | MultiDiscrete[IntegerT_co]", subspace)
 
     def __len__(self) -> int:
         """Gives the ``len`` of samples from this space."""

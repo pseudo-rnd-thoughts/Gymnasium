@@ -2,7 +2,7 @@
 
 import math
 import os
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING, NamedTuple, cast
 
 import jax
 import jax.numpy as jnp

@@ -22,7 +22,7 @@ import numbers
 from collections import abc
 from collections.abc import Iterable, Mapping
 from types import ModuleType, NoneType
-from typing import Any, SupportsFloat
+from typing import Any, SupportsFloat, cast
 
 import numpy as np
 from array_api_compat import is_numpy_namespace
@@ -104,11 +104,14 @@ def _iterable_array_conversion(
     # for some frameworks (see e.g. https://github.com/data-apis/array-api-compat/issues/204)
     if is_array_api_obj(value):
         return _array_api_array_conversion(value, xp, device)
+    # The concrete iterable type is only known at runtime, so its constructor (and a
+    # namedtuple's `_make`) cannot be checked against `type[Iterable[Any]]`.
+    value_type = cast("Any", type(value))
     if hasattr(value, "_make"):
         # namedtuple - underline used to prevent potential name conflicts
         # noinspection PyProtectedMember
-        return type(value)._make(array_conversion(v, xp, device) for v in value)
-    return type(value)(array_conversion(v, xp, device) for v in value)
+        return value_type._make(array_conversion(v, xp, device) for v in value)
+    return value_type(array_conversion(v, xp, device) for v in value)
 
 
 def _array_api_array_conversion(

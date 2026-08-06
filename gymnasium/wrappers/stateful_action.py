@@ -7,7 +7,6 @@ from typing import Any, SupportsFloat, cast
 import numpy as np
 
 import gymnasium as gym
-from gymnasium.core import WrapperActType, WrapperObsType
 from gymnasium.error import InvalidBound, InvalidProbability
 
 __all__ = ["StickyAction", "RepeatAction"]

@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Any
+from collections.abc import Callable
+from typing import Any, Protocol, cast
 
 import jax
 import jax.numpy as jnp
@@ -18,7 +19,7 @@ from gymnasium.vector.utils import batch_space
 type PRNGKeyType = jax.Array
 
 
-class _TransformedFuncEnv(Protocol, Generic[StateType, ObsType, ActType]):
+class _TransformedFuncEnv[StateType, ObsType, ActType](Protocol):
     """Static view of a :class:`FuncEnv` as used by the Jax env wrappers.
 
     ``FuncEnv.transform`` rebinds the instance methods at runtime (documented with

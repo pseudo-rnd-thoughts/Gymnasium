@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from os import path
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING, NamedTuple, cast
 
 import jax
 import jax.numpy as jnp

@@ -93,7 +93,7 @@ class Discrete[IntegerT_co: np.integer[Any] = np.int64](Space[IntegerT_co]):
         # determine dtype
         if dtype is None:
             raise TypeError(f"Invalid Discrete dtype, cannot be {dtype}.")
-        self.dtype = cast("np.dtype[_IntegerT_co]", np.dtype(dtype))
+        self.dtype = cast("np.dtype[IntegerT_co]", np.dtype(dtype))
 
         #  * check that dtype is an accepted dtype
         if not (np.issubdtype(self.dtype, np.integer)):
@@ -180,7 +180,7 @@ class Discrete[IntegerT_co: np.integer[Any] = np.int64](Space[IntegerT_co]):
         # uniform sampling
         else:
             return cast(
-                "_IntegerT_co",
+                "IntegerT_co",
                 self.start + self.np_random.integers(self.n, dtype=self.dtype.type),
             )
 

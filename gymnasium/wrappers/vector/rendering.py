@@ -6,7 +6,7 @@ import gc
 import os
 from collections.abc import Callable, Sequence
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 import numpy.typing as npt
@@ -434,7 +434,7 @@ class RecordVideo[VectorObsType = Any, VectorActType = Any, VectorRewardType = A
             h, w, c = cast("np.ndarray", envs_frame[0]).shape
             self._get_concat_frame_shape(n_frames, h, w)
 
-        concatenated_envs_frame = self._concat_frames(envs_frame)
+        concatenated_envs_frame = self._concat_frames(cast("npt.ArrayLike", envs_frame))
         self.recorded_frames.append(concatenated_envs_frame)
 
     def reset(
