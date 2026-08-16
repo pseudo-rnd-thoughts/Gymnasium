@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 
@@ -124,7 +124,9 @@ class OneOf[T_co](Space[tuple[int, T_co]]):
         Returns:
             Tuple of the subspace's samples
         """
-        subspace_idx: int = self.np_random.integers(0, len(self.spaces), dtype=np.int64)
+        # The index is kept as `np.int64` at runtime -- `contains` accepts both it and
+        # `int`, and narrowing it to `int` here would change the sampled value's type.
+        subspace_idx = self.np_random.integers(0, len(self.spaces), dtype=np.int64)
         subspace = self.spaces[subspace_idx]
 
         if mask is not None and probability is not None:
@@ -153,7 +155,7 @@ class OneOf[T_co](Space[tuple[int, T_co]]):
         else:
             subspace_sample = subspace.sample()
 
-        return subspace_idx, subspace_sample
+        return cast("int", subspace_idx), subspace_sample
 
     def contains(self, x: tuple[int, Any]) -> bool:
         """Return boolean specifying if x is a valid member of this space."""

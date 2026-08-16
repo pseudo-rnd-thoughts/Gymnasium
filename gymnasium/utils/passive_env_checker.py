@@ -56,7 +56,9 @@ def _check_box_action_space(action_space: spaces.Box) -> None:
 
 
 def check_space(
-    space: Space, space_type: str, check_box_space_fn: Callable[[spaces.Box], None]
+    space: Space[Any],
+    space_type: str,
+    check_box_space_fn: Callable[[spaces.Box[Any]], None],
 ) -> None:
     """A passive check of the environment action space that should not affect the environment."""
     if not isinstance(space, spaces.Space):
@@ -79,11 +81,14 @@ def check_space(
             f"Discrete {space_type} space's shape should be empty, actual shape: {space.shape}"
         )
     elif isinstance(space, spaces.MultiDiscrete):
-        assert space.shape == space.nvec.shape, (
-            f"Multi-discrete {space_type} space's shape must be equal to the nvec shape, space shape: {space.shape}, nvec shape: {space.nvec.shape}"
+        # `isinstance` leaves the space's scalar type parameter unsolved, and numpy's
+        # `ndarray` is invariant in its dtype, so widen before comparing below.
+        nvec = cast("np.typing.NDArray[np.integer[Any]]", space.nvec)
+        assert space.shape == nvec.shape, (
+            f"Multi-discrete {space_type} space's shape must be equal to the nvec shape, space shape: {space.shape}, nvec shape: {nvec.shape}"
         )
-        assert np.all(0 < space.nvec), (
-            f"Multi-discrete {space_type} space's all nvec elements must be greater than 0, actual nvec: {space.nvec}"
+        assert np.all(0 < nvec), (
+            f"Multi-discrete {space_type} space's all nvec elements must be greater than 0, actual nvec: {nvec}"
         )
     elif isinstance(space, spaces.MultiBinary):
         assert np.all(0 < np.asarray(space.shape)), (

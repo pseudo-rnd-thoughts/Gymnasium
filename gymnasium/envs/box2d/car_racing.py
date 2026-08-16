@@ -640,7 +640,7 @@ class CarRacing(gym.Env, EzPickle):
         font = pygame.font.Font(pygame.font.get_default_font(), 42)
         text = font.render(f"{self.reward:04.0f}", True, (255, 255, 255), (0, 0, 0))
         text_rect = text.get_rect()
-        text_rect.center = (60, WINDOW_H - WINDOW_H * 2.5 / 40.0)
+        text_rect.center = (60, int(WINDOW_H - WINDOW_H * 2.5 / 40.0))
         self.surf.blit(text, text_rect)
 
         if mode == "human":

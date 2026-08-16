@@ -289,7 +289,7 @@ class CliffWalkingEnv(Env):
             )
 
         for s in range(self.nS):
-            row, col = np.unravel_index(s, self.shape)
+            row, col = (int(idx) for idx in np.unravel_index(s, self.shape))
             pos = (col * self.cell_size[0], row * self.cell_size[1])
             check_board_mask = int(row % 2) ^ int(col % 2)
             self.window_surface.blit(self.mountain_bg_img[check_board_mask], pos)

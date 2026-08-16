@@ -289,7 +289,7 @@ class MultiDiscrete[IntegerT_co: np.integer[Any] = np.int64](
         # you don't need to deepcopy as np random generator call replaces the state not the data
         subspace.np_random.bit_generator.state = self.np_random.bit_generator.state
 
-        return cast("Discrete[IntegerT_co] | MultiDiscrete[IntegerT_co]", subspace)
+        return subspace
 
     def __len__(self) -> int:
         """Gives the ``len`` of samples from this space."""

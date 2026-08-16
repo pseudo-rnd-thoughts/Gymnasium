@@ -414,7 +414,11 @@ def _check_version_exists(ns: str | None, name: str, version: int | None) -> Non
     ]
 
     latest_spec = max(
-        versioned_specs, key=lambda env_spec: env_spec.version, default=None
+        versioned_specs,
+        # `versioned_specs` is filtered on `version is not None`, which ty cannot
+        # narrow through the comprehension into the key function.
+        key=lambda env_spec: cast("int", env_spec.version),
+        default=None,
     )
     if (
         latest_spec is not None

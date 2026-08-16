@@ -332,9 +332,9 @@ class CliffWalkingFunctional(
         ) = render_state
 
         for s in range(nS):
-            row, col = np.unravel_index(s, shape)
+            row, col = (int(idx) for idx in np.unravel_index(s, shape))
             pos = (col * cell_size[0], row * cell_size[1])
-            check_board_mask = cast("int", row % 2) ^ cast("int", col % 2)
+            check_board_mask = (row % 2) ^ (col % 2)
             window_surface.blit(mountain_bg_img[check_board_mask], pos)
 
             if cliff[row, col]:

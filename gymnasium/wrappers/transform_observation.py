@@ -598,10 +598,13 @@ class DtypeObservation[WrapperObsType = Any, ActType = Any, ObsType = Any](
 
         self.dtype = dtype
         if isinstance(env.observation_space, spaces.Box):
+            # `isinstance` leaves the space's scalar type parameter unsolved, and numpy's
+            # `ndarray` is invariant in its dtype, so `low` / `high` need widening here.
+            box_space = cast("spaces.Box[Any]", env.observation_space)
             new_observation_space = spaces.Box(
-                low=env.observation_space.low,
-                high=env.observation_space.high,
-                shape=env.observation_space.shape,
+                low=box_space.low,
+                high=box_space.high,
+                shape=box_space.shape,
                 dtype=self.dtype,
             )
         elif isinstance(env.observation_space, spaces.Discrete):
@@ -612,8 +615,11 @@ class DtypeObservation[WrapperObsType = Any, ActType = Any, ObsType = Any](
                 dtype=self.dtype,
             )
         elif isinstance(env.observation_space, spaces.MultiDiscrete):
+            multi_discrete_space = cast(
+                "spaces.MultiDiscrete[Any]", env.observation_space
+            )
             new_observation_space = spaces.MultiDiscrete(
-                env.observation_space.nvec, dtype=dtype
+                multi_discrete_space.nvec, dtype=dtype
             )
         elif isinstance(env.observation_space, spaces.MultiBinary):
             new_observation_space = spaces.Box(
@@ -826,8 +832,11 @@ class DiscretizeObservation[WrapperObsType = Any, ActType = Any, ObsType = Any](
                 "DiscretizeObservation is only compatible with Box continuous observations."
             )
 
-        self.low = env.observation_space.low
-        self.high = env.observation_space.high
+        # `isinstance` leaves the space's scalar type parameter unsolved, and numpy's
+        # `ndarray` is invariant in its dtype, so widen before the arithmetic below.
+        box_space = cast("spaces.Box[Any]", env.observation_space)
+        self.low = box_space.low
+        self.high = box_space.high
         self.n_dims = self.low.shape[0]
 
         if np.any(np.isinf(self.low)) or np.any(np.isinf(self.high)):

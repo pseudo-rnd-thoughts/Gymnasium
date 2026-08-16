@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from functools import singledispatch
-from typing import cast
+from typing import Any, cast
 
 import numpy as np
 
@@ -156,10 +156,12 @@ def _create_one_of_zero_array(space: OneOf):
 
 
 def rescale_box(
-    box: Box,
+    box: Box[Any],
     new_min: np.floating | np.integer | np.ndarray,
     new_max: np.floating | np.integer | np.ndarray,
-) -> tuple[Box, Callable[[np.ndarray], np.ndarray], Callable[[np.ndarray], np.ndarray]]:
+) -> tuple[
+    Box[Any], Callable[[np.ndarray], np.ndarray], Callable[[np.ndarray], np.ndarray]
+]:
     """Rescale and shift the given box space to match the given bounds.
 
     For unbounded components in the original space, the corresponding target bounds must also be infinite and vice versa.
