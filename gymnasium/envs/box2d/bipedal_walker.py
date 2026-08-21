@@ -1,7 +1,7 @@
 __credits__ = ["Andrea PIERRÉ"]
 
 import math
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -168,7 +168,7 @@ class BipedalWalker(gym.Env, EzPickle):
 
     """
 
-    metadata = {
+    metadata: dict[str, Any] = {
         "render_modes": ["human", "rgb_array"],
         "render_fps": FPS,
     }

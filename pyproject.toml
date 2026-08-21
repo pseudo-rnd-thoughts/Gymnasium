@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 name = "gymnasium"
 description = "A standard API for reinforcement learning and a diverse set of reference environments (formerly Gym)."
 readme = "README.md"
-requires-python = ">= 3.10"
+requires-python = ">= 3.13"
 authors = [{ name = "Farama Foundation", email = "contact@farama.org" }]
 license = { text = "MIT License" }
 keywords = ["Reinforcement Learning", "game", "RL", "AI", "gymnasium"]
@@ -16,9 +16,6 @@ classifiers = [
     "Development Status :: 5 - Production/Stable",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
     "Intended Audience :: Science/Research",
@@ -27,7 +24,6 @@ classifiers = [
 dependencies = [
     "numpy >=1.22.0",
     "cloudpickle >=1.2.0",
-    "typing-extensions >=4.3.0",
     "farama-notifications >=0.0.1",
 ]
 dynamic = ["version"]
@@ -143,19 +139,22 @@ respect-type-ignore-comments = false
 error-on-warning = false
 
 [tool.ty.environment]
-python-version = "3.10"
+python-version = "3.13"
 python-platform = "all"
 extra-paths = []
 
+# All of `gymnasium` is now clean at error level for these rules (they are errors by
+# default, so they are simply not downgraded here). The per-folder ratchet that used to
+# live in this file has been removed now that it covered the whole package.
+#
+# `unresolved-import` and `unused-ignore-comment` stay at "warn" because optional
+# dependencies are not installed in every check environment: a suppression that is
+# required when e.g. pygame or matplotlib is present is reported as unused when it is
+# not. Both are clean at error level against a full `gymnasium[all]` environment, so
+# they can be promoted if CI is ever changed to install the optional dependencies.
 [tool.ty.rules]
-invalid-argument-type = "warn"            # TODO remove
-invalid-assignment = "warn"               # TODO remove
-invalid-method-override = "warn"          # TODO remove
-invalid-return-type = "warn"              # TODO remove
-missing-argument = "warn"                 # TODO remove
-unresolved-attribute = "warn"             # TODO remove
-unresolved-import = "warn"                # TODO remove
-unsupported-operator = "warn"             # TODO remove
+unresolved-import = "warn"
+unused-ignore-comment = "warn"
 
 [tool.pytest.ini_options]
 filterwarnings = ["ignore::DeprecationWarning:gymnasium.*:"]

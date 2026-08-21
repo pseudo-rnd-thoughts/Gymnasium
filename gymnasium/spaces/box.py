@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping, Sequence
-from typing import TYPE_CHECKING, Any, Literal, TypeAlias, cast, overload
+from typing import Any, Literal, TypeIs, cast, overload
 
 import numpy as np
 from numpy.typing import NDArray
@@ -11,30 +11,12 @@ from numpy.typing import NDArray
 import gymnasium as gym
 from gymnasium.spaces.space import Space
 
-if TYPE_CHECKING:
-    from typing_extensions import TypeIs, TypeVar
+type _RealScalar = np.floating | np.integer
+type _RealArrayLike = int | float | _RealScalar | NDArray[_RealScalar]
+type _ToSeed = int | np.random.Generator
+type _ToShape = Sequence[int | np.integer]
 
-    _ScalarT_co = TypeVar(
-        "_ScalarT_co",
-        bound="_RealScalar",
-        default="_RealScalar",
-        covariant=True,
-    )
-else:
-    from typing import TypeVar
-
-    _ScalarT_co = TypeVar("_ScalarT_co", bound="_RealScalar", covariant=True)
-
-_RealScalar: TypeAlias = np.floating | np.integer
-_RealArrayLike: TypeAlias = int | float | _RealScalar | NDArray[_RealScalar]
-_ToSeed: TypeAlias = int | np.random.Generator
-_ToShape: TypeAlias = Sequence[int | np.integer]
-
-_ScalarT = TypeVar("_ScalarT", bound=_RealScalar)
-_FloatScalarT = TypeVar("_FloatScalarT", bound=np.floating)
-_IntScalarT = TypeVar("_IntScalarT", bound=np.integer)
-
-_ToDType: TypeAlias = type[_ScalarT] | np.dtype[_ScalarT]
+type _ToDType[ScalarT: _RealScalar] = type[ScalarT] | np.dtype[ScalarT]
 
 
 def array_short_repr(arr: NDArray[Any]) -> str:
@@ -61,7 +43,7 @@ def is_float_integer(var: object) -> TypeIs[float | np.floating | np.integer]:
     )
 
 
-class Box(Space[NDArray[_ScalarT_co]]):
+class Box[ScalarT_co: _RealScalar = _RealScalar](Space[NDArray[ScalarT_co]]):
     r"""A (possibly unbounded) box in :math:`\mathbb{R}^n`.
 
     Specifically, a Box represents the Cartesian product of n closed intervals.
@@ -81,11 +63,11 @@ class Box(Space[NDArray[_ScalarT_co]]):
         Box([-1. -2.], [2. 4.], (2,), float32)
     """
 
-    dtype: np.dtype[_ScalarT_co]
+    dtype: np.dtype[ScalarT_co]
     _shape: tuple[int, ...]
 
-    low: NDArray[_ScalarT_co]
-    high: NDArray[_ScalarT_co]
+    low: NDArray[ScalarT_co]
+    high: NDArray[ScalarT_co]
 
     bounded_below: NDArray[np.bool_]
     bounded_above: NDArray[np.bool_]
@@ -103,22 +85,22 @@ class Box(Space[NDArray[_ScalarT_co]]):
         seed: _ToSeed | None = None,
     ) -> None: ...
     @overload
-    def __init__(
-        self: Box[_ScalarT],
+    def __init__[ScalarT: _RealScalar](
+        self: Box[ScalarT],
         low: _RealArrayLike,
         high: _RealArrayLike,
         shape: _ToShape | None = None,
         *,
-        dtype: _ToDType[_ScalarT],
+        dtype: _ToDType[ScalarT],
         seed: _ToSeed | None = None,
     ) -> None: ...
     @overload
-    def __init__(
-        self: Box[_ScalarT],
+    def __init__[ScalarT: _RealScalar](
+        self: Box[ScalarT],
         low: _RealArrayLike,
         high: _RealArrayLike,
         shape: _ToShape | None,
-        dtype: _ToDType[_ScalarT],
+        dtype: _ToDType[ScalarT],
         seed: _ToSeed | None = None,
     ) -> None: ...
     def __init__(
@@ -126,7 +108,7 @@ class Box(Space[NDArray[_ScalarT_co]]):
         low: _RealArrayLike,
         high: _RealArrayLike,
         shape: _ToShape | None = None,
-        dtype: _ToDType[_ScalarT_co | np.float32] = np.float32,
+        dtype: _ToDType[ScalarT_co | np.float32] = np.float32,
         seed: _ToSeed | None = None,
     ) -> None:
         r"""Constructor of :class:`Box`.
@@ -152,7 +134,7 @@ class Box(Space[NDArray[_ScalarT_co]]):
         # determine dtype
         if dtype is None:
             raise ValueError("Box dtype must be explicitly provided, cannot be None.")
-        self.dtype = np.dtype(dtype)
+        self.dtype = cast("np.dtype[ScalarT_co]", np.dtype(dtype))
 
         #  * check that dtype is an accepted dtype
         if self.dtype.kind not in ("i", "u", "f", "b"):
@@ -234,7 +216,7 @@ class Box(Space[NDArray[_ScalarT_co]]):
 
     def _cast_low(
         self, low: _RealArrayLike, dtype_min: float
-    ) -> tuple[NDArray[_ScalarT_co], NDArray[np.bool_]]:
+    ) -> tuple[NDArray[ScalarT_co], NDArray[np.bool_]]:
         """Casts the input Box low value to ndarray with provided dtype.
 
         Args:
@@ -301,7 +283,7 @@ class Box(Space[NDArray[_ScalarT_co]]):
 
     def _cast_high(
         self, high: _RealArrayLike, dtype_max: float
-    ) -> tuple[NDArray[_ScalarT_co], NDArray[np.bool_]]:
+    ) -> tuple[NDArray[ScalarT_co], NDArray[np.bool_]]:
         """Casts the input Box high value to ndarray with provided dtype.
 
         Args:
@@ -403,7 +385,7 @@ class Box(Space[NDArray[_ScalarT_co]]):
 
     def sample(
         self, mask: None = None, probability: None = None
-    ) -> NDArray[_ScalarT_co]:
+    ) -> NDArray[ScalarT_co]:
         r"""Generates a single random sample inside the Box.
 
         In creating a sample of the box, each coordinate is sampled (independently) from a distribution
@@ -499,7 +481,7 @@ class Box(Space[NDArray[_ScalarT_co]]):
 
     def from_jsonable(
         self, sample_n: Iterable[float | list]
-    ) -> list[NDArray[_ScalarT_co]]:
+    ) -> list[NDArray[ScalarT_co]]:
         """Convert a JSONable data type to a batch of samples from this space."""
         return [np.asarray(sample, dtype=self.dtype) for sample in sample_n]
 

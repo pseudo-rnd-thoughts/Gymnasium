@@ -32,8 +32,8 @@ def maybe_parse_reset_bounds(
     if options is None:
         return default_low, default_high
 
-    low = options.get("low") if "low" in options else default_low
-    high = options.get("high") if "high" in options else default_high
+    low = options["low"] if "low" in options else default_low
+    high = options["high"] if "high" in options else default_high
 
     # We expect only numerical inputs.
     low = verify_number_and_cast(low)

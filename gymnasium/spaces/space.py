@@ -3,19 +3,17 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping, Sequence
-from typing import Any, Generic, TypeAlias, TypeVar
+from typing import Any
 
 import numpy as np
 import numpy.typing as npt
 
 from gymnasium.utils import seeding
 
-_T_co = TypeVar("_T_co", covariant=True)
-
-MaskNDArray: TypeAlias = npt.NDArray[np.int8]
+type MaskNDArray = npt.NDArray[np.int8]
 
 
-class Space(Generic[_T_co]):
+class Space[T_co]:
     """Superclass that is used to define observation and action spaces.
 
     Spaces are crucially used in Gym to define the format of valid actions and observations.
@@ -93,7 +91,7 @@ class Space(Generic[_T_co]):
         """Checks whether this space can be flattened to a :class:`gymnasium.spaces.Box`."""
         raise NotImplementedError
 
-    def sample(self, mask: Any | None = None, probability: Any | None = None) -> _T_co:
+    def sample(self, mask: Any | None = None, probability: Any | None = None) -> T_co:
         """Randomly sample an element of this space.
 
         Can be uniform or non-uniform sampling based on boundedness of space.
@@ -157,7 +155,7 @@ class Space(Generic[_T_co]):
         # Update our state
         self.__dict__.update(state)
 
-    def to_jsonable(self, sample_n: Iterable[_T_co]) -> list[Any] | Any:
+    def to_jsonable(self, sample_n: Iterable[T_co]) -> list[Any] | Any:
         """Convert a batch of samples from this space to a JSONable data type."""
         # By default, assume identity is JSONable
         return list(sample_n)

@@ -1,5 +1,11 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
+
+# Gymnasium uses PEP 695 type-parameter syntax, which only parses on Python >= 3.13.
+# Hooks that parse source (check-ast, debug-statements) must run on such an interpreter.
+default_language_version:
+  python: python3.13
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -18,14 +24,14 @@ repos:
       - id: detect-private-key
       - id: debug-statements
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.1
+    rev: v2.4.3
     hooks:
       - id: codespell
         args:
           - --ignore-words-list=reacher,ure,referenc,wile,ontact,manuel,SITL
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: v0.14.10
+    rev: v0.16.1
     hooks:
       # Run the linter.
       - id: ruff-check
@@ -46,6 +52,6 @@ repos:
 #        exclude: ^(gymnasium/envs/box2d)|(gymnasium/envs/classic_control)|(gymnasium/envs/mujoco)|(gymnasium/envs/toy_text)|(tests/envs)|(tests/spaces)|(tests/utils)|(tests/vector)|(docs/)
 
   - repo: https://github.com/astral-sh/ty-pre-commit
-    rev: v0.0.54
+    rev: v0.0.68
     hooks:
       - id: ty

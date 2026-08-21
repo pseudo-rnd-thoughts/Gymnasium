@@ -13,7 +13,7 @@ from collections.abc import Callable, Iterable, Iterator, Mapping
 from collections.abc import Sequence as _PySequence
 from copy import deepcopy
 from functools import singledispatch
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
@@ -34,7 +34,7 @@ from gymnasium.spaces import (
 )
 
 if TYPE_CHECKING:
-    from typing_extensions import Never
+    from typing import Never
 
 __all__ = [
     "batch_space",
@@ -43,8 +43,6 @@ __all__ = [
     "concatenate",
     "create_empty_array",
 ]
-
-_T = TypeVar("_T")
 
 
 @singledispatch
@@ -296,7 +294,7 @@ def _batch_spaces_undefined(
 
 
 @singledispatch
-def iterate(space: Space[_T], items: _T) -> Iterator[Any]:
+def iterate[T](space: Space[T], items: T) -> Iterator[Any]:
     """Iterate over the elements of a (batched) space.
 
     Args:
@@ -453,7 +451,9 @@ def _concatenate_dict(
 @concatenate.register(Sequence)
 @concatenate.register(Space)
 @concatenate.register(OneOf)
-def _concatenate_custom(space: Space, items: Iterable[_T], out: None) -> tuple[_T, ...]:
+def _concatenate_custom[T](
+    space: Space, items: Iterable[T], out: None
+) -> tuple[T, ...]:
     return tuple(items)
 
 
@@ -527,7 +527,7 @@ def _create_empty_array_graph(
 ) -> tuple[GraphInstance, ...]:
     return tuple(
         GraphInstance(
-            nodes=create_empty_array(space.node_space, n=1, fn=fn),
+            nodes=cast("np.ndarray", create_empty_array(space.node_space, n=1, fn=fn)),
             edges=(
                 create_empty_array(space.edge_space, n=1, fn=fn)
                 if space.edge_space is not None

@@ -1,5 +1,7 @@
 __credits__ = ["Kallinteris-Andreas"]
 
+from typing import Any
+
 import numpy as np
 
 from gymnasium import utils
@@ -156,7 +158,7 @@ class PusherEnv(MujocoEnv, utils.EzPickle):
     * v0: Initial versions release.
     """
 
-    metadata = {
+    metadata: dict[str, Any] = {
         "render_modes": [
             "human",
             "rgb_array",

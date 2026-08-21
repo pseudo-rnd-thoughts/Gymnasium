@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -158,7 +158,7 @@ class Sequence(Space[tuple[Any, ...] | Any]):
 
     def generate_sample_length(
         self,
-        length_mask: None | np.integer | NDArray[np.integer],
+        length_mask: None | int | np.integer | NDArray[np.integer],
         mask_type: None | str,
     ) -> int:
         """Generate the sample length for a given length mask and mask type."""
@@ -168,7 +168,8 @@ class Sequence(Space[tuple[Any, ...] | Any]):
                     f"Expects the length mask of `{mask_type}` to be greater than or equal to zero, actual value: {length_mask}"
                 )
 
-                return length_mask
+                # Guarded by the `np.issubdtype` check above: a scalar integer length.
+                return cast("int", length_mask)
             elif isinstance(length_mask, np.ndarray):
                 assert len(length_mask.shape) == 1, (
                     f"Expects the shape of the length mask of `{mask_type}` to be 1-dimensional, actual shape: {length_mask.shape}"

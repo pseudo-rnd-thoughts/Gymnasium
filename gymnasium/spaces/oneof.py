@@ -3,16 +3,14 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from typing import Any, Generic, TypeVar
+from typing import Any, cast
 
 import numpy as np
 
 from gymnasium.spaces.space import Space
 
-_T_co = TypeVar("_T_co", covariant=True)
 
-
-class OneOf(Space[tuple[int, _T_co]], Generic[_T_co]):
+class OneOf[T_co](Space[tuple[int, T_co]]):
     """An exclusive tuple (more precisely: the direct sum) of :class:`Space` instances.
 
     Elements of this space are elements of one of the constituent spaces.
@@ -32,11 +30,11 @@ class OneOf(Space[tuple[int, _T_co]], Generic[_T_co]):
         2
     """
 
-    spaces: tuple[Space[_T_co], ...]
+    spaces: tuple[Space[T_co], ...]
 
     def __init__(
         self,
-        spaces: Iterable[Space[_T_co]],
+        spaces: Iterable[Space[T_co]],
         seed: int | np.random.Generator | None = None,
     ) -> None:
         r"""Constructor of :class:`OneOf` space.
@@ -112,7 +110,7 @@ class OneOf(Space[tuple[int, _T_co]], Generic[_T_co]):
         self,
         mask: tuple[Any | None, ...] | None = None,
         probability: tuple[Any | None, ...] | None = None,
-    ) -> tuple[int, _T_co]:
+    ) -> tuple[int, T_co]:
         """Generates a single random sample inside this space.
 
         This method draws independent samples from the subspaces.
@@ -126,7 +124,9 @@ class OneOf(Space[tuple[int, _T_co]], Generic[_T_co]):
         Returns:
             Tuple of the subspace's samples
         """
-        subspace_idx: int = self.np_random.integers(0, len(self.spaces), dtype=np.int64)  # ty:ignore[invalid-assignment]
+        # The index is kept as `np.int64` at runtime -- `contains` accepts both it and
+        # `int`, and narrowing it to `int` here would change the sampled value's type.
+        subspace_idx = self.np_random.integers(0, len(self.spaces), dtype=np.int64)
         subspace = self.spaces[subspace_idx]
 
         if mask is not None and probability is not None:
@@ -155,7 +155,7 @@ class OneOf(Space[tuple[int, _T_co]], Generic[_T_co]):
         else:
             subspace_sample = subspace.sample()
 
-        return subspace_idx, subspace_sample
+        return cast("int", subspace_idx), subspace_sample
 
     def contains(self, x: tuple[int, Any]) -> bool:
         """Return boolean specifying if x is a valid member of this space."""
@@ -189,7 +189,7 @@ class OneOf(Space[tuple[int, _T_co]], Generic[_T_co]):
             for space_idx, jsonable_sample in sample_n
         ]
 
-    def __getitem__(self, index: int) -> Space[_T_co]:
+    def __getitem__(self, index: int) -> Space[T_co]:
         """Get the subspace at specific `index`."""
         return self.spaces[index]
 

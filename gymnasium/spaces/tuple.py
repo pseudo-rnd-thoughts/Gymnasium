@@ -4,16 +4,14 @@ from __future__ import annotations
 
 import typing
 from collections.abc import Iterable
-from typing import Any, TypeVar, overload
+from typing import Any, cast, overload
 
 import numpy as np
 
 from gymnasium.spaces.space import Space
 
-_T_co = TypeVar("_T_co", covariant=True)
 
-
-class Tuple(Space[tuple[_T_co, ...]], typing.Sequence[_T_co]):
+class Tuple[T_co](Space[tuple[T_co, ...]], typing.Sequence[Space[T_co]]):
     """A tuple (more precisely: the cartesian product) of :class:`Space` instances.
 
     Elements of this space are tuples of elements of the constituent spaces.
@@ -25,11 +23,11 @@ class Tuple(Space[tuple[_T_co, ...]], typing.Sequence[_T_co]):
         (np.int64(0), array([-0.3991573 ,  0.21649833], dtype=float32))
     """
 
-    spaces: tuple[Space[_T_co], ...]
+    spaces: tuple[Space[T_co], ...]
 
     def __init__(
         self,
-        spaces: Iterable[Space[_T_co]],
+        spaces: Iterable[Space[T_co]],
         seed: int | np.random.Generator | None = None,
     ) -> None:
         r"""Constructor of :class:`Tuple` space.
@@ -86,7 +84,7 @@ class Tuple(Space[tuple[_T_co, ...]], typing.Sequence[_T_co]):
                 )
 
             return tuple(
-                space.seed(subseed)
+                space.seed(cast("int", subseed))
                 for subseed, space in zip(seed, self.spaces, strict=True)
             )
         else:
@@ -98,7 +96,7 @@ class Tuple(Space[tuple[_T_co, ...]], typing.Sequence[_T_co]):
         self,
         mask: tuple[Any | None, ...] | None = None,
         probability: tuple[Any | None, ...] | None = None,
-    ) -> tuple[_T_co, ...]:
+    ) -> tuple[T_co, ...]:
         """Generates a single random sample inside this space.
 
         This method draws independent samples from the subspaces.
@@ -186,12 +184,10 @@ class Tuple(Space[tuple[_T_co, ...]], typing.Sequence[_T_co]):
         ]
 
     @overload
-    def __getitem__(self, index: int) -> Space[_T_co]: ...
+    def __getitem__(self, index: int) -> Space[T_co]: ...
     @overload
-    def __getitem__(self, index: slice) -> tuple[Space[_T_co], ...]: ...
-    def __getitem__(
-        self, index: int | slice
-    ) -> Space[_T_co] | tuple[Space[_T_co], ...]:
+    def __getitem__(self, index: slice) -> tuple[Space[T_co], ...]: ...
+    def __getitem__(self, index: int | slice) -> Space[T_co] | tuple[Space[T_co], ...]:
         """Get the subspace at specific `index`."""
         return self.spaces[index]
 

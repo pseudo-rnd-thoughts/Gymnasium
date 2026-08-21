@@ -3,26 +3,22 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Any, Generic, TypeVar
+from typing import Any
 
 import numpy as np
 
 from gymnasium import Space
 
-StateType = TypeVar("StateType")
-ActType = TypeVar("ActType")
-ObsType = TypeVar("ObsType")
-RewardType = TypeVar("RewardType")
-TerminalType = TypeVar("TerminalType")
-RenderStateType = TypeVar("RenderStateType")
-Params = TypeVar("Params")
 
-
-class FuncEnv(
-    Generic[
-        StateType, ObsType, ActType, RewardType, TerminalType, RenderStateType, Params
-    ]
-):
+class FuncEnv[
+    StateType,
+    ObsType,
+    ActType,
+    RewardType,
+    TerminalType,
+    RenderStateType,
+    Params,
+]:
     """Base class (template) for functional envs.
 
     This API is meant to be used in a stateless manner, with the environment state being passed around explicitly.
@@ -101,12 +97,15 @@ class FuncEnv(
 
     def transform(self, func: Callable[[Callable], Callable]):
         """Functional transformations."""
-        self.initial = func(self.initial)
-        self.transition = func(self.transition)
-        self.observation = func(self.observation)
-        self.reward = func(self.reward)
-        self.terminal = func(self.terminal)
-        self.state_info = func(self.state_info)
+        # Dynamically replace the bound methods with transformed callables. These
+        # per-instance reassignments of methods defined on the class cannot be
+        # expressed statically, so the invalid-assignment warnings are suppressed.
+        self.initial = func(self.initial)  # ty: ignore[invalid-assignment]
+        self.transition = func(self.transition)  # ty: ignore[invalid-assignment]
+        self.observation = func(self.observation)  # ty: ignore[invalid-assignment]
+        self.reward = func(self.reward)  # ty: ignore[invalid-assignment]
+        self.terminal = func(self.terminal)  # ty: ignore[invalid-assignment]
+        self.state_info = func(self.state_info)  # ty: ignore[invalid-assignment]
         self.step_info = func(self.transition_info)
 
     def render_image(

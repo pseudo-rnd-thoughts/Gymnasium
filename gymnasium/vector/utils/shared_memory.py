@@ -9,7 +9,7 @@ from ctypes import c_bool, c_int32, c_int64, c_uint8
 from functools import singledispatch
 from multiprocessing.sharedctypes import SynchronizedArray
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, TypeAlias
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
@@ -30,15 +30,15 @@ from gymnasium.spaces import (
 )
 
 if TYPE_CHECKING:
-    from typing_extensions import Never, Unpack
+    from typing import Never
 
 __all__ = ["create_shared_memory", "read_from_shared_memory", "write_to_shared_memory"]
 
 
-_SharedMemory: TypeAlias = dict[str, Any] | tuple[Any, ...] | SynchronizedArray
-_SharedMemoryOneOf: TypeAlias = tuple[
-    "SynchronizedArray[c_int64]",
-    "Unpack[tuple[SynchronizedArray[Any], ...]]",
+type _SharedMemory = dict[str, Any] | tuple[Any, ...] | SynchronizedArray
+type _SharedMemoryOneOf = tuple[
+    SynchronizedArray[c_int64],
+    *tuple[SynchronizedArray[Any], ...],
 ]
 
 
@@ -182,8 +182,7 @@ def _read_base_from_shared_memory(
     n: int = 1,
 ) -> np.ndarray:
     assert space.shape is not None
-    # the `ty:ignore` is needed because of a bug in the typeshed `multiprocessing` stubs
-    return np.frombuffer(  # ty:ignore[no-matching-overload]
+    return np.frombuffer(
         shared_memory.get_obj(),
         dtype=space.dtype,
     ).reshape((n,) + space.shape)
@@ -213,8 +212,7 @@ def _read_dict_from_shared_memory(
 def _read_text_from_shared_memory(
     space: Text, shared_memory: SynchronizedArray[c_int32], n: int = 1
 ) -> tuple[str, ...]:
-    # the `ty:ignore` is needed because of a bug in the typeshed `multiprocessing` stubs
-    data = np.frombuffer(  # ty:ignore[no-matching-overload]
+    data = np.frombuffer(
         shared_memory.get_obj(),
         dtype=np.int32,
     ).reshape((n, space.max_length))
@@ -235,8 +233,7 @@ def _read_text_from_shared_memory(
 def _read_one_of_from_shared_memory(
     space: OneOf, shared_memory: _SharedMemoryOneOf, n: int = 1
 ) -> tuple[Any, ...]:
-    # typeshed bug: `Array[_SimpleCData[c_int64]]` is missing `__buffer__` method stubs
-    sample_indexes = np.frombuffer(shared_memory[0].get_obj(), dtype=np.int64)  # ty:ignore[no-matching-overload]
+    sample_indexes = np.frombuffer(shared_memory[0].get_obj(), dtype=np.int64)
 
     subspace_samples = tuple(
         read_from_shared_memory(subspace, memory, n=n)
@@ -289,8 +286,7 @@ def _write_base_to_shared_memory(
 ) -> None:
     assert space.shape is not None
     size = int(np.prod(space.shape))
-    # the `ty:ignore` is needed because of a bug in the typeshed `multiprocessing` stubs
-    destination = np.frombuffer(shared_memory.get_obj(), dtype=space.dtype)  # ty:ignore[no-matching-overload]
+    destination = np.frombuffer(shared_memory.get_obj(), dtype=space.dtype)
     np.copyto(
         destination[index * size : (index + 1) * size],
         np.asarray(value, dtype=space.dtype).flatten(),
@@ -323,11 +319,12 @@ def _write_text_to_shared_memory(
     space: Text, index: int, values: str, shared_memory: SynchronizedArray[c_int32]
 ) -> None:
     size = space.max_length
-    # the `ty:ignore` is needed because of a bug in the typeshed `multiprocessing` stubs
-    destination = np.frombuffer(shared_memory.get_obj(), dtype=np.int32)  # ty:ignore[no-matching-overload]
+    destination = np.frombuffer(shared_memory.get_obj(), dtype=np.int32)
     np.copyto(
         destination[index * size : (index + 1) * size],
-        flatten(space, values),  # ty:ignore[invalid-argument-type]
+        # `flatten` is a singledispatch whose declared return type is the union of
+        # every space's flat representation; the `Text` implementation returns an array.
+        cast("np.ndarray[Any, np.dtype[Any]]", flatten(space, values)),
     )
 
 
@@ -337,8 +334,7 @@ def _write_oneof_to_shared_memory(
 ) -> None:
     subspace_idx, space_value = values
 
-    # typeshed bug: `Array[_SimpleCData[c_int64]]` is missing `__buffer__` method stubs
-    destination = np.frombuffer(shared_memory[0].get_obj(), dtype=np.int64)  # ty:ignore[no-matching-overload]
+    destination = np.frombuffer(shared_memory[0].get_obj(), dtype=np.int64)
     np.copyto(destination[index : index + 1], subspace_idx)
 
     # only the subspace's memory is updated with the sample value, ignoring the other memories as data might not match

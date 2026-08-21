@@ -7,18 +7,17 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import SupportsFloat
+from typing import Any, SupportsFloat, cast
 
 import numpy as np
 
 import gymnasium as gym
-from gymnasium.core import ActType, ObsType
 from gymnasium.error import InvalidBound
 
 __all__ = ["TransformReward", "ClipReward"]
 
 
-class TransformReward(
+class TransformReward[ObsType = Any, ActType = Any](
     gym.RewardWrapper[ObsType, ActType], gym.utils.RecordConstructorArgs
 ):
     """Applies a function to the ``reward`` received from the environment's ``step``.
@@ -64,7 +63,9 @@ class TransformReward(
         return self.func(reward)
 
 
-class ClipReward(TransformReward[ObsType, ActType], gym.utils.RecordConstructorArgs):
+class ClipReward[ObsType = Any, ActType = Any](
+    TransformReward[ObsType, ActType], gym.utils.RecordConstructorArgs
+):
     """Clips the rewards for an environment between an upper and lower bound.
 
     A vector version of the wrapper exists :class:`gymnasium.wrappers.vector.ClipReward`.
@@ -111,5 +112,9 @@ class ClipReward(TransformReward[ObsType, ActType], gym.utils.RecordConstructorA
         TransformReward.__init__(
             self,
             env=env,
-            func=lambda x: np.clip(x, a_min=min_reward, a_max=max_reward),  # ty:ignore[no-matching-overload]
+            # `np.clip` is typed only for numpy scalars/arrays, but accepts any
+            # `SupportsFloat` at runtime and preserves its type.
+            func=lambda x: np.clip(
+                cast("np.floating[Any]", x), a_min=min_reward, a_max=max_reward
+            ),
         )

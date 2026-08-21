@@ -12,11 +12,11 @@ from __future__ import annotations
 import time
 from collections import deque
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, SupportsFloat
+from typing import TYPE_CHECKING, Any, SupportsFloat, cast
 
 import gymnasium as gym
 from gymnasium import logger
-from gymnasium.core import ActType, ObsType, RenderFrame, WrapperObsType
+from gymnasium.core import RenderFrame
 from gymnasium.error import ResetNeeded
 from gymnasium.utils.passive_env_checker import (
     check_action_space,
@@ -39,7 +39,7 @@ __all__ = [
 ]
 
 
-class TimeLimit(
+class TimeLimit[ObsType = Any, ActType = Any](
     gym.Wrapper[ObsType, ActType, ObsType, ActType], gym.utils.RecordConstructorArgs
 ):
     """Limits the number of steps for an environment through truncating the environment if a maximum number of timesteps is exceeded.
@@ -111,7 +111,7 @@ class TimeLimit(
         gym.Wrapper.__init__(self, env)
 
         self._max_episode_steps = max_episode_steps
-        self._elapsed_steps = None
+        self._elapsed_steps: int | None = None
 
     def step(
         self, action: ActType
@@ -127,7 +127,7 @@ class TimeLimit(
 
         """
         observation, reward, terminated, truncated, info = self.env.step(action)
-        self._elapsed_steps += 1
+        self._elapsed_steps = cast(int, self._elapsed_steps) + 1
 
         if self._elapsed_steps >= self._max_episode_steps:
             truncated = True
@@ -170,7 +170,7 @@ class TimeLimit(
         return env_spec
 
 
-class Autoreset(
+class Autoreset[ObsType = Any, ActType = Any](
     gym.Wrapper[ObsType, ActType, ObsType, ActType], gym.utils.RecordConstructorArgs
 ):
     """The wrapped environment is automatically reset when a terminated or truncated state is reached.
@@ -195,7 +195,7 @@ class Autoreset(
 
     def reset(
         self, *, seed: int | None = None, options: dict[str, Any] | None = None
-    ) -> tuple[WrapperObsType, dict[str, Any]]:
+    ) -> tuple[ObsType, dict[str, Any]]:
         """Resets the environment and sets autoreset to False preventing."""
         self.autoreset = False
         return super().reset(seed=seed, options=options)
@@ -221,7 +221,7 @@ class Autoreset(
         return obs, reward, terminated, truncated, info
 
 
-class PassiveEnvChecker(
+class PassiveEnvChecker[ObsType = Any, ActType = Any](
     gym.Wrapper[ObsType, ActType, ObsType, ActType], gym.utils.RecordConstructorArgs
 ):
     """A passive wrapper that surrounds the ``step``, ``reset`` and ``render`` functions to check they follow Gymnasium's API.
@@ -341,7 +341,7 @@ class PassiveEnvChecker(
                 raise e
 
 
-class OrderEnforcing(
+class OrderEnforcing[ObsType = Any, ActType = Any](
     gym.Wrapper[ObsType, ActType, ObsType, ActType], gym.utils.RecordConstructorArgs
 ):
     """Will produce an error if ``step`` or ``render`` is called before ``reset``.
@@ -438,7 +438,7 @@ class OrderEnforcing(
         return env_spec
 
 
-class RecordEpisodeStatistics(
+class RecordEpisodeStatistics[ObsType = Any, ActType = Any](
     gym.Wrapper[ObsType, ActType, ObsType, ActType], gym.utils.RecordConstructorArgs
 ):
     """This wrapper will keep track of cumulative rewards and episode lengths.
@@ -516,7 +516,7 @@ class RecordEpisodeStatistics(
         """Steps through the environment, recording the episode statistics."""
         obs, reward, terminated, truncated, info = super().step(action)
 
-        self.episode_returns += reward
+        self.episode_returns += cast(float, reward)
         self.episode_lengths += 1
 
         if terminated or truncated:

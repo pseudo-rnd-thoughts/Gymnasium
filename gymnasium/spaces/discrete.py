@@ -3,28 +3,14 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
-from typing import TYPE_CHECKING, Any, Generic, Literal, overload
+from typing import Any, Literal, cast, overload
 
 import numpy as np
 
 from gymnasium.spaces.space import MaskNDArray, Space
 
-if TYPE_CHECKING:
-    from typing_extensions import TypeVar
 
-    _IntegerT_co = TypeVar(
-        "_IntegerT_co",
-        bound=np.integer[Any],
-        covariant=True,
-        default=np.int64,
-    )
-else:
-    from typing import TypeVar
-
-    _IntegerT_co = TypeVar("_IntegerT_co", bound=np.integer[Any], covariant=True)
-
-
-class Discrete(Space[_IntegerT_co], Generic[_IntegerT_co]):
+class Discrete[IntegerT_co: np.integer[Any] = np.int64](Space[IntegerT_co]):
     r"""A space consisting of finitely many elements.
 
     This class represents a finite subset of integers, more specifically a set of the form :math:`\{ a, a+1, \dots, a+n-1 \}`.
@@ -48,9 +34,9 @@ class Discrete(Space[_IntegerT_co], Generic[_IntegerT_co]):
         np.int32(0)
     """
 
-    dtype: np.dtype[_IntegerT_co]
-    n: _IntegerT_co
-    start: _IntegerT_co
+    dtype: np.dtype[IntegerT_co]
+    n: IntegerT_co
+    start: IntegerT_co
 
     @overload
     def __init__(
@@ -59,7 +45,7 @@ class Discrete(Space[_IntegerT_co], Generic[_IntegerT_co]):
         seed: int | np.random.Generator | None = None,
         start: int | np.integer[Any] = 0,
         *,
-        dtype: type[_IntegerT_co] | np.dtype[_IntegerT_co],
+        dtype: type[IntegerT_co] | np.dtype[IntegerT_co],
     ) -> None: ...
     @overload
     def __init__(
@@ -107,7 +93,7 @@ class Discrete(Space[_IntegerT_co], Generic[_IntegerT_co]):
         # determine dtype
         if dtype is None:
             raise TypeError(f"Invalid Discrete dtype, cannot be {dtype}.")
-        self.dtype = np.dtype(dtype)
+        self.dtype = cast("np.dtype[IntegerT_co]", np.dtype(dtype))
 
         #  * check that dtype is an accepted dtype
         if not (np.issubdtype(self.dtype, np.integer)):
@@ -126,7 +112,7 @@ class Discrete(Space[_IntegerT_co], Generic[_IntegerT_co]):
 
     def sample(
         self, mask: MaskNDArray | None = None, probability: MaskNDArray | None = None
-    ) -> _IntegerT_co:
+    ) -> IntegerT_co:
         """Generates a single random sample from this space.
 
         A sample will be chosen uniformly at random with the mask if provided, or it will be chosen according to a specified probability distribution if the probability mask is provided.
@@ -193,7 +179,10 @@ class Discrete(Space[_IntegerT_co], Generic[_IntegerT_co]):
             )
         # uniform sampling
         else:
-            return self.start + self.np_random.integers(self.n, dtype=self.dtype.type)
+            return cast(
+                "IntegerT_co",
+                self.start + self.np_random.integers(self.n, dtype=self.dtype.type),
+            )
 
     def contains(self, x: Any) -> bool:
         """Return boolean specifying if x is a valid member of this space.
@@ -201,6 +190,9 @@ class Discrete(Space[_IntegerT_co], Generic[_IntegerT_co]):
         Also checks if the given value, when provided as an int, can be cast to the space's dtype.
         """
         if isinstance(x, int):
+            dtype_info = np.iinfo(self.dtype)
+            if not (dtype_info.min <= x <= dtype_info.max):
+                return False
             as_np = np.dtype(self.dtype).type(x)
 
         elif isinstance(x, (np.generic, np.ndarray)) and (
@@ -259,6 +251,6 @@ class Discrete(Space[_IntegerT_co], Generic[_IntegerT_co]):
         """Converts a list of samples to a list of ints."""
         return [int(x) for x in sample_n]
 
-    def from_jsonable(self, sample_n: list[int]) -> list[_IntegerT_co]:
+    def from_jsonable(self, sample_n: list[int]) -> list[IntegerT_co]:
         """Converts a list of json samples to a list of numpy integer scalars."""
         return [self.dtype.type(x) for x in sample_n]

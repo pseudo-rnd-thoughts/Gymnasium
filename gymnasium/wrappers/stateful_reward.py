@@ -10,13 +10,12 @@ from typing import Any, SupportsFloat
 import numpy as np
 
 import gymnasium as gym
-from gymnasium.core import ActType, ObsType
 from gymnasium.wrappers.utils import RunningMeanStd
 
 __all__ = ["NormalizeReward"]
 
 
-class NormalizeReward(
+class NormalizeReward[ObsType = Any, ActType = Any](
     gym.Wrapper[ObsType, ActType, ObsType, ActType], gym.utils.RecordConstructorArgs
 ):
     r"""Normalizes immediate rewards such that their exponential moving average has an approximately fixed variance.

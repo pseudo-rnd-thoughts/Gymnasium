@@ -13,13 +13,13 @@ import gc
 import os
 from collections.abc import Callable
 from copy import deepcopy
-from typing import Any, Generic, SupportsFloat, cast
+from typing import Any, SupportsFloat, cast
 
 import numpy as np
 
 import gymnasium as gym
 from gymnasium import error, logger
-from gymnasium.core import ActType, ObsType, RenderFrame
+from gymnasium.core import RenderFrame
 from gymnasium.error import DependencyNotInstalled, InvalidProbability
 
 __all__ = [
@@ -31,9 +31,8 @@ __all__ = [
 ]
 
 
-class RenderCollection(
+class RenderCollection[ObsType, ActType](
     gym.Wrapper[ObsType, ActType, ObsType, ActType],
-    Generic[ObsType, ActType],
     gym.utils.RecordConstructorArgs,
 ):
     """Collect rendered frames of an environment such ``render`` returns a ``list[RenderedFrame]``.
@@ -139,7 +138,7 @@ class RenderCollection(
     ) -> tuple[ObsType, SupportsFloat, bool, bool, dict[str, Any]]:
         """Perform a step in the base environment and collect a frame."""
         output = super().step(action)
-        self.frame_list.append(super().render())
+        self.frame_list.append(cast(RenderFrame, super().render()))
         return output
 
     def reset(
@@ -150,7 +149,7 @@ class RenderCollection(
 
         if self.reset_clean:
             self.frame_list = []
-        self.frame_list.append(super().render())
+        self.frame_list.append(cast(RenderFrame, super().render()))
 
         return output
 
@@ -163,9 +162,8 @@ class RenderCollection(
         return frames
 
 
-class RecordVideo(
+class RecordVideo[ObsType, ActType](
     gym.Wrapper[ObsType, ActType, ObsType, ActType],
-    Generic[ObsType, ActType],
     gym.utils.RecordConstructorArgs,
 ):
     """Records videos of environment episodes using the environment's render function.
@@ -304,7 +302,9 @@ class RecordVideo(
         self.frames_per_sec: int = fps
         self.name_prefix: str = name_prefix
         self._video_name: str | None = None
-        self.video_length: int = video_length if video_length != 0 else float("inf")
+        self.video_length: int | float = (
+            video_length if video_length != 0 else float("inf")
+        )
         self.recording: bool = False
         self.recorded_frames: list[RenderFrame] = []
         self.render_history: list[RenderFrame] = []
@@ -378,14 +378,14 @@ class RecordVideo(
 
     def render(self) -> RenderFrame | list[RenderFrame]:
         """Compute the render frames as specified by render_mode attribute during initialization of the environment."""
-        render_out = super().render()
+        render_out = cast("RenderFrame | list[RenderFrame]", super().render())
         if self.recording and isinstance(render_out, list):
             self.recorded_frames += render_out
 
         if len(self.render_history) > 0:
             tmp_history = self.render_history
             self.render_history = []
-            return tmp_history + render_out
+            return tmp_history + cast("list[RenderFrame]", render_out)
         else:
             return render_out
 
@@ -437,7 +437,7 @@ class RecordVideo(
             logger.warn("Unable to save last video! Did you call close()?")
 
 
-class HumanRendering(
+class HumanRendering[ObsType, ActType](
     gym.Wrapper[ObsType, ActType, ObsType, ActType], gym.utils.RecordConstructorArgs
 ):
     """Allows human like rendering for environments that support "rgb_array" rendering.
@@ -586,7 +586,7 @@ class HumanRendering(
         super().close()
 
 
-class AddWhiteNoise(
+class AddWhiteNoise[ObsType, ActType](
     gym.Wrapper[ObsType, ActType, ObsType, ActType], gym.utils.RecordConstructorArgs
 ):
     """Randomly replaces pixels with white noise.
@@ -662,7 +662,7 @@ class AddWhiteNoise(
         return np.where(mask[..., None], noise, render_out)
 
 
-class ObstructView(
+class ObstructView[ObsType, ActType](
     gym.Wrapper[ObsType, ActType, ObsType, ActType], gym.utils.RecordConstructorArgs
 ):
     """Randomly obstructs rendering with white noise patches.

@@ -4,13 +4,12 @@ from __future__ import annotations
 
 from collections import deque
 from collections.abc import Callable, Iterable
-from typing import TYPE_CHECKING, Any, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
 import gymnasium as gym
 from gymnasium import Env, logger
-from gymnasium.core import ActType
 from gymnasium.error import DependencyNotInstalled
 
 if TYPE_CHECKING:
@@ -36,12 +35,7 @@ try:
     import matplotlib.pyplot as plt
 except ImportError:
     logger.warn('matplotlib is not installed, run `pip install "gymnasium[other]"`')
-    matplotlib, plt = None, None
-
-
-_ObsT_contra = TypeVar("_ObsT_contra", contravariant=True)
-_ActT_contra = TypeVar("_ActT_contra", contravariant=True)
-_ActionKey = TypeVar("_ActionKey", bound=tuple[str | int, ...] | str | int)
+    matplotlib, plt = None, None  # ty: ignore[invalid-assignment]
 
 
 class MissingKeysToAction(Exception):
@@ -56,7 +50,7 @@ class PlayableGame:
     original_video_size: tuple[int, int]
     video_size: tuple[int, int]
     screen: Surface
-    pressed_keys: list[int]
+    pressed_keys: set[int]
     running: bool
 
     def __init__(
@@ -179,14 +173,13 @@ def display_arr(
     screen.blit(pyg_img, (width_offset, height_offset))
 
 
-def play(
+def play[ActType](
     env: Env[Any, ActType],
     transpose: bool | None = True,
     fps: int | None = None,
     zoom: float | None = None,
     callback: Callable | None = None,
-    # `dict` is invariant so we use a type variable as key type
-    keys_to_action: dict[_ActionKey, ActType] | None = None,
+    keys_to_action: dict[tuple[str | int, ...] | str | int, ActType] | None = None,
     seed: int | None = None,
     noop: ActType | int = 0,
     wait_on_player: bool = False,
@@ -359,7 +352,10 @@ def play(
                 rendered = rendered[-1]
             assert isinstance(rendered, np.ndarray)
             display_arr(
-                game.screen, rendered, transpose=transpose, video_size=game.video_size
+                game.screen,
+                cast(np.typing.NDArray[np.uint8], rendered),
+                transpose=transpose,
+                video_size=game.video_size,
             )
 
         # process pygame events
@@ -371,7 +367,7 @@ def play(
     pygame.quit()
 
 
-class PlayPlot(Generic[_ObsT_contra, _ActT_contra]):
+class PlayPlot[ObsType, ActType]:
     """Provides a callback to create live plots of arbitrary metrics when using :func:`play`.
 
     This class is instantiated with a function that accepts information about a single environment transition:
@@ -400,7 +396,7 @@ class PlayPlot(Generic[_ObsT_contra, _ActT_contra]):
     """
 
     data_callback: Callable[
-        [_ObsT_contra, _ObsT_contra, _ActT_contra, float, bool, bool, dict],
+        [ObsType, ObsType, ActType, float, bool, bool, dict],
         Iterable[float],
     ]
     horizon_timesteps: int
@@ -414,7 +410,7 @@ class PlayPlot(Generic[_ObsT_contra, _ActT_contra]):
     def __init__(
         self,
         callback: Callable[
-            [_ObsT_contra, _ObsT_contra, _ActT_contra, float, bool, bool, dict],
+            [ObsType, ObsType, ActType, float, bool, bool, dict],
             Iterable[Any],
         ],
         horizon_timesteps: int,
@@ -456,9 +452,9 @@ class PlayPlot(Generic[_ObsT_contra, _ActT_contra]):
 
     def callback(
         self,
-        obs_t: _ObsT_contra,
-        obs_tp1: _ObsT_contra,
-        action: _ActT_contra,
+        obs_t: ObsType,
+        obs_tp1: ObsType,
+        action: ActType,
         rew: float,
         terminated: bool,
         truncated: bool,

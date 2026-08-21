@@ -4,6 +4,7 @@ permalink: https://perma.cc/6Z2N-PFWC
 """
 
 import math
+from typing import Any
 
 import numpy as np
 
@@ -100,7 +101,7 @@ class MountainCarEnv(gym.Env):
     * v0: Initial versions release
     """
 
-    metadata = {
+    metadata: dict[str, Any] = {
         "render_modes": ["human", "rgb_array"],
         "render_fps": 30,
     }

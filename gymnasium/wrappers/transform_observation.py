@@ -15,13 +15,12 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Sequence
-from typing import Any, Final
+from typing import Any, Final, cast
 
 import numpy as np
 
 import gymnasium as gym
 from gymnasium import spaces
-from gymnasium.core import ActType, ObsType, WrapperObsType
 from gymnasium.error import DependencyNotInstalled
 
 __all__ = [
@@ -40,7 +39,7 @@ __all__ = [
 from gymnasium.wrappers.utils import rescale_box
 
 
-class TransformObservation(
+class TransformObservation[WrapperObsType = Any, ActType = Any, ObsType = Any](
     gym.ObservationWrapper[WrapperObsType, ActType, ObsType],
     gym.utils.RecordConstructorArgs,
 ):
@@ -97,7 +96,7 @@ class TransformObservation(
         return self.func(observation)
 
 
-class FilterObservation(
+class FilterObservation[WrapperObsType = Any, ActType = Any, ObsType = Any](
     TransformObservation[WrapperObsType, ActType, ObsType],
     gym.utils.RecordConstructorArgs,
 ):
@@ -146,6 +145,7 @@ class FilterObservation(
                 raise TypeError(
                     f"All filter keys must be strings for a Dict space, got {filter_keys}"
                 )
+            filter_keys = cast("Sequence[str]", filter_keys)
 
             if any(
                 key not in env.observation_space.spaces.keys() for key in filter_keys
@@ -182,6 +182,7 @@ class FilterObservation(
                 raise TypeError(
                     f"All filter keys must be integers for a Tuple space, got {filter_keys}"
                 )
+            filter_keys = cast("Sequence[int]", filter_keys)
             if len(set(filter_keys)) != len(filter_keys):
                 raise ValueError(f"Duplicate keys exist, filter_keys: {filter_keys}")
 
@@ -221,7 +222,7 @@ class FilterObservation(
         self.filter_keys: Final[Sequence[str | int]] = filter_keys
 
 
-class FlattenObservation(
+class FlattenObservation[WrapperObsType = Any, ActType = Any, ObsType = Any](
     TransformObservation[WrapperObsType, ActType, ObsType],
     gym.utils.RecordConstructorArgs,
 ):
@@ -261,7 +262,7 @@ class FlattenObservation(
         )
 
 
-class GrayscaleObservation(
+class GrayscaleObservation[WrapperObsType = Any, ActType = Any, ObsType = Any](
     TransformObservation[WrapperObsType, ActType, ObsType],
     gym.utils.RecordConstructorArgs,
 ):
@@ -350,7 +351,7 @@ class GrayscaleObservation(
             )
 
 
-class ResizeObservation(
+class ResizeObservation[WrapperObsType = Any, ActType = Any, ObsType = Any](
     TransformObservation[WrapperObsType, ActType, ObsType],
     gym.utils.RecordConstructorArgs,
 ):
@@ -444,7 +445,7 @@ class ResizeObservation(
         )
 
 
-class ReshapeObservation(
+class ReshapeObservation[WrapperObsType = Any, ActType = Any, ObsType = Any](
     TransformObservation[WrapperObsType, ActType, ObsType],
     gym.utils.RecordConstructorArgs,
 ):
@@ -512,7 +513,7 @@ class ReshapeObservation(
         )
 
 
-class RescaleObservation(
+class RescaleObservation[WrapperObsType = Any, ActType = Any, ObsType = Any](
     TransformObservation[WrapperObsType, ActType, ObsType],
     gym.utils.RecordConstructorArgs,
 ):
@@ -565,7 +566,7 @@ class RescaleObservation(
         )
 
 
-class DtypeObservation(
+class DtypeObservation[WrapperObsType = Any, ActType = Any, ObsType = Any](
     TransformObservation[WrapperObsType, ActType, ObsType],
     gym.utils.RecordConstructorArgs,
 ):
@@ -597,10 +598,13 @@ class DtypeObservation(
 
         self.dtype = dtype
         if isinstance(env.observation_space, spaces.Box):
+            # `isinstance` leaves the space's scalar type parameter unsolved, and numpy's
+            # `ndarray` is invariant in its dtype, so `low` / `high` need widening here.
+            box_space = cast("spaces.Box[Any]", env.observation_space)
             new_observation_space = spaces.Box(
-                low=env.observation_space.low,
-                high=env.observation_space.high,
-                shape=env.observation_space.shape,
+                low=box_space.low,
+                high=box_space.high,
+                shape=box_space.shape,
                 dtype=self.dtype,
             )
         elif isinstance(env.observation_space, spaces.Discrete):
@@ -611,8 +615,11 @@ class DtypeObservation(
                 dtype=self.dtype,
             )
         elif isinstance(env.observation_space, spaces.MultiDiscrete):
+            multi_discrete_space = cast(
+                "spaces.MultiDiscrete[Any]", env.observation_space
+            )
             new_observation_space = spaces.MultiDiscrete(
-                env.observation_space.nvec, dtype=dtype
+                multi_discrete_space.nvec, dtype=dtype
             )
         elif isinstance(env.observation_space, spaces.MultiBinary):
             new_observation_space = spaces.Box(
@@ -635,7 +642,7 @@ class DtypeObservation(
         )
 
 
-class AddRenderObservation(
+class AddRenderObservation[WrapperObsType = Any, ActType = Any, ObsType = Any](
     TransformObservation[WrapperObsType, ActType, ObsType],
     gym.utils.RecordConstructorArgs,
 ):
@@ -703,8 +710,8 @@ class AddRenderObservation(
         """
         gym.utils.RecordConstructorArgs.__init__(
             self,
-            pixels_only=render_only,
-            pixels_key=render_key,
+            render_only=render_only,
+            render_key=render_key,
             obs_key=obs_key,
         )
 
@@ -752,7 +759,7 @@ class AddRenderObservation(
             )
 
 
-class DiscretizeObservation(
+class DiscretizeObservation[WrapperObsType = Any, ActType = Any, ObsType = Any](
     TransformObservation[WrapperObsType, ActType, ObsType],
     gym.utils.RecordConstructorArgs,
 ):
@@ -825,8 +832,11 @@ class DiscretizeObservation(
                 "DiscretizeObservation is only compatible with Box continuous observations."
             )
 
-        self.low = env.observation_space.low
-        self.high = env.observation_space.high
+        # `isinstance` leaves the space's scalar type parameter unsolved, and numpy's
+        # `ndarray` is invariant in its dtype, so widen before the arithmetic below.
+        box_space = cast("spaces.Box[Any]", env.observation_space)
+        self.low = box_space.low
+        self.high = box_space.high
         self.n_dims = self.low.shape[0]
 
         if np.any(np.isinf(self.low)) or np.any(np.isinf(self.high)):
@@ -854,9 +864,13 @@ class DiscretizeObservation(
         ]
 
         if self.multidiscrete:
-            self.observation_space = spaces.MultiDiscrete(self.bins)
+            self.observation_space = cast(
+                "spaces.Space[WrapperObsType]", spaces.MultiDiscrete(self.bins)
+            )
         else:
-            self.observation_space = spaces.Discrete(np.prod(self.bins))
+            self.observation_space = cast(
+                "spaces.Space[WrapperObsType]", spaces.Discrete(np.prod(self.bins))
+            )
 
     def observation(self, observation):
         """Discretizes the observation."""

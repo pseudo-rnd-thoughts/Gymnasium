@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from functools import singledispatch
-from typing import TypeVar
+from typing import Any, cast
 
 import numpy as np
 
@@ -26,8 +26,6 @@ from gymnasium.spaces import (
 )
 
 __all__ = ["RunningMeanStd", "update_mean_var_count_from_moments", "create_zero_array"]
-
-_T = TypeVar("_T")
 
 
 class RunningMeanStd:
@@ -72,7 +70,7 @@ def update_mean_var_count_from_moments(
 
 
 @singledispatch
-def create_zero_array(space: Space[_T]) -> _T:
+def create_zero_array[T](space: Space[T]) -> T:
     """Creates a zero-based array of a space, this is similar to ``create_empty_array`` except all arrays are valid samples from the space.
 
     As some ``Box`` cases have ``high`` or ``low`` that don't contain zero then the ``create_empty_array`` would in case
@@ -158,10 +156,12 @@ def _create_one_of_zero_array(space: OneOf):
 
 
 def rescale_box(
-    box: Box,
+    box: Box[Any],
     new_min: np.floating | np.integer | np.ndarray,
     new_max: np.floating | np.integer | np.ndarray,
-) -> tuple[Box, Callable[[np.ndarray], np.ndarray], Callable[[np.ndarray], np.ndarray]]:
+) -> tuple[
+    Box[Any], Callable[[np.ndarray], np.ndarray], Callable[[np.ndarray], np.ndarray]
+]:
     """Rescale and shift the given box space to match the given bounds.
 
     For unbounded components in the original space, the corresponding target bounds must also be infinite and vice versa.
@@ -187,6 +187,7 @@ def rescale_box(
                 f"Expected new_min to be an integer, float, or numpy array, got {type(new_min)}"
             )
         new_min = np.full(box.shape, new_min)
+    new_min = cast(np.ndarray, new_min)
     if new_min.shape != box.shape:
         raise ValueError(
             f"Expected new_min.shape to be {box.shape}, got {new_min.shape}"
@@ -201,6 +202,7 @@ def rescale_box(
                 f"Expected new_max to be an integer, float, or numpy array, got {type(new_max)}"
             )
         new_max = np.full(box.shape, new_max)
+    new_max = cast(np.ndarray, new_max)
     if new_max.shape != box.shape:
         raise ValueError(
             f"Expected new_max.shape to be {box.shape}, got {new_max.shape}"

@@ -10,16 +10,22 @@ import numpy as np
 import numpy.typing as npt
 
 from gymnasium.logger import warn
-from gymnasium.vector.vector_env import (
-    AutoresetMode,
-    VectorEnv,
-    VectorWrapper,
-)
+from gymnasium.vector.vector_env import AutoresetMode, VectorEnv, VectorWrapper
 
 __all__ = ["RecordEpisodeStatistics"]
 
 
-class RecordEpisodeStatistics(VectorWrapper):
+class RecordEpisodeStatistics[
+    VectorObsType = Any,
+    VectorActType = Any,
+    # A specialised, `np.ndarray`-bound reward array type. This is *not* the shared
+    # `gymnasium.typing.RewardArrayType` (which is unbounded), so it keeps a distinct name.
+    NDRewardArrayType: np.ndarray = Any,
+](
+    VectorWrapper[
+        VectorObsType, VectorActType, NDRewardArrayType, npt.NDArray[np.bool_]
+    ],
+):
     """This wrapper will keep track of cumulative rewards and episode lengths.
 
     At the end of any episode within the vectorized env, the statistics of the episode
@@ -78,7 +84,9 @@ class RecordEpisodeStatistics(VectorWrapper):
 
     def __init__(
         self,
-        env: VectorEnv,
+        env: VectorEnv[
+            VectorObsType, VectorActType, NDRewardArrayType, npt.NDArray[np.bool_]
+        ],
         buffer_length: int = 100,
         stats_key: str = "episode",
     ) -> None:
@@ -118,7 +126,7 @@ class RecordEpisodeStatistics(VectorWrapper):
         self,
         seed: int | None = None,
         options: dict[str, Any] | None = None,
-    ) -> tuple[np.ndarray, dict[str, Any]]:
+    ) -> tuple[VectorObsType, dict[str, Any]]:
         """Resets the environment using kwargs and resets the episode returns and lengths."""
         obs, info = super().reset(seed=seed, options=options)
 
@@ -154,10 +162,10 @@ class RecordEpisodeStatistics(VectorWrapper):
         return obs, info
 
     def step(
-        self, actions: np.ndarray
+        self, actions: VectorActType
     ) -> tuple[
-        np.ndarray,
-        npt.NDArray[np.float64],
+        VectorObsType,
+        NDRewardArrayType,
         npt.NDArray[np.bool_],
         npt.NDArray[np.bool_],
         dict[str, Any],
