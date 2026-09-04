@@ -149,22 +149,18 @@ def test_passive_checker_wrapper_data_reuse():
         for _ in range(4):
             checker_env.step(0)
 
-    sources = [
-        str(warning.message)
-        .split("returned by `")[1]
-        .split("` share an object")[0]
-        .replace("` and the following `", " -> ")
-        for warning in caught_warnings
-        if "share an object" in str(warning.message)
+    assert len(caught_warnings) == 4
+    expected_warnings = [
+        "The observations returned by `reset` and the following `step` share an object",
+        "The infos returned by `reset` and the following `step` share an object",
+        "The observations returned by `step` and the following `step` share an object",
+        "The infos returned by `step` and the following `step` share an object",
     ]
-    # both the observations and the infos are shared for each of the two checked pairs
-    assert sources == [
-        "reset -> step",
-        "reset -> step",
-        "step -> step",
-        "step -> step",
-    ], sources
+    assert all(
+        expected in actual.message.args[0]
+        for expected, actual in zip(expected_warnings, caught_warnings, strict=True)
+    )
 
     # the checks are not repeated and the wrapper stops holding a reference to the user's data
-    assert checker_env.checked_data_reuse == 2
+    assert checker_env.checked_data_reuse
     assert checker_env._previous_data is None

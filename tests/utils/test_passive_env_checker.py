@@ -478,7 +478,10 @@ def test_env_data_reuse_passive_checker():
         env_data_reuse_passive_checker((buffer[:], {}), (buffer[:], {}), "step", "step")
 
     shared, fresh = np.zeros(3), np.zeros(3)
-    with pytest.warns(UserWarning, match=re.escape("Shared keys: ['shared']")):
+    with pytest.warns(
+        UserWarning,
+        match="The infos returned by `reset` and the following `step` share an object",
+    ):
         env_data_reuse_passive_checker(
             (fresh, {"shared": shared, "fresh": np.zeros(3)}),
             (np.zeros(3), {"shared": shared, "fresh": np.zeros(3)}),

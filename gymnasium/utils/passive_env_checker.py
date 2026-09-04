@@ -199,7 +199,7 @@ def data_shares_objects(data_1: Any, data_2: Any) -> bool:
     elif isinstance(data_1, tuple):
         # A tuple is immutable, however the data within it might not be.
         #   Differing lengths simply means fewer positions to compare, so `strict=False`.
-        return data_1 is data_2 or any(
+        return any(
             data_shares_objects(o_1, o_2)
             for o_1, o_2 in zip(data_1, data_2, strict=False)
         )

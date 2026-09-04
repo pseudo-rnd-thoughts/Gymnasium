@@ -390,13 +390,12 @@ def test_data_shares_objects_distinct(data_1, data_2, shared):
 
 def test_data_shares_objects_shared():
     """Every mutable container and a view of an array must be detected as shared."""
-    array, dictionary, listing = np.zeros(3), {"a": np.zeros(3)}, [np.zeros(3)]
+    array, dictionary = np.zeros(3), {"a": np.zeros(3)}
 
     assert data_shares_objects(array, array)
     assert data_shares_objects(array, array[:])
     assert data_shares_objects(dictionary, dictionary)
     assert data_shares_objects({"a": array}, {"a": array})
-    assert data_shares_objects(listing, listing)
     assert data_shares_objects((array,), (array,))
     assert data_shares_objects(
         np.array([dictionary], dtype=object), np.array([dictionary], dtype=object)

@@ -291,22 +291,25 @@ class PassiveEnvChecker(
         if self.checked_step is False:
             self.checked_step = True
             result = env_step_passive_checker(self.env, action)
-            obs, reward, terminated, truncated, info = result
 
+            obs, reward, terminated, truncated, info = result
             env_data_reuse_passive_checker(
                 self._previous_data, (obs, info), "reset", "step"
             )
             self._previous_data = (obs, info)
+
             return result
         else:
             result = self.env.step(action)
-            obs, reward, terminated, truncated, info = result
 
-            if self._previous_data is not None:
+            if self.checked_data_reuse is False:
+                obs, reward, terminated, truncated, info = result
                 env_data_reuse_passive_checker(
                     self._previous_data, (obs, info), "step", "step"
                 )
                 self._previous_data = None
+                self.checked_data_reuse = True
+
             return result
 
     def reset(
