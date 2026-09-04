@@ -16,6 +16,7 @@ These projects are covered by the MIT License.
 
 import inspect
 from copy import deepcopy
+from itertools import combinations
 from typing import Any
 
 import numpy as np
@@ -25,6 +26,7 @@ from gymnasium import logger, spaces
 from gymnasium.utils.passive_env_checker import (
     check_action_space,
     check_observation_space,
+    data_shares_objects,
     env_render_passive_checker,
     env_reset_passive_checker,
     env_step_passive_checker,
@@ -265,6 +267,43 @@ def check_step_determinism(env: gym.Env, seed: int = 123) -> None:
         )
 
 
+def check_returned_data_not_reused(env: gym.Env, seed: int = 123) -> None:
+    """Check that the environment returns new observation and info data on every call.
+
+    As this compares identity rather than value, an array or dictionary that an environment intends
+    to be constant must also be copied into each observation or info, as neither the user nor this
+    check can know that a later call will not modify it.
+
+    Raises:
+        AssertionError: Two calls returned observations or infos that share an object.
+    """
+    env.action_space.seed(seed)
+
+    calls = [("env.reset() (call 1)", env.reset(seed=seed))]
+    for _ in range(2):
+        obs, _, terminated, truncated, info = env.step(env.action_space.sample())
+        calls.append((f"env.step() (call {len(calls) + 1})", (obs, info)))
+
+        if terminated or truncated:
+            break
+    # `AutoresetMode.SAME_STEP` resets a sub-environment as it terminates or truncates
+    calls.append((f"env.reset() (call {len(calls) + 1})", env.reset(seed=seed)))
+
+    for (source_1, (obs_1, info_1)), (source_2, (obs_2, info_2)) in combinations(
+        calls, 2
+    ):
+        assert not data_shares_objects(obs_1, obs_2), (
+            f"The observations returned by `{source_1}` and `{source_2}` share an object, "
+            "therefore, modifying one will modify the other. Environments must return new "
+            "observation data on every call as users keep the data returned to them."
+        )
+        assert not data_shares_objects(info_1, info_2), (
+            f"The infos returned by `{source_1}` and `{source_2}` share an object, therefore, "
+            "modifying one will modify the other. Environments must return new info data on "
+            "every call as users keep the data returned to them."
+        )
+
+
 def check_reset_return_info_deprecation(env: gym.Env) -> None:
     """Makes sure support for deprecated `return_info` argument is dropped.
 
@@ -437,6 +476,7 @@ def check_env(
 
     # ==== Check the step method ====
     check_step_determinism(env)
+    check_returned_data_not_reused(env)
 
     # ==== Check the render method and the declared render modes ====
     if not skip_render_check:

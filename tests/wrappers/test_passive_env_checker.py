@@ -110,3 +110,61 @@ def test_api_failures():
     assert env.checked_render
 
     env.close()
+
+
+def _reused_buffer_reset(self, seed=None, options=None):
+    """Reset an environment that reuses one observation buffer and one info dictionary."""
+    super(GenericTestEnv, self).reset(seed=seed)
+    self.buffer = getattr(self, "buffer", np.zeros(1, dtype=np.float32))
+    self.buffer[...] = 0
+    self.info = getattr(self, "info", {})
+    self.info["count"] = 0
+
+    return self.buffer, self.info
+
+
+def _reused_buffer_step(self, action):
+    """Mutate the reused observation buffer and info dictionary."""
+    self.buffer += 1
+    self.info["count"] += 1
+
+    return self.buffer, 0.0, False, False, self.info
+
+
+def test_passive_checker_wrapper_data_reuse():
+    """The wrapper warns for the reset to the first step, then the first to the second step."""
+    checker_env = PassiveEnvChecker(
+        GenericTestEnv(
+            action_space=gym.spaces.Discrete(1),
+            observation_space=gym.spaces.Box(0, 100, (1,), dtype=np.float32),
+            reset_func=_reused_buffer_reset,
+            step_func=_reused_buffer_step,
+        )
+    )
+
+    with warnings.catch_warnings(record=True) as caught_warnings:
+        warnings.simplefilter("always")
+
+        checker_env.reset()
+        for _ in range(4):
+            checker_env.step(0)
+
+    sources = [
+        str(warning.message)
+        .split("returned by `")[1]
+        .split("` share an object")[0]
+        .replace("` and the following `", " -> ")
+        for warning in caught_warnings
+        if "share an object" in str(warning.message)
+    ]
+    # both the observations and the infos are shared for each of the two checked pairs
+    assert sources == [
+        "reset -> step",
+        "reset -> step",
+        "step -> step",
+        "step -> step",
+    ], sources
+
+    # the checks are not repeated and the wrapper stops holding a reference to the user's data
+    assert checker_env.checked_data_reuse == 2
+    assert checker_env._previous_data is None
